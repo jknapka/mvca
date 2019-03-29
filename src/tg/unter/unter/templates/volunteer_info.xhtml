@@ -1,0 +1,55 @@
+<html py:extends="master.xhtml" py:strip="True">
+  <head py:block="head" py:strip="True">
+	  <title py:block="master_title">Volunteer information for ${user.user_name}</title>
+    <meta name="generator" content="HTML Tidy for Linux/x86 (vers 11 February 2007), see www.w3.org" />
+  </head>
+
+  <body py:block="body" py:strip="True">
+    <div class="row">
+      <div class="col-md-12">
+        <div class="page-header">
+		<h2>Volunteer account for ${user.user_name}</h2>
+        </div>
+
+	<table>
+		<tr>
+			<th>User name</th>
+			<td>${user.user_name}</td>
+		</tr>
+		<tr>
+			<th>Zip code</th>
+			<td>${volunteer_info.zipcode}</td>
+		</tr>
+		<tr>
+			<th>Notes</th>
+			<td>${volunteer_info.description}</td>
+		</tr>
+		<tr>
+			<th>Available times</th>
+			<td>
+				<table border="1">
+					<tr py:for="av in availabilities">
+						<td>
+							<div py:if="av.dow_monday==1">Mon </div>
+							<div py:if="av.dow_tuesday==1">Tue </div>
+							<div py:if="av.dow_wednesday==1">Wed </div>
+							<div py:if="av.dow_thursday==1">Thu </div>
+							<div py:if="av.dow_friday==1">Fri </div>
+							<div py:if="av.dow_saturday==1">Sat </div>
+							<div py:if="av.dow_sunday==1">Sun</div>
+						</td>
+						<td>From ${av.start_time} to ${av.end_time}</td>
+					</tr>
+				</table>
+				<a href="/add_availability_start?user_id=${user.user_id}">
+					Add an available time period
+				</a>
+			</td>
+		</tr>
+	</table>
+
+      </div>
+    </div>
+  </body>
+</html>
+

@@ -119,6 +119,11 @@ class User(DeclarativeBase):
         return DBSession.query(cls).filter_by(user_name=username).first()
 
     @classmethod
+    def by_user_id(cls, user_id):
+        """Return the user object whose user name is ``username``."""
+        return DBSession.query(cls).filter_by(user_id=user_id).first()
+
+    @classmethod
     def _hash_password(cls, password):
         salt = sha256()
         salt.update(os.urandom(60))

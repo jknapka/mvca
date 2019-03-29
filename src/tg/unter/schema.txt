@@ -51,8 +51,10 @@ CREATE TABLE tg_user_group (
 );
 CREATE TABLE volunteer_info (
 	viid INTEGER NOT NULL, 
-	description VARCHAR(255) NOT NULL, 
+	description VARCHAR(2048) NOT NULL, 
 	phone VARCHAR(32), 
+	text_alerts_ok INTEGER, 
+	zipcode VARCHAR(5), 
 	user_id INTEGER, 
 	PRIMARY KEY (viid), 
 	FOREIGN KEY(user_id) REFERENCES tg_user (user_id)
@@ -60,7 +62,13 @@ CREATE TABLE volunteer_info (
 CREATE INDEX ix_volunteer_info_user_id ON volunteer_info (user_id);
 CREATE TABLE volunteer_availability (
 	vaid INTEGER NOT NULL, 
-	days_of_week INTEGER NOT NULL, 
+	dow_sunday INTEGER NOT NULL, 
+	dow_monday INTEGER NOT NULL, 
+	dow_tuesday INTEGER NOT NULL, 
+	dow_wednesday INTEGER NOT NULL, 
+	dow_thursday INTEGER NOT NULL, 
+	dow_friday INTEGER NOT NULL, 
+	dow_saturday INTEGER NOT NULL, 
 	start_time INTEGER NOT NULL, 
 	end_time INTEGER NOT NULL, 
 	user_id INTEGER, 

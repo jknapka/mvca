@@ -1,0 +1,24 @@
+<html py:extends="master.xhtml" py:strip="True">
+  <head py:block="head" py:strip="True">
+    <title py:block="master_title">Add volunteer availability time</title>
+    <meta name="generator" content="HTML Tidy for Linux/x86 (vers 11 February 2007), see www.w3.org" />
+  </head>
+
+  <body py:block="body" py:strip="True">
+   <py:import href="form_renderer.xhtml" alias="fr"/>
+    <div class="row">
+      <div class="col-md-12">
+        <div class="page-header">
+          <h2>Add a time period when you are available to help</h2>
+        </div>
+
+        <p>Indicate a time period and the days of the week you are available.
+	You can do this as many times as necessary to tell us all the times
+	when you are available.
+	All fields are required.</p>
+
+	<div>${fr.renderForm(form,url)}</div>
+      </div>
+    </div>
+  </body>
+</html>

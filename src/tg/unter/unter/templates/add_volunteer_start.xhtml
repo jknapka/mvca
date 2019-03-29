@@ -1,0 +1,22 @@
+<html py:extends="master.xhtml" py:strip="True">
+  <head py:block="head" py:strip="True">
+    <title py:block="master_title">Add a new volunteer for migrant assistance</title>
+    <meta name="generator" content="HTML Tidy for Linux/x86 (vers 11 February 2007), see www.w3.org" />
+  </head>
+
+  <body py:block="body" py:strip="True">
+   <py:import href="form_renderer.xhtml" alias="fr"/>
+    <div class="row">
+      <div class="col-md-12">
+        <div class="page-header">
+          <h2>Create a new volunteer account</h2>
+        </div>
+
+        <p>Enter your information to sign up as a volunteer for migrant assistance.
+	All fields are required.</p>
+
+	<div>${fr.renderForm(form,url)}</div>
+      </div>
+    </div>
+  </body>
+</html>

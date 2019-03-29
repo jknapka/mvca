@@ -12,11 +12,10 @@ class VolunteerInfo(DeclarativeBase):
     __tablename__ = 'volunteer_info'
 
     viid = Column(Integer, primary_key=True)
-    description = Column(Unicode(255), nullable=False)
+    description = Column(Unicode(2048), nullable=False)
     phone = Column(Unicode(32),nullable=True)
-
-    # TO DO: track volunteer locations to enable drive-time
-    # estimation. (Use a separate table.)
+    text_alerts_ok = Column(Integer,nullable=True,default=1)
+    zipcode = Column(Unicode(5),nullable=True,default='')
 
     user_id = Column(Integer, ForeignKey('tg_user.user_id'), index=True)
     user = relationship('User', uselist=False,
@@ -28,8 +27,13 @@ class VolunteerAvailability(DeclarativeBase):
 
     vaid = Column(Integer, primary_key=True)
 
-    # Bitmask of days of week of availability, Sunday=bit 0.
-    days_of_week = Column(Integer,nullable=False)
+    dow_sunday = Column(Integer,nullable=False,default=0)
+    dow_monday = Column(Integer,nullable=False,default=0)
+    dow_tuesday = Column(Integer,nullable=False,default=0)
+    dow_wednesday = Column(Integer,nullable=False,default=0)
+    dow_thursday = Column(Integer,nullable=False,default=0)
+    dow_friday = Column(Integer,nullable=False,default=0)
+    dow_saturday = Column(Integer,nullable=False,default=0)
 
     # Start and end times of availability interval in minutes-
     # past-midnight.
@@ -49,9 +53,6 @@ class NeedEvent(DeclarativeBase):
 
     neid = Column(Integer,primary_key=True)
 
-    # This can just be a Unix time.
-    date_of_need = Column(Integer,nullable=False)
-
     # Type of need:
     # 0 == airport
     # 1 == bus station
@@ -59,7 +60,7 @@ class NeedEvent(DeclarativeBase):
     # ??
     ev_type = Column(Integer,nullable=False)
 
-    # Date on which action is needed.
+    # Date on which action is needed. Unix time.
     date_of_need = Column(Integer,nullable=False)
 
     # Time of pickup for delivery to transit point, or at which
@@ -82,6 +83,12 @@ class NeedEvent(DeclarativeBase):
     # service recipients.
     notes = Column(Unicode(2048),nullable=False)
 
+    # If non-null and non-zero, this event has been
+    # cancelled.
+    #cancelled = Column(Integer,nullable=True)
+
+    #responses = relationship('VolunteerResponse',back_populates='need_event')
+
 class VolunteerResponse(DeclarativeBase):
     '''
     When a volunteer indicates they will respond to a need request,
@@ -99,6 +106,9 @@ class VolunteerResponse(DeclarativeBase):
 
     # The event being served by this volunteer.
     neid = Column(Integer,ForeignKey('need_event.neid'),nullable=False)
+    #need_event = relationship('NeedEvent',uselist=False,
+    #                    backref=backref('need_event',
+    #                                    cascade='all, delete-orphan'))
 
 __all__ = ['VolunteerInfo','VolunteerAvailability','NeedEvent','VolunteerResponse']
 

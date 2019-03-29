@@ -1,0 +1,18 @@
+<py:def function="renderForm(form,url)">
+	<form method="POST" action="${url}">
+		<table border="1" class="tbirdreg-form-table">
+			<tr py:for="fld in form">
+				<py:if test="fld.__class__.__name__ == 'HiddenField'">
+					<tr style="display: none;"><th>${fld.label}</th><td>${fld}</td></tr>
+				</py:if><py:else>
+					<tr><th>${fld.label}</th><td>${fld}</td>
+						<py:if test="fld.errors">
+							<td>Error: ${fld.errors[0]}</td>
+						</py:if>
+					</tr>
+				</py:else>
+			</tr>
+			<tr><th><input type="submit"></input></th></tr>
+		</table>
+	</form>
+</py:def>
