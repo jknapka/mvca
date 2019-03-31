@@ -1,0 +1,115 @@
+<html py:extends="master.xhtml" py:strip="True">
+  <head py:block="head" py:strip="True">
+    <title py:block="master_title">List of volunteer needs</title>
+    <meta name="generator" content="HTML Tidy for Linux/x86 (vers 11 February 2007), see www.w3.org" />
+  </head>
+
+  <body py:block="body" py:strip="True">
+    <?py import time ?>
+    <div class="row">
+      <div class="col-md-12">
+        <div class="page-header">
+          <h2>List of Volunteer Needs</h2>
+        </div>
+
+	<div>Welcome, ${user.display_name}.
+		<div py:if="isCoordinator">
+			You are a coordinator, and can manage the events below. Thank you for your time and energy!
+			<br/>
+
+			<div class="unter-actions">
+				<span py:if="isCoordinator" >
+					<a style="border-right: 1px solid black"
+						href="/add_need_event_start">New event </a>
+				</span>
+				<span py:if="isCoordinator">
+					<a  style="border-right: 1px solid black"
+						href="/need_events?completed=0">&nbsp;See active events </a>
+				</span>
+				<span py:if="isCoordinator">
+					<a href="/need_events?completed=1">&nbsp;See completed events</a>
+				</span>
+			</div>
+
+		</div><div py:else="">
+			You are a volunteer, and can respond to the events below. Thank you for helping!
+		</div>
+	</div>
+
+	<table border="1" id="ev-tab">
+		<thead style="background-color:rgba(255,255,255,1.0)">
+		<tr style="border-bottom: 4px solid black">
+			<th>Created by</th>
+			<th>Date</th>
+			<th>Time</th>
+			<th>Type</th>
+			<th>Estimated duration</th>
+			<th>Location</th>
+			<th>Affected persons</th>
+			<th>Volunteers needed</th>
+			<th>Volunteers responding</th>
+			<th>Last alert</th>
+			<th py:if="isCoordinator">Mark completed</th>
+			<th py:if="'respond_to_need' in [p.permission_name for p in user.permissions] and complete != 1">
+				Commit to serve at this event
+			</th>
+		</tr>
+		</thead>
+
+		<tbody>
+		<div py:for="ev in evs">
+			<tr style="border-left: 4px solid black">
+			<td>${user.display_name}</td>
+			<td>${ev.date_str}</td>
+			<td>${ev.time_str}</td>
+			<td>${ev.ev_str}</td>
+			<td>${ev.ev.duration}</td>
+			<td>${ev.ev.location}</td>
+			<td>${ev.ev.affected_persons}</td>
+			<td>${ev.ev.volunteer_count}</td>
+			<td>??</td>
+			<td>${ev.last_alert_time}
+				<a py:if="isCoordinator and ev.ev.complete != 1 and time.time() - 3600 > ev.ev.last_alert_time"
+				       href="/send_alert?neid=${ev.ev.neid}"><br/>Send alert</a>
+			</td>
+			<td py:if="isCoordinator"><a py:if="ev.ev.complete != 1"
+					href="/event_complete?neid=${ev.ev.neid}">Mark complete</a>
+				<span py:if="ev.ev.complete == 1">Already complete</span>
+			</td>
+			<td py:if="'respond_to_need' in [p.permission_name for p in user.permissions] and complete != 1">
+				<a href="/respond?user_id=${user.user_id}x&amp;neid=${ev.ev.neid}">Respond</a>
+			</td>
+			</tr>
+			<tr border="1" style="border-bottom: 4px solid black; border-left: 4px solid black">
+			<td border="0"></td>
+			<td colspan="100">${ev.ev.notes}</td>
+			</tr>
+		</div>
+		</tbody>
+	</table>
+
+	<div class="unter-actions">
+		<span py:if="isCoordinator" >
+			<a style="border-right: 1px solid black"  href="/add_need_event_start">New event </a>
+		</span>
+		<span py:if="isCoordinator">
+			<a  style="border-right: 1px solid black" href="/need_events?completed=0">&nbsp;See active events </a>
+		</span>
+		<span py:if="isCoordinator">
+			<a href="/need_events?completed=1">&nbsp;See completed events</a>
+		</span>
+	</div>
+
+      </div>
+    </div>
+
+	<script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+	<script src="javascript/jquery.floatThead.min.js"></script>
+	<script>
+	var tab = $$("#ev-tab");
+	tab.floatThead();
+	</script>
+
+
+  </body>
+</html>

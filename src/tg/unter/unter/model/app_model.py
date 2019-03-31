@@ -76,18 +76,28 @@ class NeedEvent(DeclarativeBase):
     # Number of individuals to be served.
     affected_persons = Column(Integer,nullable=False,default=1)
 
+    # Location to perform service (pick-up point, etc.)
+    location = Column(Unicode(255))
+
     # Free-form notes - indicate number of individuals, names,
     # etc. We DO NOT want to force users to spend a lot of time
     # entering permanent records for individuals in need of
-    # services. This is the only place where we'll track
-    # service recipients.
+    # services. Among other things that could be dangerous for
+    # the people being served. This is the only place where we'll
+    # track service recipients.
     notes = Column(Unicode(2048),nullable=False)
 
     # If non-null and non-zero, this event has been
     # cancelled.
-    #cancelled = Column(Integer,nullable=True)
+    cancelled = Column(Integer,nullable=True)
 
-    #responses = relationship('VolunteerResponse',back_populates='need_event')
+    # Non-null and non-zero if the event is complete.
+    complete = Column(Integer,nullable=False,default=0)
+
+    # Last time at which alerts for this event were sent.
+    last_alert_time = Column(Integer,nullable=False,default=0)
+
+    responses = relationship('VolunteerResponse')
 
 class VolunteerResponse(DeclarativeBase):
     '''
@@ -106,9 +116,9 @@ class VolunteerResponse(DeclarativeBase):
 
     # The event being served by this volunteer.
     neid = Column(Integer,ForeignKey('need_event.neid'),nullable=False)
-    #need_event = relationship('NeedEvent',uselist=False,
-    #                    backref=backref('need_event',
-    #                                    cascade='all, delete-orphan'))
+    need_event = relationship('NeedEvent',uselist=False,
+                        backref=backref('need_event',
+                                        cascade='all, delete-orphan'))
 
 __all__ = ['VolunteerInfo','VolunteerAvailability','NeedEvent','VolunteerResponse']
 

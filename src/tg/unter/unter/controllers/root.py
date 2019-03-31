@@ -16,12 +16,20 @@ from tgext.admin.controller import AdminController
 
 from unter.lib.base import BaseController
 from unter.controllers.error import ErrorController
+from unter.controllers.need import checkOneEvent, checkValidEvents
 
 from unter.controllers.forms import NewAcctForm,AvailabilityForm,NeedEventForm
 
 from twilio.rest import Client as TwiCli
 
+from sqlalchemy import or_,text
+
 __all__ = ['RootController']
+
+def evTypeToString(evt):
+    return {0:"take people to the airport",
+            1:"take people to the bus station",
+            2:"interpeter services"}[evt]
 
 def minutesPastMidnight(tm):
     print("tm is a {}".format(tm.__class__.__name__))
@@ -37,9 +45,11 @@ class Thing(object):
     ''' A generic ocntainer in which to unpack form data. '''
 
     def print(self,label="Thing:"):
-        print(label)
-        for key in self.__dict__.keys():
-            print("  {}={}".format(key,self.__dict__[key]))
+        printDict(self.__dict__)
+
+def printDict(kwargs,label="kwargs:"):
+    print(label)
+    print(('  {}\n'*len(kwargs)).format(*['{}={}'.format(key,kwargs[key]) for key in kwargs]))
 
 class RootController(BaseController):
     """
@@ -69,16 +79,15 @@ class RootController(BaseController):
     #==================================
 
     @expose('unter.templates.add_volunteer_start')
-    def add_volunteer_start(self,form=None):
+    def add_volunteer_start(self,form=None,error_msg=None):
         ''' Show the "Add a volunteer" page. '''
         if form is None:
             form = NewAcctForm()
-        return dict(page='add_volunteer_start',form=form,url='/add_volunteer_post')
+        return dict(page='add_volunteer_start',form=form,url='/add_volunteer_post',error_msg=error_msg)
 
     @expose('unter.templates.add_volunteer_start')
     def add_volunteer_post(self,**kwargs):
         ''' Try to create a new volunteer. '''
-        print(('{}\n'*len(kwargs)).format(*['{}={}'.format(key,kwargs[key]) for key in kwargs]))
         form = NewAcctForm(request.POST)
         if not form.validate():
             print("form.errors = {}".format(form.errors))
@@ -99,16 +108,12 @@ class RootController(BaseController):
 
             existingUser = model.User.by_user_name(user_name)
             if existingUser is not None:
-                redirect(url('/acctError'), dict(message='Account %s already exists'%user_name,
-                                     user_name=user_name, email=email))
+                return self.add_volunteer_start(form=form,error_msg='Account %s already exists'%user_name)
             existingUser = model.User.by_email_address(email)
             if existingUser is not None:
-                redirect(url('/acctError'), dict(message='Email address %s is in use, please us a different one'%email,
-                                     user_name=user_name, email=email))
-            if pwd != pwd2:
-                redirect(url('/acctError'), dict(message='Oops! The passwords do not match',
-                    user_name=user_name, email=email))
-            acct = model.User(user_name=user_name, email_address=email)
+                return self.add_volunteer_start(form=form,error_msg='Email address %s is in use, please us a different one'%email)
+
+            acct = model.User(user_name=user_name, email_address=email,display_name=form.display_name.data)
             acct.password = pwd
             DBSession.add(acct)
             acct = model.User.by_email_address(email)
@@ -117,6 +122,13 @@ class RootController(BaseController):
                     phone=form.phone.data,text_alerts_ok={True:1,False:0}[form.text_alerts_ok.data],
                     zipcode=form.zipcode.data)
             DBSession.add(vinfo)
+
+            # Add the volunteer to the 'volunteers' group. To promote a
+            # volunteer to a coordinator, add them to the 'coordinators' group
+            # via the admin interface (/admin/ URL - you must be logged in as
+            # 'manager' to use that).
+            volGroup = DBSession.query(model.Group).filter_by(group_name='volunteers').first()
+            volGroup.users.append(acct)
 
             redirect(lurl('/login'),dict(message='Please log in and let us know when you are available.'))
 
@@ -151,17 +163,26 @@ class RootController(BaseController):
                     end_time = minutesPastMidnight(obj.end_time))
             DBSession.add(avail)
 
-            redirect('/volunteer_info',dict(user_id=obj.user_id))
+            redirect('/volunteer_info',dict())
 
     @expose('unter.templates.volunteer_info')
-    def volunteer_info(self,user_id,**kwargs):
-        user = model.User.by_user_id(user_id)
-        vinfo = user.volunteer_info[0]
+    def volunteer_info(self,**kwargs):
+        if not request.identity:
+            login_counter = request.environ.get('repoze.who.logins', 0) + 1
+            redirect('/login',
+                     params=dict(came_from="/volunteer_info",__logins=login_counter))
+        user,vinfo = self.getVolunteerIdentity()
+        if vinfo is None:
+            # Not actually a volunteer - probably manager.
+            redirect(lurl('/'),dict(message="No volunteer info for {}".format(user.user_name)))
         availabilities = [self.toRawAvailability(av) for av in user.volunteer_availability]
 
         return dict(user=user,volunteer_info=vinfo,availabilities=availabilities)
 
     def toRawAvailability(self,av):
+        ''' Convert a model VolunteerAvailability object to a plain ol' Python
+        object containing the same data in a format easy for templates to
+        digest. '''
         result = Thing()
         result.dow_sunday = av.dow_sunday
         result.dow_monday = av.dow_monday
@@ -175,10 +196,34 @@ class RootController(BaseController):
         return result
 
     #==================================
+    # Coordinator pages.
+    #==================================
+
+    @expose('unter.templates.coord_page')
+    #@require(predicates.has_permission('manage_events'))
+    def coord_page(self,**kwargs):
+        user,vinfo = self.getVolunteerIdentity()
+        if user is None:
+            redirect(lurl('/login'))
+        return 'Placeholder for the coordinator page.'
+
+    def getVolunteerIdentity(self):
+        ''' Get the logged-in user's volunteer identity. '''
+        if request.identity is not None and 'repoze.who.userid' in request.identity:
+            userid = request.identity['repoze.who.userid']
+            user = model.User.by_user_name(userid)
+            vinfo = user.vinfo
+            print("user.vinfo = {}".format(vinfo))
+        else:
+            user, vinfo = None,None
+        return user,vinfo
+
+    #==================================
     # Need event management.
     #==================================
 
     @expose('unter.templates.add_need_event_start')
+    #@require(predicates.has_permission('manage_events'))
     def add_need_event_start(self,form=None,**kwargs):
         ''' Present the "add a need event" form. '''
         if form is None:
@@ -186,6 +231,7 @@ class RootController(BaseController):
         return dict(page='add_need_event_start',form=form,url='/add_need_event_post')
 
     @expose('unter.templates.add_need_event_start')
+    #@require(predicates.has_permission('manage_events'))
     def add_need_event_post(self,**kwargs):
         form = NeedEventForm(request.POST)
         for fld in form:
@@ -210,10 +256,14 @@ class RootController(BaseController):
                     time_of_need=minutesPastMidnight(obj.time_of_need),
                     volunteer_count=int(obj.volunteer_count),
                     affected_persons=int(obj.affected_persons),
-                    notes=obj.notes)
+                    notes=obj.notes,complete=0,location=obj.location)
             DBSession.add(nev)
+            DBSession.flush()
 
-            self.smsJoe(obj.volunteer_count,minutesPastMidnight(obj.time_of_need),int(obj.ev_type))
+            # TEST
+            # self.smsJoe(obj.volunteer_count,minutesPastMidnight(obj.time_of_need),int(obj.ev_type))
+
+            self.check_need_events(ev_id=nev.neid)
 
             redirect(lurl('/need_events'))
 
@@ -221,24 +271,60 @@ class RootController(BaseController):
         sid = 'xxxx'
         auth_tok = 'xxx'
        
-        def evTypeToString(evt):
-            return {0:"take people to the airport",
-                    1:"take people to the bus station",
-                    2:"interpeter services"}[evt]
-
         cli = TwiCli(sid,auth_tok)
         message = cli.messages.create(body="We have a need for {} volunteer(s) at {}. Purpose: {}. Can you help?".format(n_vols,minutesPastMidnightToTimeString(at_time), evTypeToString(ev_type)),
                 from_="+19159743306",
                 to="+19155495098")
         print(message.sid)
 
+    @expose('unter.templates.need_events')
+    def need_events(self,completed=0,**kwargs):
+        completed = int(completed)
+        evs = DBSession.query(model.NeedEvent).filter(model.NeedEvent.complete == completed)
+        evs = [self.toWrappedEvent(ev) for ev in evs]
+        user,vinfo = self.getVolunteerIdentity()
+        isCoordinator = False
+        if user is not None:
+            print("user.permissions: {}".format(user.permissions))
+            isCoordinator = 'manage_events' in [perm.permission_name for perm in user.permissions]
+        return dict(user=user,vinfo=vinfo,isCoordinator=isCoordinator,evs=evs,complete=completed)
+
     @expose()
-    def need_events(self,**kwargs):
-        return "Placeholder"
+    def event_complete(self,neid):
+        ''' Mark a need event as being complete. '''
+        ev = DBSession.query(model.NeedEvent).filter(model.NeedEvent.neid == neid).first()
+        if ev is not None:
+            print("Got need event {}".format(neid))
+            #DBSession.add(ev)
+            ev.complete = 1
+        else:
+            print("No such need event {}".format(neid))
+        redirect(lurl("/need_events"))
+
+    @expose()
+    def send_event_alert(self,neid=None):
+        pass
+
+    def toWrappedEvent(self,ev):
+        thing = Thing()
+        thing.ev = ev
+        date = datetime.date.fromtimestamp(ev.date_of_need)
+        thing.date_str = "{:02d}/{:02d}/{:04d}".format(date.month,date.day,date.year)
+        thing.time_str = minutesPastMidnightToTimeString(ev.time_of_need)
+        thing.ev_str = evTypeToString(ev.ev_type)
+        thing.complete = {1:'Yes',0:'No'}[ev.complete]
+        thing.last_alert_time = datetime.datetime.fromtimestamp(ev.last_alert_time).ctime()
+        return thing
 
     @expose('json')
     def check_need_events(self,ev_id=None):
-        pass
+        print("Checking events with ev_id={}".format(ev_id))
+
+        if ev_id is not None:
+            checkOneEvent(DBSession,ev_id)
+        else:
+            now = datetime.datetime.now()
+            checkActiveEvents(DBSession,now)
 
     #==================================
     # TG quickstart boilerplate follows.
@@ -307,17 +393,18 @@ class RootController(BaseController):
             login_counter = request.environ.get('repoze.who.logins', 0) + 1
             redirect('/login',
                      params=dict(came_from=came_from, __logins=login_counter))
+        printDict(request.identity,"request.identity:")
         userid = request.identity['repoze.who.userid']
         flash(_('Welcome back, %s!') % userid)
 
         user = model.User.by_user_name(userid)
 
-        for attr in request.identity:
-            print("request.identity[{}] = {}".format(attr,request.identity[attr]))
-
         # Do not use tg.redirect with tg.url as it will add the mountpoint
         # of the application twice.
-        came_from = lurl('/volunteer_info',params=dict(user_id=user.user_id))
+        if predicates.in_group('volunteers'):
+            came_from = lurl('/volunteer_info',params=dict())
+        if predicates.in_group('coordinators'):
+            came_from = lurl('/coord_page',params=dict())
         return HTTPFound(location=came_from)
 
     @expose()

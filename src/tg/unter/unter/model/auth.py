@@ -15,7 +15,7 @@ __all__ = ['User', 'Group', 'Permission']
 
 from sqlalchemy import Table, ForeignKey, Column
 from sqlalchemy.types import Unicode, Integer, DateTime
-from sqlalchemy.orm import relation, synonym
+from sqlalchemy.orm import relation, synonym, relationship
 
 from unter.model import DeclarativeBase, metadata, DBSession
 
@@ -89,6 +89,8 @@ class User(DeclarativeBase):
     display_name = Column(Unicode(255))
     _password = Column('password', Unicode(128))
     created = Column(DateTime, default=datetime.now)
+
+    vinfo = relationship('VolunteerInfo',uselist=False)
 
     def __repr__(self):
         return '<User: name=%s, email=%s, display=%s>' % (

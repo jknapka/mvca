@@ -7,47 +7,28 @@
       <div class="row">
         <div class="col-md-8">
           <div class="jumbotron">
-            <h1>Welcome to TurboGears 2.3</h1>
-            <p>If you see this page it means your installation was successful!</p>
-            <p>TurboGears 2 is rapid web application development toolkit designed to make your life easier.</p>
-            <p>
-              <a class="btn btn-primary btn-lg" href="http://www.turbogears.org" target="_blank">
-                ${h.icon('book')} Learn more
-              </a>
-            </p>
+            <h1>Welcome to the Migrant Volunteer Coordinating Assistant</h1>
+	    <p>You can <a href="/add_volunteer_start">register as a new volunteer</a> and then
+	    tell us which days and times during the week you are available to help.</p>
+	    <p>If you are already registered, you can <a href="/login?came_from=/volunteer_info">log in</a>
+	    to see your profile and any events you may be able to help with. We often need volunteers
+	    to
+	    <ul>
+		<li>Drive migrants to the airport or bus station from local hotels and shelters.</li>
+		<li>Provide interpreter services for other volunteers and migrants (almost always
+			English/Spanish).</li>
+		<li>Help prepare or serve meals for our local migrant population.</li>
+	    </ul>
+	    </p>
+	    <p>If you are an administrator, you can <a href="login?came_from=/events">log in</a>
+	    to create new events and send text or email alerts to volunteers who have
+	    availability at the appropriate times. You can also check the status of upcoming
+	    events and verify whether enough volunteers are available, and find the information
+	    needed to manually call, text, or email volunteers if needed.</p>
           </div>
         </div>
-        <div class="col-md-4 hidden-xs hidden-sm">
-          <a class="btn btn-info btn-sm active" href="http://turbogears.readthedocs.io/en/latest">${h.icon('book')} TG2 Documentation</a> <span class="label label-success">new</span><em> Get Started</em><br/>
-            <br/>
-          <a class="btn btn-info btn-sm active" href="http://turbogears.readthedocs.io/en/latest/cookbook/cookbook.html">${h.icon('book')} TG2 CookBook</a><em> Read the Cookbook</em> <br/>
-            <br/>
-          <a class="btn btn-info btn-sm active" href="http://groups.google.com/group/turbogears">${h.icon('comment')} Join the Mail List</a> <em>for help/discussion</em><br/>
-            <br/>
-          <a class="btn btn-info btn-sm active" href="http://runnable.com/TurboGears">${h.icon('play')} Play on Runnable</a> <em>for basic examples</em><br/>
-            <br/>
-          <a class="btn btn-info btn-sm active" href="http://stackoverflow.com/questions/tagged/turbogears2">${h.icon('search')} Search Stackoverflow</a> <em>for questions</em>
-        </div>
+	<em class="pull-right small"> Copyright (c) 2019, Joseph Knapka. Built using
+		<a href="https://www.turbogears.org">TurboGears</a></em>
       </div>
-
-      <div class="row">
-        <div class="col-md-4">
-          <h3>Code your data model</h3>
-          <p> Design your data <code>model</code>, Create the database, and Add some bootstrap data.</p>
-        </div>
-
-        <div class="col-md-4">
-          <h3>Design your URL architecture</h3>
-          <p> Decide your URLs, Program your <code>controller</code> methods, Design your
-            <code>templates</code>, and place some static files (CSS and/or Javascript). </p>
-        </div>
-
-        <div class="col-md-4">
-          <h3>Distribute your app</h3>
-          <p> Test your source, Generate project documents, Build a distribution.</p>
-        </div>
-      </div>
-
-      <em class="pull-right small"> Thank you for choosing TurboGears.</em>
     </body>
 </html>

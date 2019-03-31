@@ -17,8 +17,6 @@ def bootstrap(command, conf, vars):
         u.email_address = 'manager@somedomain.com'
         u.password = 'managepass'
 
-        model.DBSession.add(u)
-
         g = model.Group()
         g.group_name = 'managers'
         g.display_name = 'Managers Group'
@@ -33,6 +31,30 @@ def bootstrap(command, conf, vars):
         p.groups.append(g)
 
         model.DBSession.add(p)
+
+        g = model.Group()
+        g.group_name = 'volunteers'
+        g.display_name = 'Volunteers Group'
+        model.DBSession.add(g)
+
+        p = model.Permission(permission_name="respond_to_need",
+                description="This permission allows a volunteer to respond to a need.")
+        p.groups.append(g)
+        model.DBSession.add(p)
+
+        g = model.Group()
+        g.group_name = 'coordinators'
+        g.display_name = 'Volunteer Coordinators Group'
+
+        p = model.Permission()
+        p.permission_name = 'manage_events'
+        p.description = 'Permission to create and manage volunteer need events.'
+        p.groups.append(g)
+
+        model.DBSession.add(p)
+        #g.users.append(u)
+        model.DBSession.add(g)
+        model.DBSession.add(u)
 
         u1 = model.User()
         u1.user_name = 'editor'
