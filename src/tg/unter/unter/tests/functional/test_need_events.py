@@ -11,7 +11,9 @@ import unter.controllers.need as need
 import unter.controllers.alerts as alerts
 import datetime as dt
 
-class TestNeedEvent(ut.TestCase):
+from unter.tests import TestController
+
+class TestNeedEvent(TestController,ut.TestCase):
     '''
     Story:
       - Carla creates a need event for a family needing
@@ -36,11 +38,9 @@ class TestNeedEvent(ut.TestCase):
     '''
 
     def setUp(self):
+        super().setUp()
         self.now = dt.datetime(2019,3,30,hour=12,minute=0)
         self.session = self.setupDB()
-
-    def tearDown(self):
-        self.session.close()
 
     def testCarlaExists(self):
         '''
@@ -108,6 +108,7 @@ class TestNeedEvent(ut.TestCase):
         self.assertTrue(alertsSent)
 
     def createAirportNeed(self,user):
+        print("Creating NeedEvent using self.session {} model.DBSession {}".format(self.session,model.DBSession))
         nev = model.NeedEvent()
 
         # March 31 2019 is a Sunday.
@@ -124,36 +125,57 @@ class TestNeedEvent(ut.TestCase):
         nev.created_by = user
 
         self.session.add(nev)
-        transaction.commit()
+        #transaction.commit()
 
         return nev
+
+    def tearDown(self):
+        #model.DBSession = self.original_model_session
+        pass
 
     def setupDB(self):
         '''
         Set up the test DB.
+
+        BIG HUGE WTF: setUp() and tearDown() are run against the same
+        in-memory DB for each test case????
         '''
+
+        # OK apparently setup-app runs automatically when testing?
+        # And uses an in-memory SQLite DB?
+        # So I don't need to do all of this. Just use the model's
+        # DBSession object, and create the test entities.
 
         # Create the DB engine - this is the connection to the
         # back-end DB, which in this case is just an SQLite in-memory
         # one.
-        engine = sql.create_engine('sqlite:///:memory:')
+        #engine = sql.create_engine('sqlite:///:memory:')
+
+        session = model.DBSession
+        #session.configure(bind=engine)
+        # Work around the BIG HUGE WTF above:
+        carla = session.query(model.User).filter_by(user_name='carla').first()
+        if carla is not None:
+            # WE HAVE ALREADY DONE THIS ON THIS DB INSTANCE WTFFFFFFF????
+            return session
+
 
         # Create an ORM session bound to the engine.
-        sessionmaker = orm.sessionmaker()
-        session = sessionmaker(bind=engine)
+        #sessionmaker = orm.sessionmaker()
+        #session = sessionmaker(bind=engine)
 
         # Ensure that code that depends on model.DBSession uses
         # our session.
-        model.DBSession = session
+        #model.DBSession = session
 
         # Create our model schema. This will create the schema for all
         # model classes we've imported.
-        model.Group.metadata.create_all(engine)
+        #model.Group.metadata.create_all(session.bind)
 
         # Create the users and groups we need:
 
         # First the base TG bootstrap entities...
-        create_entities(session)
+        #create_entities(session)
 
         # Then the entities that support our test stories.
         g = session.query(model.Group).filter_by(group_name='coordinators').first()
@@ -164,7 +186,7 @@ class TestNeedEvent(ut.TestCase):
                 description='Carla the coordinator')
         u.vinfo = v
         session.flush()
-        transaction.commit()
+        #transaction.commit()
 
         g = session.query(model.Group).filter_by(group_name='volunteers').first()
         phone = 9150010001
@@ -176,7 +198,7 @@ class TestNeedEvent(ut.TestCase):
             v = model.VolunteerInfo(user_id=u.user_id,zipcode='79900',phone=str(phone),
                     description='{} the volunteer')
             u.vinfo = v
-        transaction.commit()
+        #transaction.commit()
 
         # Availabilities:
         
@@ -191,7 +213,7 @@ class TestNeedEvent(ut.TestCase):
                 dow_sunday=1)
         av.user = self.getUser(session,'vincent')
         session.add(av)
-        transaction.commit()
+        #transaction.commit()
 
         av = model.VolunteerAvailability(start_time=6*60,end_time=18*60,
                 dow_monday=0,
@@ -203,7 +225,7 @@ class TestNeedEvent(ut.TestCase):
                 dow_sunday=1)
         av.user = self.getUser(session,'veronica')
         session.add(av)
-        transaction.commit()
+        #transaction.commit()
 
         av = model.VolunteerAvailability(start_time=9*60+15,end_time=12*60+45,
                 dow_monday=1,
@@ -215,7 +237,7 @@ class TestNeedEvent(ut.TestCase):
                 dow_sunday=1)
         av.user = self.getUser(session,'velma')
         session.add(av)
-        transaction.commit()
+        #transaction.commit()
 
         av = model.VolunteerAvailability(start_time=9*60+15,end_time=12*60+45,
                 dow_monday=1,
@@ -227,7 +249,7 @@ class TestNeedEvent(ut.TestCase):
                 dow_sunday=0)
         av.user = self.getUser(session,'velma')
         session.add(av)
-        transaction.commit()
+        #transaction.commit()
 
         av = model.VolunteerAvailability(start_time=9*60+15,end_time=12*60+45,
                 dow_monday=0,
@@ -239,7 +261,7 @@ class TestNeedEvent(ut.TestCase):
                 dow_sunday=0)
         av.user = self.getUser(session,'vaughn')
         session.add(av)
-        transaction.commit()
+        #transaction.commit()
 
         # Need events: Vincent is committed to a bus-station
         # event.
@@ -256,7 +278,7 @@ class TestNeedEvent(ut.TestCase):
         vne.created_by = self.getUser(session,'carla')
         session.add(vne)
 
-        transaction.commit()
+        #transaction.commit()
 
         # Commit Vincent to the bus-station event.
         user = self.getUser(session,'vincent')
@@ -265,7 +287,7 @@ class TestNeedEvent(ut.TestCase):
         vcom.need_event = vne
         session.add(vcom)
 
-        transaction.commit()
+        #transaction.commit()
 
         return session
 
