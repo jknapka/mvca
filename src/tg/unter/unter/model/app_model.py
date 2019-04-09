@@ -60,6 +60,10 @@ class NeedEvent(DeclarativeBase):
     # ??
     ev_type = Column(Integer,nullable=False)
 
+    EV_TYPE_AIRPORT = 0
+    EV_TYPE_BUS = 1
+    EV_TYPE_INTERPRETER = 2
+
     # Date on which action is needed. Unix time.
     date_of_need = Column(Integer,nullable=False)
 
@@ -77,7 +81,7 @@ class NeedEvent(DeclarativeBase):
     affected_persons = Column(Integer,nullable=False,default=1)
 
     # Location to perform service (pick-up point, etc.)
-    location = Column(Unicode(255))
+    location = Column(Unicode(255),nullable=False,default='Unspecified')
 
     # Free-form notes - indicate number of individuals, names,
     # etc. We DO NOT want to force users to spend a lot of time
@@ -85,7 +89,7 @@ class NeedEvent(DeclarativeBase):
     # services. Among other things that could be dangerous for
     # the people being served. This is the only place where we'll
     # track service recipients.
-    notes = Column(Unicode(2048),nullable=False)
+    notes = Column(Unicode(2048),nullable=False,default='')
 
     # If non-null and non-zero, this event has been
     # cancelled.
@@ -96,6 +100,11 @@ class NeedEvent(DeclarativeBase):
 
     # Last time at which alerts for this event were sent.
     last_alert_time = Column(Integer,nullable=False,default=0)
+
+    created_by_id = Column(Integer,ForeignKey('tg_user.user_id'),nullable=False)
+    created_by = relationship('User', uselist=False,
+                        backref=backref('need_event',
+                                        cascade='all, delete-orphan'))
 
     responses = relationship('VolunteerResponse')
 

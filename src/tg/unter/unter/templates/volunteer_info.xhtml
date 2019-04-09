@@ -44,6 +44,7 @@
 							<div py:if="av.dow_sunday==1">Sun</div>
 						</td>
 						<td>From ${av.start_time} to ${av.end_time}</td>
+						<td><a href="${tg.url('/remove_availability?vaid=%s'%av.av.vaid)}">Remove</a></td>
 					</tr>
 				</table>
 				<a href="/add_availability_start?user_id=${user.user_id}">
@@ -52,7 +53,6 @@
 			</td>
 		</tr>
 	</table>
-
       </div>
     </div>
   </body>

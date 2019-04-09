@@ -20,36 +20,11 @@ from unter.controllers.need import checkOneEvent, checkValidEvents
 
 from unter.controllers.forms import NewAcctForm,AvailabilityForm,NeedEventForm
 
-from twilio.rest import Client as TwiCli
+from unter.controllers.util import *
 
 from sqlalchemy import or_,text
 
 __all__ = ['RootController']
-
-def evTypeToString(evt):
-    return {0:"take people to the airport",
-            1:"take people to the bus station",
-            2:"interpeter services"}[evt]
-
-def minutesPastMidnight(tm):
-    print("tm is a {}".format(tm.__class__.__name__))
-
-    return 60*tm.hour+tm.minute
-
-def minutesPastMidnightToTimeString(mpm):
-    hour = int(mpm/60)
-    mins = mpm % 60
-    return "{}:{:02d}".format(hour,mins)
-
-class Thing(object):
-    ''' A generic ocntainer in which to unpack form data. '''
-
-    def print(self,label="Thing:"):
-        printDict(self.__dict__)
-
-def printDict(kwargs,label="kwargs:"):
-    print(label)
-    print(('  {}\n'*len(kwargs)).format(*['{}={}'.format(key,kwargs[key]) for key in kwargs]))
 
 class RootController(BaseController):
     """
@@ -133,6 +108,7 @@ class RootController(BaseController):
             redirect(lurl('/login'),dict(message='Please log in and let us know when you are available.'))
 
     @expose('unter.templates.add_availability_start')
+    @require(predicates.not_anonymous())
     def add_availability_start(self,user_id,form=None):
         ''' Present the "add a time slot" form. '''
         if form is None:
@@ -140,6 +116,7 @@ class RootController(BaseController):
         return dict(page='add_availability_start',form=form,url='/add_availability_post')
 
     @expose('unter.templates.add_availability_start')
+    @require(predicates.not_anonymous())
     def add_availability_post(self,**kwargs):
         form = AvailabilityForm(request.POST)
         if not form.validate:
@@ -166,6 +143,7 @@ class RootController(BaseController):
             redirect('/volunteer_info',dict())
 
     @expose('unter.templates.volunteer_info')
+    @require(predicates.not_anonymous())
     def volunteer_info(self,**kwargs):
         if not request.identity:
             login_counter = request.environ.get('repoze.who.logins', 0) + 1
@@ -178,6 +156,11 @@ class RootController(BaseController):
         availabilities = [self.toRawAvailability(av) for av in user.volunteer_availability]
 
         return dict(user=user,volunteer_info=vinfo,availabilities=availabilities)
+
+    @expose()
+    def remove_availability(self,vaid):
+        pass
+
 
     def toRawAvailability(self,av):
         ''' Convert a model VolunteerAvailability object to a plain ol' Python
@@ -193,6 +176,7 @@ class RootController(BaseController):
         result.dow_saturday = av.dow_saturday
         result.start_time = minutesPastMidnightToTimeString(av.start_time)
         result.end_time = minutesPastMidnightToTimeString(av.end_time)
+        result.av = av
         return result
 
     #==================================
@@ -200,12 +184,12 @@ class RootController(BaseController):
     #==================================
 
     @expose('unter.templates.coord_page')
-    #@require(predicates.has_permission('manage_events'))
+    @require(predicates.has_permission('manage_events'))
     def coord_page(self,**kwargs):
         user,vinfo = self.getVolunteerIdentity()
         if user is None:
             redirect(lurl('/login'))
-        return 'Placeholder for the coordinator page.'
+        return dict()
 
     def getVolunteerIdentity(self):
         ''' Get the logged-in user's volunteer identity. '''
@@ -245,6 +229,8 @@ class RootController(BaseController):
             form.populate_obj(obj)
             obj.print("NeedEvent:")
 
+            user,vinfo = self.getVolunteerIdentity()
+
             dt = datetime.datetime(obj.date_of_need.year,
                     obj.date_of_need.month,
                     obj.date_of_need.day,
@@ -256,32 +242,24 @@ class RootController(BaseController):
                     time_of_need=minutesPastMidnight(obj.time_of_need),
                     volunteer_count=int(obj.volunteer_count),
                     affected_persons=int(obj.affected_persons),
-                    notes=obj.notes,complete=0,location=obj.location)
+                    notes=obj.notes,complete=0,location=obj.location,
+                    created_by=user)
             DBSession.add(nev)
             DBSession.flush()
-
-            # TEST
-            # self.smsJoe(obj.volunteer_count,minutesPastMidnight(obj.time_of_need),int(obj.ev_type))
 
             self.check_need_events(ev_id=nev.neid)
 
             redirect(lurl('/need_events'))
 
-    def smsJoe(self,n_vols,at_time,ev_type):
-        sid = 'xxxx'
-        auth_tok = 'xxx'
-       
-        cli = TwiCli(sid,auth_tok)
-        message = cli.messages.create(body="We have a need for {} volunteer(s) at {}. Purpose: {}. Can you help?".format(n_vols,minutesPastMidnightToTimeString(at_time), evTypeToString(ev_type)),
-                from_="+19159743306",
-                to="+19155495098")
-        print(message.sid)
-
     @expose('unter.templates.need_events')
+    @require(predicates.not_anonymous())
     def need_events(self,completed=0,**kwargs):
         completed = int(completed)
-        evs = DBSession.query(model.NeedEvent).filter(model.NeedEvent.complete == completed)
-        evs = [self.toWrappedEvent(ev) for ev in evs]
+        evs = DBSession.query(model.NeedEvent).filter(model.NeedEvent.complete == completed).all()
+        now = datetime.date.today()
+        evs = [toWrappedEvent(ev,now) for ev in evs]
+        evs = [ev for ev in evs if ev.ev.complete==completed]
+        evs.sort(key=lambda ev: (ev.ev.date_of_need,ev.ev.time_of_need),reverse=True)
         user,vinfo = self.getVolunteerIdentity()
         isCoordinator = False
         if user is not None:
@@ -290,31 +268,16 @@ class RootController(BaseController):
         return dict(user=user,vinfo=vinfo,isCoordinator=isCoordinator,evs=evs,complete=completed)
 
     @expose()
+    #@require(predicates.has_permission('manage_events'))
     def event_complete(self,neid):
         ''' Mark a need event as being complete. '''
         ev = DBSession.query(model.NeedEvent).filter(model.NeedEvent.neid == neid).first()
         if ev is not None:
             print("Got need event {}".format(neid))
-            #DBSession.add(ev)
             ev.complete = 1
         else:
             print("No such need event {}".format(neid))
         redirect(lurl("/need_events"))
-
-    @expose()
-    def send_event_alert(self,neid=None):
-        pass
-
-    def toWrappedEvent(self,ev):
-        thing = Thing()
-        thing.ev = ev
-        date = datetime.date.fromtimestamp(ev.date_of_need)
-        thing.date_str = "{:02d}/{:02d}/{:04d}".format(date.month,date.day,date.year)
-        thing.time_str = minutesPastMidnightToTimeString(ev.time_of_need)
-        thing.ev_str = evTypeToString(ev.ev_type)
-        thing.complete = {1:'Yes',0:'No'}[ev.complete]
-        thing.last_alert_time = datetime.datetime.fromtimestamp(ev.last_alert_time).ctime()
-        return thing
 
     @expose('json')
     def check_need_events(self,ev_id=None):
@@ -325,6 +288,7 @@ class RootController(BaseController):
         else:
             now = datetime.datetime.now()
             checkActiveEvents(DBSession,now)
+        return dict()
 
     #==================================
     # TG quickstart boilerplate follows.

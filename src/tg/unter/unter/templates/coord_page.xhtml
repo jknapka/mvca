@@ -1,0 +1,49 @@
+<html py:extends="master.xhtml" py:strip="True">
+  <head py:block="head" py:strip="True">
+    <title py:block="master_title">List of volunteer needs</title>
+    <meta name="generator" content="HTML Tidy for Linux/x86 (vers 11 February 2007), see www.w3.org" />
+  </head>
+
+  <body py:block="body" py:strip="True">
+    <?py import time ?>
+    <div class="row">
+      <div class="col-md-12">
+        <div class="page-header">
+		<h2>Welcome to your Coordinator page, ${user.display_name}.</h2>
+        </div>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-md-12">
+	      <div><h3>Events you have created.</h3></div>
+	      <div class="unter-coord-events">
+		<table border="1">
+			<thead>
+				<tr>
+					<th>Event ID</th>
+					<th>Date</th>
+					<th>Time</th>
+					<th>Service</th>
+					<th>Location</th>
+					<th>Notes</th>
+					<th>Available volunteers</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr py:for="ev in events">
+					<td>${ev.ev.neid}</td>
+					<td>${ev.date_str}</td>
+					<td>${ev.time_str}</td>
+					<td>${ev.ev_str}</td>
+					<td>${ev.ev.location}</td>
+					<td>${ev.ev.notes</td>
+					<td><a href="vols_available?neid=${ev.ev.neid}">See volunteers</a></td>
+				</tr>
+			</tbody>
+	      </div>
+      </div>
+    </div>
+  </body>
+</html>
+
