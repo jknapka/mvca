@@ -45,7 +45,7 @@ This will start as a pure web app that:
 The webapp is built on TurboGears 2.4 using Python 3.7 (actually
 Python 3.4 or better should be OK). TurboGears is a fairly standard
 "batteries included" kind of Python web framework, similar to
-Flask. Visit https://www.turbogears.org for docs.
+Flask. Visit http://www.turbogears.org for docs.
 
 To work on the web app, you need to install virtualenv:
 
