@@ -21,6 +21,8 @@ from unter.controllers.need import checkOneEvent, checkValidEvents
 from unter.controllers.forms import NewAcctForm,AvailabilityForm,NeedEventForm
 
 from unter.controllers.util import *
+import unter.controllers.need as need
+import unter.controllers.alerts as alerts
 
 from sqlalchemy import or_,text
 
@@ -189,7 +191,9 @@ class RootController(BaseController):
         user,vinfo = self.getVolunteerIdentity()
         if user is None:
             redirect(lurl('/login'))
-        return dict()
+        events = model.DBSession.query(model.NeedEvent).filter_by(created_by=user).all()
+        events = [toWrappedEvent(ev,datetime.date.today()) for ev in events if ev.complete == 0]
+        return dict(user=user,events=events)
 
     def getVolunteerIdentity(self):
         ''' Get the logged-in user's volunteer identity. '''
@@ -207,7 +211,7 @@ class RootController(BaseController):
     #==================================
 
     @expose('unter.templates.add_need_event_start')
-    #@require(predicates.has_permission('manage_events'))
+    @require(predicates.has_permission('manage_events'))
     def add_need_event_start(self,form=None,**kwargs):
         ''' Present the "add a need event" form. '''
         if form is None:
@@ -215,7 +219,7 @@ class RootController(BaseController):
         return dict(page='add_need_event_start',form=form,url='/add_need_event_post')
 
     @expose('unter.templates.add_need_event_start')
-    #@require(predicates.has_permission('manage_events'))
+    @require(predicates.has_permission('manage_events'))
     def add_need_event_post(self,**kwargs):
         form = NeedEventForm(request.POST)
         for fld in form:
@@ -268,7 +272,7 @@ class RootController(BaseController):
         return dict(user=user,vinfo=vinfo,isCoordinator=isCoordinator,evs=evs,complete=completed)
 
     @expose()
-    #@require(predicates.has_permission('manage_events'))
+    @require(predicates.has_permission('manage_events'))
     def event_complete(self,neid):
         ''' Mark a need event as being complete. '''
         ev = DBSession.query(model.NeedEvent).filter(model.NeedEvent.neid == neid).first()
@@ -289,6 +293,15 @@ class RootController(BaseController):
             now = datetime.datetime.now()
             checkActiveEvents(DBSession,now)
         return dict()
+
+    @expose('unter.templates.event_details')
+    def event_details(self,neid):
+        user,vinfo = self.getVolunteerIdentity()
+        nev = model.DBSession.query(model.NeedEvent).filter_by(neid=neid).first()
+        vols = need.getAvailableVolunteers(model.DBSession,nev)
+        now = datetime.date.today()
+        nev = toWrappedEvent(nev,now)
+        return dict(ev=nev,volunteers=vols,user=user)
 
     #==================================
     # TG quickstart boilerplate follows.

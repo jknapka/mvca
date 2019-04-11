@@ -1,11 +1,27 @@
 '''
 Test that need_events can be matched up with volunteers correctly.
 
-NOTE: this case is testing units of functionality outside the
-TG framework's request-handling mechanism. That is why it must
-perform manual transaction management via the transaction
-module - there is no application stack to take care of that
-for us.
+NOTE 1: test fixtures (that is, the setUp() and tearDown() methods
+of a test case) MUST perform manual transaction management via
+the transaction module, eg
+
+try:
+    # Manipulate the model via model.DBSession
+except:
+    transaction.abort()
+else:
+    transaction.commit()
+
+Failure to do this will cause SQLAlchemy to raise a
+"Transaction is closed" error.
+
+NOTE 2: much of this code is testing units of functionality outside the
+TG framework's request-handling mechanism. That is why some of the
+test methods (as opposed to the fixture methods mentioned above) must
+also perform manual transaction management module - there is no application
+stack to take care of that for us. In cases where we make an HTTP
+request (via app.get() or similar), we allow the app stack to manage
+transaction state.
 
 '''
 import sqlalchemy as sql
@@ -56,7 +72,7 @@ class TestNeedEvent(TestController):
         else:
             transaction.commit()
 
-    def testCarlaExists(self):
+    def test_1_CarlaExists(self):
         '''
         Check that Carla the coordinator exists.
         '''
@@ -66,7 +82,7 @@ class TestNeedEvent(TestController):
         carla2 = self.session.query(model.User).filter_by(user_name='carla2').first()
         ok_(carla2 is None)
 
-    def testAirportNeedEvent_1(self):
+    def test_2_AirportNeedEvent_1(self):
         '''
         Check that we find the correct volunteers to alert for
         a given need event.
@@ -88,7 +104,7 @@ class TestNeedEvent(TestController):
         ok_('veronica' in names)
         ok_('velma' in names)
 
-    def testAirportNeedEvent_2(self):
+    def test_3_AirportNeedEvent_2(self):
         '''
         Check that getAlertableVolunteers() works as expected.
         '''
@@ -100,7 +116,7 @@ class TestNeedEvent(TestController):
         ok_('veronica' in names)
         ok_('velma' in names)
 
-    def testAlertAirportNeed(self):
+    def test_4_AlertAirportNeed(self):
         '''
         Check that alerts:
         1) Are sent when the event is new.
@@ -122,6 +138,23 @@ class TestNeedEvent(TestController):
         nev.last_alert_time = nev.last_alert_time - (3600*5)
         alertsSent = alerts.sendAlerts(volunteers,nev,honorLastAlertTime=True)
         ok_(alertsSent)
+
+    def test_5_0_coordEventPage(self):
+        ''' Coordinators can see event details. '''
+        environ = {'REMOTE_USER': 'carla'}
+        nev = self.createAirportNeed(self.getUser(self.session,'carla'))
+        resp = self.app.get('/event_details?neid={}'.format(nev.neid), extra_environ=environ, status=200)
+        ok_('Test - Veronica and Velma alert' in resp.text,resp.text)
+
+    def test_5_1_coordsCanSeeVolunteerPhone(self):
+        """Coordinators can see phone numbers of available volunteers."""
+        # Note how authentication is forged:
+        environ = {'REMOTE_USER': 'carla'}
+        nev = self.createAirportNeed(self.getUser(self.session,'carla'))
+        resp = self.app.get('/event_details?neid={}'.format(nev.neid), extra_environ=environ, status=200)
+        ok_('9150010002' in resp.text, resp.text)
+        ok_('9150010003' in resp.text, resp.text)
+        ok_('9150010004' in resp.text, resp.text)
 
     def createAirportNeed(self,user):
         ''' Create a new "need" for volunteer help. '''

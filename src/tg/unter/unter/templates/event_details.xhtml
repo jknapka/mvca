@@ -1,0 +1,42 @@
+<html py:extends="master.xhtml" py:strip="True">
+    <head py:block="head" py:strip="True">
+        <title py:block="master_title">Event Details</title>
+    </head>
+
+    <body py:block="body" py:strip="True">
+		<?python
+		permissions = [perm.permission_name for perm in user.permissions]
+		?>
+      <div class="row">
+        <div class="col-md-12">
+			<h2>Event Details for event ${ev.ev.neid}</h2>
+          <p>
+		  <table border="1">
+			    <tr><th>Type</th><td>${ev.ev_str}</td></tr>
+				<tr><th>Date</th><td>${ev.date_str}</td></tr>
+				<tr><th>Time</th><td>${ev.time_str}</td></tr>
+				<tr><th>Location</th><td>${ev.ev.location}</td></tr>
+				<tr><th>Persons in need</th><td>${ev.ev.affected_persons}</td></tr>
+				<tr><th>Volunteers needed</th><td>${ev.ev.volunteer_count}</td></tr>
+				<tr><th>Notes</th><td>${ev.ev.notes}</td></tr>
+		  </table>
+		  <div py:if="'manage_events' in permissions">
+			  <h2>Available volunteers</h2>
+			<table border="1">
+				<thead>
+					<tr><th>Name</th><th>Phone</th><th>Email</th></tr>
+				</thead>
+				<tbody>
+					<tr py:for="vol in volunteers">
+						<td>${vol.display_name}</td>
+						<td>${vol.vinfo.phone}</td>
+						<td>${vol.email_address}</td>
+					</tr>
+				</tbody>
+			</table>
+		  </div>
+          </p>
+        </div>
+      </div>
+    </body>
+</html>
