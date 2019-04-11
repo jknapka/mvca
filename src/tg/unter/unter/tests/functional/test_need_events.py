@@ -21,8 +21,6 @@ from unter.tests import TestController
 
 from nose.tools import ok_, eq_
 
-import sys
-
 class TestNeedEvent(TestController):
     '''
     Story:
