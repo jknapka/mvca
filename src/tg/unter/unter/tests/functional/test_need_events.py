@@ -13,6 +13,9 @@ import datetime as dt
 
 from unter.tests import TestController
 
+from nose.tools import ok_, eq_
+
+
 class TestNeedEvent(TestController,ut.TestCase):
     '''
     Story:
@@ -40,17 +43,23 @@ class TestNeedEvent(TestController,ut.TestCase):
     def setUp(self):
         super().setUp()
         self.now = dt.datetime(2019,3,30,hour=12,minute=0)
-        self.session = self.setupDB()
+
+        try:
+            self.session = self.setupDB()
+        except:
+            transaction.abort()
+        else:
+            transaction.commit()
 
     def testCarlaExists(self):
         '''
         Check that Carla the coordinator exists.
         '''
         carla = self.session.query(model.User).filter_by(user_name='carla').first()
-        self.assertTrue(carla is not None)
+        ok_(carla is not None)
 
         carla2 = self.session.query(model.User).filter_by(user_name='carla2').first()
-        self.assertTrue(carla2 is None)
+        ok_(carla2 is None)
 
     def testAirportNeedEvent_1(self):
         '''
@@ -60,17 +69,17 @@ class TestNeedEvent(TestController,ut.TestCase):
         nev = self.createAirportNeed(self.getUser(self.session,'carla'))
 
         volunteers = need.getAvailableVolunteers(self.session,nev)
-        self.assertEqual(3,len(volunteers))
+        eq_(3,len(volunteers))
         names = [vol.user_name for vol in volunteers]
-        self.assertTrue('vincent' in names)
-        self.assertTrue('veronica' in names)
-        self.assertTrue('velma' in names)
+        ok_('vincent' in names)
+        ok_('veronica' in names)
+        ok_('velma' in names)
 
         volunteers = need.getUncommittedVolunteers(self.session,nev,volunteers)
-        self.assertEqual(2,len(volunteers))
+        eq_(2,len(volunteers))
         names = [vol.user_name for vol in volunteers]
-        self.assertTrue('veronica' in names)
-        self.assertTrue('velma' in names)
+        ok_('veronica' in names)
+        ok_('velma' in names)
 
     def testAirportNeedEvent_2(self):
         '''
@@ -79,10 +88,10 @@ class TestNeedEvent(TestController,ut.TestCase):
         nev = self.createAirportNeed(self.getUser(self.session,'carla'))
 
         volunteers = need.getAlertableVolunteers(self.session,nev)
-        self.assertEqual(2,len(volunteers))
+        eq_(2,len(volunteers))
         names = [vol.user_name for vol in volunteers]
-        self.assertTrue('veronica' in names)
-        self.assertTrue('velma' in names)
+        ok_('veronica' in names)
+        ok_('velma' in names)
 
     def testAlertAirportNeed(self):
         '''
@@ -95,17 +104,17 @@ class TestNeedEvent(TestController,ut.TestCase):
 
         # We should send alerts now, because the event is new.
         alertsSent = alerts.sendAlerts(volunteers,nev,honorLastAlertTime=True)
-        self.assertTrue(alertsSent)
+        ok_(alertsSent)
 
         # We should NOT send alerts now, because the event
         # was alerted recently.
         alertsSent = alerts.sendAlerts(volunteers,nev,honorLastAlertTime=True)
-        self.assertFalse(alertsSent)
+        ok_(not alertsSent)
 
         # Back-date the alert time on nev so we can alert again.
         nev.last_alert_time = nev.last_alert_time - (3600*5)
         alertsSent = alerts.sendAlerts(volunteers,nev,honorLastAlertTime=True)
-        self.assertTrue(alertsSent)
+        ok_(alertsSent)
 
     def createAirportNeed(self,user):
         print("Creating NeedEvent using self.session {} model.DBSession {}".format(self.session,model.DBSession))
@@ -125,13 +134,8 @@ class TestNeedEvent(TestController,ut.TestCase):
         nev.created_by = user
 
         self.session.add(nev)
-        #transaction.commit()
 
         return nev
-
-    def tearDown(self):
-        #model.DBSession = self.original_model_session
-        pass
 
     def setupDB(self):
         '''
@@ -186,7 +190,6 @@ class TestNeedEvent(TestController,ut.TestCase):
                 description='Carla the coordinator')
         u.vinfo = v
         session.flush()
-        #transaction.commit()
 
         g = session.query(model.Group).filter_by(group_name='volunteers').first()
         phone = 9150010001
@@ -198,7 +201,6 @@ class TestNeedEvent(TestController,ut.TestCase):
             v = model.VolunteerInfo(user_id=u.user_id,zipcode='79900',phone=str(phone),
                     description='{} the volunteer')
             u.vinfo = v
-        #transaction.commit()
 
         # Availabilities:
         
@@ -213,7 +215,6 @@ class TestNeedEvent(TestController,ut.TestCase):
                 dow_sunday=1)
         av.user = self.getUser(session,'vincent')
         session.add(av)
-        #transaction.commit()
 
         av = model.VolunteerAvailability(start_time=6*60,end_time=18*60,
                 dow_monday=0,
@@ -225,7 +226,6 @@ class TestNeedEvent(TestController,ut.TestCase):
                 dow_sunday=1)
         av.user = self.getUser(session,'veronica')
         session.add(av)
-        #transaction.commit()
 
         av = model.VolunteerAvailability(start_time=9*60+15,end_time=12*60+45,
                 dow_monday=1,
@@ -237,7 +237,6 @@ class TestNeedEvent(TestController,ut.TestCase):
                 dow_sunday=1)
         av.user = self.getUser(session,'velma')
         session.add(av)
-        #transaction.commit()
 
         av = model.VolunteerAvailability(start_time=9*60+15,end_time=12*60+45,
                 dow_monday=1,
@@ -249,7 +248,6 @@ class TestNeedEvent(TestController,ut.TestCase):
                 dow_sunday=0)
         av.user = self.getUser(session,'velma')
         session.add(av)
-        #transaction.commit()
 
         av = model.VolunteerAvailability(start_time=9*60+15,end_time=12*60+45,
                 dow_monday=0,
@@ -261,7 +259,6 @@ class TestNeedEvent(TestController,ut.TestCase):
                 dow_sunday=0)
         av.user = self.getUser(session,'vaughn')
         session.add(av)
-        #transaction.commit()
 
         # Need events: Vincent is committed to a bus-station
         # event.
@@ -278,7 +275,6 @@ class TestNeedEvent(TestController,ut.TestCase):
         vne.created_by = self.getUser(session,'carla')
         session.add(vne)
 
-        #transaction.commit()
 
         # Commit Vincent to the bus-station event.
         user = self.getUser(session,'vincent')
@@ -287,7 +283,6 @@ class TestNeedEvent(TestController,ut.TestCase):
         vcom.need_event = vne
         session.add(vcom)
 
-        #transaction.commit()
 
         return session
 
