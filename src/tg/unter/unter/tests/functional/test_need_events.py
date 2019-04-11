@@ -12,7 +12,6 @@ import sqlalchemy as sql
 import sqlalchemy.orm as orm
 import transaction
 import unter.model as model
-from unter.websetup.bootstrap import create_entities
 import unter.controllers.need as need
 import unter.controllers.alerts as alerts
 import datetime as dt
@@ -141,60 +140,30 @@ class TestNeedEvent(TestController):
             nev.cancelled = 0
             nev.complete = 0
             nev.created_by = user
+            self.session.add(nev)
+            self.session.flush() # So we can get a PK for nev.
+            neid = nev.neid
         except:
             transaction.abort()
         else:
             transaction.commit()
 
-        self.session.add(nev)
+        # We do this because, since the transaction was committed,
+        # nev is no longer bound to the session.
+        nev2 = self.session.query(model.NeedEvent).filter_by(neid=neid).first()
 
-        return nev
+        return nev2
 
     def setupDB(self):
         '''
         Set up the test DB.
-
-        BIG HUGE WTF: setUp() and tearDown() are run against the same
-        in-memory DB for each test case????
         '''
 
-        # OK apparently setup-app runs automatically when testing?
-        # And uses an in-memory SQLite DB?
-        # So I don't need to do all of this. Just use the model's
-        # DBSession object, and create the test entities.
-
-        # Create the DB engine - this is the connection to the
-        # back-end DB, which in this case is just an SQLite in-memory
-        # one.
-        #engine = sql.create_engine('sqlite:///:memory:')
-
         session = model.DBSession
-        #session.configure(bind=engine)
-        # Work around the BIG HUGE WTF above:
-        carla = session.query(model.User).filter_by(user_name='carla').first()
-        if carla is not None:
-            # WE HAVE ALREADY DONE THIS ON THIS DB INSTANCE WTFFFFFFF????
-            return session
 
+        # Create the entities that support our test stories.
 
-        # Create an ORM session bound to the engine.
-        #sessionmaker = orm.sessionmaker()
-        #session = sessionmaker(bind=engine)
-
-        # Ensure that code that depends on model.DBSession uses
-        # our session.
-        #model.DBSession = session
-
-        # Create our model schema. This will create the schema for all
-        # model classes we've imported.
-        #model.Group.metadata.create_all(session.bind)
-
-        # Create the users and groups we need:
-
-        # First the base TG bootstrap entities...
-        #create_entities(session)
-
-        # Then the entities that support our test stories.
+        # Users:
         g = session.query(model.Group).filter_by(group_name='coordinators').first()
         u = model.User(user_name='carla',display_name='Carla',email_address='carla@nowhere.com')
         g.users.append(u)
@@ -295,7 +264,6 @@ class TestNeedEvent(TestController):
         vcom.user = user
         vcom.need_event = vne
         session.add(vcom)
-
 
         return session
 
