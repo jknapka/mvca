@@ -1,3 +1,4 @@
+htmlcov
 .coverage
 *.swp
 __pycache__
