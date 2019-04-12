@@ -129,5 +129,28 @@ class VolunteerResponse(DeclarativeBase):
                         backref=backref('need_event',
                                         cascade='all, delete-orphan'))
 
-__all__ = ['VolunteerInfo','VolunteerAvailability','NeedEvent','VolunteerResponse']
+class VolunteerDecommitment(DeclarativeBase):
+    '''
+    When a volunteer de-commits from an event, we erase the
+    corresponding volunteer_response row and add a row here.
+    This permits the app code to be much cleaner than if
+    we carry a "decommit" flag in volunteer_response.
+    '''
+    __tablename__ = "volunteer_decommitment"
+
+    vrid = Column(Integer,primary_key=True)
+
+    # The volunteer NOT responding to the event.    
+    user_id = Column(Integer,ForeignKey('tg_user.user_id'),nullable=False)
+    user = relationship('User', uselist=False,
+                        backref=backref('volunteer_decommitment',
+                                        cascade='all, delete-orphan'))
+
+    # The event NOT being served by this volunteer.
+    neid = Column(Integer,ForeignKey('need_event.neid'),nullable=False)
+    need_event = relationship('NeedEvent',uselist=False,
+                        backref=backref('decommitted_event',
+                                        cascade='all, delete-orphan'))
+
+__all__ = ['VolunteerInfo','VolunteerAvailability','NeedEvent','VolunteerResponse','VolunteerDecommitment']
 

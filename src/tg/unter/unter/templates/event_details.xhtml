@@ -28,9 +28,9 @@
 				</thead>
 				<tbody>
 					<tr py:for="vol in volunteers">
-						<td>${vol.display_name}</td>
-						<td>${vol.vinfo.phone}</td>
-						<td>${vol.email_address}</td>
+						<td><a href="${tg.url('/volunteer_info',dict(user_id=vol.user_id))}">${vol.display_name}</a></td>
+						<td><a href="${tg.url('/volunteer_info',dict(user_id=vol.user_id))}">${vol.vinfo.phone}</a></td>
+						<td><a href="${tg.url('/volunteer_info',dict(user_id=vol.user_id))}">${vol.email_address}</a></td>
 					</tr>
 				</tbody>
 			</table>

@@ -16,6 +16,17 @@ def checkOneEvent(dbsession,ev_id,honorLastAlertTime=True):
 def checkValidEvents(dbsession,when):
     print("Checking need events at {}".format(when))
 
+def decommit_volunteer(dbsession,vresp):
+    '''
+    When a volunteer de-commits from an event, call this
+    to manage the response and decommitment rows in the DB.
+    '''
+    decommit = model.VolunteerDecommitment()
+    decommit.user = vresp.user
+    decommit.need_event = vresp.need_event
+    dbsession.add(decommit)
+    dbsession.delete(vresp)
+
 def getDowCheck(nev):
     '''
     Get a function that will check VolunteerAvailability

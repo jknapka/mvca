@@ -13,7 +13,7 @@
 
 
 	<div class="unter-actions">
-		<a href="/need_events?complete=0">See volunteer needs</a>
+		<a href="/need_events?complete=0&amp;staffed=0">See volunteer needs</a>
 	</div>
 
 	<table>
@@ -53,6 +53,32 @@
 			</td>
 		</tr>
 	</table>
+
+	<div py:if="len(events) > 0">
+		<h3>Events you plan to serve</h3>
+		<table border="1">
+			<thead>
+				<tr>
+					<th>Type</th>
+					<th>Date</th>
+					<th>Time</th>
+					<th>Location</th>
+					<th>Coordinator</th>
+					<th>Break commitment</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr py:for="ev in events">
+					<td>${ev.ev_str}</td>
+					<td>${ev.date_str}</td>
+					<td>${ev.time_str}</td>
+					<td>${ev.ev.location}</td>
+					<td>${ev.ev.created_by.display_name} (${ev.ev.created_by.vinfo.phone})</td>
+					<td><a href="${tg.url('/decommit',dict(neid=ev.ev.neid))}">Sorry, can't make it :-(</a></td>
+				</tr>
+			</tbody>
+		</table>
+	</div>
       </div>
     </div>
   </body>

@@ -156,13 +156,14 @@ class RootController(BaseController):
             # Not actually a volunteer - probably manager.
             redirect(lurl('/'),dict(message="No volunteer info for {}".format(user.user_name)))
         availabilities = [self.toRawAvailability(av) for av in user.volunteer_availability]
+        events = [vr.need_event for vr in user.volunteer_response if vr.need_event.complete == 0]
+        events = [toWrappedEvent(ev) for ev in events]
 
-        return dict(user=user,volunteer_info=vinfo,availabilities=availabilities)
+        return dict(user=user,volunteer_info=vinfo,availabilities=availabilities,events=events)
 
     @expose()
     def remove_availability(self,vaid):
-        pass
-
+        return "<h1>Not yet implemented</h1>"
 
     def toRawAvailability(self,av):
         ''' Convert a model VolunteerAvailability object to a plain ol' Python
@@ -209,6 +210,15 @@ class RootController(BaseController):
     #==================================
     # Need event management.
     #==================================
+
+    @expose()
+    def respond(self,neid):
+        user,vinfo = self.getVolunteerIdentity()
+        if user is None:
+            redirect(lurl('/login'))
+        vresp = model.VolunteerResponse(user_id=user.user_id,neid=neid)
+        model.DBSession.add(vresp)
+        redirect(lurl('/volunteer_info',dict(user_id=user.user_id)))
 
     @expose('unter.templates.add_need_event_start')
     @require(predicates.has_permission('manage_events'))

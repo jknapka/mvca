@@ -58,8 +58,8 @@
 
 		<tbody>
 		<div py:for="ev in evs">
-			<tr style="border-left: 4px solid black">
-			<td>${user.display_name}</td>
+			<tr py:if="len(ev.ev.responses) &lt; ev.ev.volunteer_count" style="border-left: 4px solid black">
+			<td>${ev.ev.created_by.display_name}</td>
 			<td>${ev.date_str}</td>
 			<td>${ev.time_str}</td>
 			<td>${ev.ev_str}</td>
@@ -67,7 +67,7 @@
 			<td>${ev.ev.location}</td>
 			<td>${ev.ev.affected_persons}</td>
 			<td>${ev.ev.volunteer_count}</td>
-			<td>??</td>
+			<td>${len(ev.ev.responses)}</td>
 			<td>${ev.last_alert_time}
 				<a py:if="isCoordinator and ev.ev.complete != 1 and time.time() - 3600 > ev.ev.last_alert_time"
 				       href="/send_alert?neid=${ev.ev.neid}"><br/>Send alert</a>
@@ -76,11 +76,14 @@
 					href="/event_complete?neid=${ev.ev.neid}">Mark complete</a>
 				<span py:if="ev.ev.complete == 1">Already complete</span>
 			</td>
-			<td py:if="'respond_to_need' in [p.permission_name for p in user.permissions] and complete != 1">
-				<a href="/respond?user_id=${user.user_id}x&amp;neid=${ev.ev.neid}">Respond</a>
+			<td>
+				<a py:if="'respond_to_need' in [p.permission_name for p in user.permissions] and complete != 1"
+				   	href="/respond?neid=${ev.ev.neid}">Respond</a>
 			</td>
 			</tr>
-			<tr border="1" style="border-bottom: 4px solid black; border-left: 4px solid black">
+			<tr py:if="len(ev.ev.responses) &lt; ev.ev.volunteer_count"
+			   	border="1"
+			   	style="border-bottom: 4px solid black; border-left: 4px solid black">
 			<td border="0"></td>
 			<td colspan="100">${ev.ev.notes}</td>
 			</tr>
