@@ -34,7 +34,7 @@ TO DO:
 events that are active and not already fully-staffed by
 volunteers.
 
-Story (INCOMPLETE, MISSING TESTS): Veronica the Volunteer logs into Unter.
+Story (DONE): Veronica the Volunteer logs into Unter.
   - On her volunteer info page, she can see a list of events that
     occur during her times of availability.
   - She does not see events that do not occur during her
