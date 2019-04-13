@@ -8,6 +8,7 @@
     <?python
 import time
 perms = [p.permission_name for p in user.permissions]
+isCoordinator = 'manage_events' in perms
     ?>
     <div class="row">
       <div class="col-md-12">
@@ -46,6 +47,7 @@ perms = [p.permission_name for p in user.permissions]
 					<th>Location</th>
 					<th>Notes</th>
 					<th>Available volunteers</th>
+					<th>Last alert sent</th>
 				</tr>
 			</thead>
 			<tbody>
@@ -57,6 +59,10 @@ perms = [p.permission_name for p in user.permissions]
 					<td><a href="${tg.url('/event_details',dict(neid=ev.ev.neid))}">${ev.ev.location}</a></td>
 					<td><a href="${tg.url('/event_details',dict(neid=ev.ev.neid))}">${ev.ev.notes}</a></td>
 					<td><a href="${tg.url('/event_details',dict(neid=ev.ev.neid))}">See volunteers</a></td>
+					<td id="alert-time-neid-${ev.ev.neid}">${ev.last_alert_time}
+						<a py:if="isCoordinator and ev.ev.complete != 1 and time.time() - 3600 > ev.ev.last_alert_time"
+							   href="/send_alert?neid=${ev.ev.neid}"><br/>Send alert</a>
+					</td>
 				</tr>
 			</tbody>
 		</table>

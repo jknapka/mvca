@@ -197,7 +197,7 @@ class RootController(BaseController):
         if user is None:
             redirect(lurl('/login'))
         events = model.DBSession.query(model.NeedEvent).filter_by(created_by=user).all()
-        events = [toWrappedEvent(ev,datetime.date.today()) for ev in events if ev.complete == 0]
+        events = [toWrappedEvent(ev) for ev in events if ev.complete == 0]
         return dict(user=user,events=events)
 
     def getVolunteerIdentity(self):

@@ -98,13 +98,13 @@ event. That is, we want to be able to issue alerts not only
 for new events, but for existing events that are not
 yet claimed by volunteers.
 
-Story (NOT STARTED): No volunteers have responded to Carla's Sunday
+Story (INCOMPLETE): No volunteers have responded to Carla's Sunday
 morning airport event as of Saturday morning. She goes
 to the event page (which shows all active event) and:
 
-  - sees that an alert was last sent for that particular event
+  - (done) sees that an alert was last sent for that particular event
     on Friday morning.
-  - She can send a new alert for that event from the event list page,
+  - (done) She can send a new alert for that event from the event list page,
     with a single click.
   - Again, Veronica and Velma should recieve alerts.
   - Carla should be able to click the event to see a list of 
