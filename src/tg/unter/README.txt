@@ -34,7 +34,7 @@ TO DO:
 events that are active and not already fully-staffed by
 volunteers.
 
-Story (INCOMPLETE): Veronica the Volunteer logs into Unter.
+Story (INCOMPLETE, MISSING TESTS): Veronica the Volunteer logs into Unter.
   - On her volunteer info page, she can see a list of events that
     occur during her times of availability.
   - She does not see events that do not occur during her
@@ -56,6 +56,9 @@ Story (INCOMPLETE): Veronica the Volunteer logs into Unter.
         decline to volunteer.
   - Volunteers should receive reminder alerts for events to which
     they've committed an hour or so prior to the event.
+  * This will require a monitor process somewhere. Maybe just a
+	cron job that pokes a URL on the web service every five
+	minutes or something.
 
 Story (TO BE WRITTEN)...
 
@@ -73,12 +76,12 @@ Story (INCOMPLETE):
   - (done) Veronica and Velma have not committed to any events that
     overlap the interval from 10:00 AM to 11:00 AM on Sunday 
     morning, so they should receive alerts. 
-  -  Alerts are sent via email, and via text (if the volunteer
+  - Alerts are sent via email, and via text (if the volunteer
     has indicated text alert preference).
   - (done) Volunteer phone numbers are visible on the event
     page to logged-in coordinators, so they can make confirmation
     phone calls to volunteers.
-  - Coordinator phone numbers are visible to volunteers for
+  - (done) Coordinator phone numbers are visible to volunteers for
     the events to which they have committed. Only the phone
     numbers for the coordinators who created those events
     are visible to volunteers, and only to the volunteers
@@ -118,6 +121,8 @@ for which no volunteers have committed.
     the story above).
   - NOTE: Show events in reverse temporal order on the event page.
     Also provide a "today's events only" link.
+  - CONSIDER: avoid alerting *volunteers* who have been alerted
+    recently, to avoid event fatigue.
 
 ) Check that when multiple volunteers respond to an event,
 we confirm the event for only the number of volunteers
@@ -137,6 +142,9 @@ is necessary for this event, so:
   - The other should receive a message saying "Thank you for
     responding! This need is already being served by other
     volunteers. There's nothing more you need to do right now." 
+  * For test purposes, we'll need an "Alerter" interface that
+    can be stubbed for testing and actually send alerts in
+    production.
 
 ) Show volunteers who have responded to events on the
 need_events page, and on the event page for a particular
@@ -187,7 +195,10 @@ should cause the coordinator who created the event to
 receive an alert. It should also alert any other
 volunteers who may be available at the event's time.
 
-Story (NOT STARTED): Veronica realizes that she is actually going to
+Story (INCOMPLETE): (some implementation of responses and
+decommits are present in need.py, and test_commit.py exists.)
+
+Veronica realizes that she is actually going to
 be out of town on Sunday and should not have committed
 to Carla's airport event. She logs into Unter and:
   - in her volunteer information page, she can see the event
