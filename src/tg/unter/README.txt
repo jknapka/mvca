@@ -128,7 +128,7 @@ to the event page (which shows all active event) and:
   - (done) She cannot send a new alert for events that have been
 	alerted "recently" (within the last N hours, for come configurable
 	value of N).
-  - Again, Veronica and Velma should recieve alerts.
+  - (done) Again, Veronica and Velma should recieve alerts.
   - Carla should be able to click the event to see a list of 
     available volunteers for the event time, and their contact
     information.

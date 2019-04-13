@@ -66,6 +66,12 @@ def getDowCheck(nev):
             6:lambda x: x.dow_sunday == 1,
             }[dow]
 
+def getCommittedVolunteers(dbsession,nev):
+    '''
+    Get volunteers who have committed to an event.
+    '''
+    return [vcom.user for vcom in nev.event_response]
+
 def getAvailableVolunteers(dbsession,nev,allVols=None):
     '''
     Get volunteers who have indicated they are available at the
@@ -140,13 +146,13 @@ def overlappingEvents(ev1,ev2):
         ev1end = ev1.time_of_need + ev1.duration
         ev2start = ev2.time_of_need
         ev2end = ev2.time_of_need + ev2.duration
-        if ev1start > ev2start and ev1start < ev2end:
+        if ev1start >= ev2start and ev1start <= ev2end:
             result = True
-        if ev1end > ev2start and ev1end < ev2end:
+        if ev1end >= ev2start and ev1end <= ev2end:
             result = True
-        if ev2start > ev1start and ev2start < ev1end:
+        if ev2start >= ev1start and ev2start <= ev1end:
             result = True
-        if ev2end > ev1start and ev2end < ev1end:
+        if ev2end >= ev1start and ev2end <= ev1end:
             result = True
     return result
 

@@ -313,9 +313,11 @@ class RootController(BaseController):
         user,vinfo = self.getVolunteerIdentity()
         nev = model.DBSession.query(model.NeedEvent).filter_by(neid=neid).first()
         vols = need.getAvailableVolunteers(model.DBSession,nev)
+        vols = need.getUncommittedVolunteers(model.DBSession,nev,vols)
+        committed = need.getCommittedVolunteers(model.DBSession,nev)
         now = datetime.date.today()
         nev = toWrappedEvent(nev,now)
-        return dict(ev=nev,volunteers=vols,user=user)
+        return dict(ev=nev,volunteers=vols,user=user,volunteers_committed=committed)
 
     #==================================
     # Alerts.

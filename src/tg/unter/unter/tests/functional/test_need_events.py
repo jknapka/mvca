@@ -106,6 +106,22 @@ class TestNeedEvent(TestController):
         ok_('veronica' in names)
         ok_('velma' in names)
 
+        try:
+            self.createResponse('velma','Test - Veronica and Velma alert')
+        except:
+            transaction.abort()
+        else:
+            transaction.commit()
+
+        # Check that Velma now does not appear as available
+        # (since she is committed to the event).
+        volunteers = need.getUncommittedVolunteers(self.session,nev,volunteers)
+        eq_(1,len(volunteers))
+        names = [vol.user_name for vol in volunteers]
+        ok_('veronica' in names)
+        ok_('velma' not in names)
+
+
     def test_3_AirportNeedEvent_2(self):
         '''
         Check that getAlertableVolunteers() works as expected.
@@ -154,7 +170,6 @@ class TestNeedEvent(TestController):
         environ = {'REMOTE_USER': 'carla'}
         nev = self.createAirportNeed(self.getUser(self.session,'carla'))
         resp = self.app.get('/event_details?neid={}'.format(nev.neid), extra_environ=environ, status=200)
-        ok_('9150010002' in resp.text, resp.text)
         ok_('9150010003' in resp.text, resp.text)
         ok_('9150010004' in resp.text, resp.text)
 

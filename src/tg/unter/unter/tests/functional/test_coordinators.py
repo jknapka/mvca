@@ -19,6 +19,8 @@ from bs4 import BeautifulSoup as bsoup
 
 from io import StringIO
 
+import logging
+
 # Alerter stub that captures alert information for tests.
 TEST_ALERT_OUTPUT = StringIO()
 def stubSMSAlerter(msg,sourceNumber="+1SOURCE",destNumber="+1DEST"):
@@ -94,6 +96,46 @@ class TestCoordPage(TestController):
         ok_('9150010002' in alertLog,alertLog)
         ok_('9150010003' in alertLog,alertLog)
         ok_('Call Carla 9150010001' in alertLog,alertLog)
+
+    def test_4_availableVolunteers(self):
+        nev = model.DBSession.query(model.NeedEvent).filter_by(\
+                notes="Veronica or Velma airport").first()
+        # No commitments.
+        env = {"REMOTE_USER":'carla'}
+        resp = self.app.get("/event_details?neid={}".format(nev.neid),
+                extra_environ=env,status=200)
+
+        zup = bsoup(resp.text,features="html.parser")
+        vols_avail = str(zup.find(id="volunteers-available"))
+        ok_("Veronica" in vols_avail,vols_avail)
+        ok_("Velma" in vols_avail,vols_avail)
+
+    def test_5_committedVolunteers(self):
+        # Commit Velma.
+        try:
+            self.createResponse('velma','Veronica or Velma airport')
+        except:
+            import sys
+            logging.getLogger('unter.test').error("ABORTING TRANSACTION: {}".format(sys.exc_info()))
+            transaction.abort()
+        else:
+            transaction.commit()
+
+        nev = model.DBSession.query(model.NeedEvent).filter_by(\
+                notes="Veronica or Velma airport").first()
+
+        env = {"REMOTE_USER":'carla'}
+        resp = self.app.get("/event_details?neid={}".format(nev.neid),
+                extra_environ=env,status=200)
+
+        zup = bsoup(resp.text,features="html.parser")
+        vols_committed = str(zup.find(id="volunteers-committed"))
+        ok_("Veronica" not in vols_committed,vols_committed)
+        ok_("Velma" in vols_committed,vols_committed)
+
+        vols_avail = str(zup.find(id="volunteers-available"))
+        ok_("Veronica" in vols_avail,vols_avail)
+        ok_("Velma" not in vols_avail,vols_avail)
 
     def setupDB(self):
         '''
