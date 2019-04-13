@@ -17,13 +17,26 @@ from nose.tools import ok_, eq_
 
 from bs4 import BeautifulSoup as bsoup
 
+from io import StringIO
+
+# Alerter stub that captures alert information for tests.
+TEST_ALERT_OUTPUT = StringIO()
+def stubSMSAlerter(msg,sourceNumber="+1SOURCE",destNumber="+1DEST"):
+    print("('{}','{}','{}')".format(msg,sourceNumber,destNumber),file=TEST_ALERT_OUTPUT)
+alerts.setSMSAlerter(stubSMSAlerter)
+alerts.SMS_ENABLED = True
+
 class TestCoordPage(TestController):
 
     def setUp(self):
         super().setUp()
+        global TEST_ALERT_OUTPUT
+        TEST_ALERT_OUTPUT = StringIO()
         try:
             self.setupDB()
         except:
+            import sys
+            print("ABORTING TRANSACTION: {}".format(sys.exc_info()),file=sys.stderr)
             transaction.abort()
         else:
             transaction.commit()
@@ -63,6 +76,25 @@ class TestCoordPage(TestController):
         td = str(zup.find(id='alert-time-neid-1'))
         ok_('href="/send_alert?neid=1"' in td,td)
 
+    def test_3_alerts1(self):
+        '''
+        Check that appropriate people are alerted when we send
+        alerts.
+        '''
+        nev = model.DBSession.query(model.NeedEvent).filter_by(\
+                notes="Veronica or Velma airport").first()
+        # No commitments.
+        env = {"REMOTE_USER":'carla'}
+        resp = self.app.get("/send_alert?neid={}".format(nev.neid),
+                extra_environ=env,status=302)
+
+        # Check that Velma's and Veronica's phone numbers
+        # appear in the alert log.
+        alertLog = TEST_ALERT_OUTPUT.getvalue()
+        ok_('9150010002' in alertLog,alertLog)
+        ok_('9150010003' in alertLog,alertLog)
+        ok_('Call Carla 9150010001' in alertLog,alertLog)
+
     def setupDB(self):
         '''
         DB entities needed for these tests:
@@ -72,4 +104,8 @@ class TestCoordPage(TestController):
         3) Some events.
         4) At least one volunteer availability for an event.
         '''
-        self.setupNeedEventEntities()
+        #self.setupNeedEventEntities()
+        self.createCoordinatorCarla()
+        self.createVolunteers()
+        self.createAvailabilities()
+        self.createEvents()

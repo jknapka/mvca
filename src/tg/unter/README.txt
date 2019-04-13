@@ -28,13 +28,15 @@ Unter supports the following functions:
 * Allows coordinators (but not other volunteers) to see
   contact information for any volunteer.
 
-TO DO:
+TO DO (some complete - this is just a place to track
+work-in-progress now):
 
 ) Volunteers should be able to see and respond only to
 events that are active and not already fully-staffed by
 volunteers.
 
 Story (DONE): Veronica the Volunteer logs into Unter.
+(tested in test_volunteers.py)
   - On her volunteer info page, she can see a list of events that
     occur during her times of availability.
   - She does not see events that do not occur during her
@@ -61,7 +63,23 @@ Story (DONE): Veronica the Volunteer logs into Unter.
     they've committed an hour or so prior to the event.
   - Volunteers should never receive alerts for events from which
 	they have decomitted.
-  * This will require a monitor process somewhere. Maybe just a
+  - Alerts contain response links that allow users to commit or
+	decommit by clicking. Currently the format of those links
+	is "/respond?user_id=U&neid=N". This is bad, those URLs are
+	easily guessable. What we should actually do is generate a
+	GUID for each user/event combination, store it associated
+	with the event and user, and use it in the URL.
+  - We also want users to be able to respond (or decommit) by
+	responding to a text message. Need to check Twilio API
+	for catching responses. ... OK, catching responses is
+	easy. The difficult part is knowing which message the
+	volunteer is responding to - we can't ask volunteers to
+	include event IDs or UUIDs in their responses :-( That
+	suggests we should send eg at most 1 alert per volunteer
+	per hour, or something, so that we can be reasonably
+	confident that when they respond "yes" we can assume they
+	are responding to the last message we sent.
+  * All of this will require a monitor process somewhere. Maybe just a
 	cron job that pokes a URL on the web service every five
 	minutes or something.
 
@@ -72,6 +90,7 @@ are available at the time of the event and who are not
 already committed to an event will receive an alert.
 
 Story (INCOMPLETE):
+(test_need_events.py)
   - (done) Carla creates a need event for a family needing
     a ride to the airport on Sunday morning at 10:00 AM, which
     will take about 1 hour.
@@ -106,6 +125,9 @@ to the event page (which shows all active event) and:
     on Friday morning.
   - (done) She can send a new alert for that event from the event list page,
     with a single click.
+  - (done) She cannot send a new alert for events that have been
+	alerted "recently" (within the last N hours, for come configurable
+	value of N).
   - Again, Veronica and Velma should recieve alerts.
   - Carla should be able to click the event to see a list of 
     available volunteers for the event time, and their contact

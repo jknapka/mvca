@@ -147,10 +147,10 @@ class RootController(BaseController):
     @expose('unter.templates.volunteer_info')
     @require(predicates.not_anonymous())
     def volunteer_info(self,**kwargs):
-        #if not request.identity:
-        #    login_counter = request.environ.get('repoze.who.logins', 0) + 1
-        #    redirect('/login',
-        #             params=dict(came_from="/volunteer_info",__logins=login_counter))
+        if not request.identity:
+            login_counter = request.environ.get('repoze.who.logins', 0) + 1
+            redirect('/login',
+                     params=dict(came_from="/volunteer_info",__logins=login_counter))
         user,vinfo = self.getVolunteerIdentity()
         if vinfo is None:
             # Not actually a volunteer - probably manager.
@@ -316,6 +316,16 @@ class RootController(BaseController):
         now = datetime.date.today()
         nev = toWrappedEvent(nev,now)
         return dict(ev=nev,volunteers=vols,user=user)
+
+    #==================================
+    # Alerts.
+    #==================================
+
+    @expose()
+    @require(predicates.has_permission('manage_events'))
+    def send_alert(self,neid,came_from=lurl('/coord_page')):
+        need.checkOneEvent(model.DBSession,neid)
+        redirect(came_from)
 
     #==================================
     # TG quickstart boilerplate follows.

@@ -209,3 +209,82 @@ class TestController(object):
         session.add(vcom)
 
         return session
+
+    def createVolunteers(self):
+        veronica = self.createUser(user_name='veronica',email='v@mars.net',
+                phone='9150010002',desc='Veronica the volunteer',
+                groups=['volunteers'])
+        
+        velma = self.createUser(user_name='velma',email='velma@scooby.com',
+                phone='9150010003',desc='Velma the volunteer',
+                groups=['volunteers'])
+
+        vaughn = self.createUser(user_name='vaughn',email='vaughn@nowhere.com',
+                phone='9150010004',desc='Vaughn the volunteer',
+                groups=['volunteers'])
+
+
+    def createCoordinatorCarla(self):
+        carla = self.createUser(user_name='carla',email='carla@nowhere.com',
+                phone='9150010001',desc='Carla the coordinator',
+                groups=['volunteers','coordinators'])
+
+    def createAvailabilities(self):
+        veronica = self.getUser(model.DBSession,'veronica')
+        velma = self.getUser(model.DBSession,'velma')
+        # Veronica is available 10AM to 2PM on all days of the week.
+        # (This saves us from having to create events on particular days
+        # of the week.)
+        av = self.createAvailability(user=veronica,
+                start_time=10*60,end_time=14*60,
+                days=["m","t","w","th","f","s","su"])
+
+        # Velma is available noon to 3 on all days of the week.
+        av = self.createAvailability(user=velma,
+                start_time=12*60,end_time=15*60,
+                days=["m","t","w","th","f","s","su"])
+
+    def createEvents(self):
+        # Events:
+        
+        carla = self.getUser(model.DBSession,'carla')
+
+        # A bus and an airport for Veronica.
+        self.createEvent(created_by=carla,
+                ev_type=model.NeedEvent.EV_TYPE_BUS,
+                date_of_need=dt.datetime.now() + dt.timedelta(days=1),
+                time_of_need=10*60+30,
+                location="Veronica only bus 1 location",
+                notes="Veronica only bus 1")
+
+        self.createEvent(created_by=carla,
+                ev_type=model.NeedEvent.EV_TYPE_AIRPORT,
+                date_of_need=dt.datetime.now() + dt.timedelta(days=2),
+                time_of_need=10*60+33,
+                location="Veronica only airport location",
+                notes="Veronica only airport")
+
+        # A bus that overlaps the other bus for Veronica:
+        self.createEvent(created_by=carla,
+                ev_type=model.NeedEvent.EV_TYPE_BUS,
+                date_of_need=dt.datetime.now() + dt.timedelta(days=1),
+                time_of_need=10*60+45,
+                location="Veronica only bus 2 location",
+                notes="Veronica only bus 2")
+
+        # A bus for Velma.
+        self.createEvent(created_by=carla,
+                ev_type=model.NeedEvent.EV_TYPE_BUS,
+                date_of_need=dt.datetime.now() + dt.timedelta(days=1),
+                time_of_need=14*60+3,
+                duration=20,
+                location="Velma only bus location",
+                notes="Velma only bus")
+
+        # An airport that either Veronica or Velma could do.
+        self.createEvent(created_by=carla,
+                ev_type=model.NeedEvent.EV_TYPE_AIRPORT,
+                date_of_need=dt.datetime.now() + dt.timedelta(days=1),
+                time_of_need=12*60+23,
+                location="Veronica or Velma airport location",
+                notes="Veronica or Velma airport")

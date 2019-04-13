@@ -13,6 +13,8 @@ MIN_ALERT_SECONDS = 3600 * 4
 SMS_ENABLED = False
 EMAIL_ENABLED = False
 
+MVCA_SITE = "https://127.0.0.1"
+
 def sendAlerts(volunteers,nev,honorLastAlertTime=True):
     '''
     Send alerts to the given volunteers for need event nev.
@@ -27,7 +29,7 @@ def sendAlerts(volunteers,nev,honorLastAlertTime=True):
         print("ALERTING {} for need event {}".format(vol.user_name,nev.neid))
         if SMS_ENABLED:
             if vol.vinfo.text_alerts_ok == 1:
-                sehdSmsForEvent(nev,vol)
+                sendSmsForEvent(nev,vol)
         if EMAIL_ENABLED:
             sendEmailForEvent(nev,vol)
     nev.last_alert_time = int(dt.datetime.now().timestamp())
@@ -61,15 +63,21 @@ def sendSmsForEvent(nev,vol,source="MVCA"):
     destNumber = makeValidSMSPhoneNumber(vol.vinfo.phone)
     n_vols = nev.volunteer_count
     at_time=nev.time_of_need
+    at_date=str(dt.date.fromtimestamp(nev.date_of_need))
     ev_type = nev.ev_type
     location = nev.location
-    link = "{}/respond?user_id={}&neid=P{".format(MVCA_SITE,vol.user_id,nev.neid)
-    msg = "This is {}. We have a need for {} volunteer(s) at {}. Purpose: {}. "\
-            +"Location: {}. Can you help? Click link to commit: {}".format(source,\
+    coord_num = nev.created_by.vinfo.phone
+    coord_name = nev.created_by.display_name
+    link = "{}/respond?user_id={}&neid={}".format(MVCA_SITE,vol.user_id,nev.neid)
+    dlink = "{}/decommit?user_id={}&neid={}".format(MVCA_SITE,vol.user_id,nev.neid)
+    msg = ("This is {}. We have a need for {} volunteer(s) at {} {}. Purpose: {}. "\
+            +"Location: {}. Can you help? Call {} {} or click link to commit: {}. "\
+            +"Or click to ignore: {}").format(source,\
             n_vols,\
             minutesPastMidnightToTimeString(at_time),\
+            at_date,
             evTypeToString(ev_type),\
-            location,link)
+            location, coord_name, coord_num, link,dlink)
     sendSMS(msg,destNumber=destNumber)
 
 # An SMS alerter that really sends an SMS, via Twilio.
@@ -106,5 +114,5 @@ def setEmailAlerter(alerter):
     global EMAIL_ALERTER
     EMAIL_ALERTER = alerter
 
-__all__ = ["getSMSAlerter","setSMSAlerter","sendAlerts"]
+__all__ = ["getSMSAlerter","setSMSAlerter","sendAlerts","SMS_ENABLED","EMAIL_ENABLED","MVCA_SITE"]
 
