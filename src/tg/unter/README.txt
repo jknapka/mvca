@@ -43,8 +43,11 @@ Story (INCOMPLETE, MISSING TESTS): Veronica the Volunteer logs into Unter.
     she has already committed.
   - She does not see events that are already being fully-served by
     other volunteers, even if she would be available for them.
-  - She can click an event to confirm her ability to serve at
-    the event.
+  - She can click a link in an event row to confirm her ability to
+    serve at the event.
+  - She can click a different link to indicate that she will not
+    be able to serve at the event (in which case she will not
+    receive any further alerts for that particular event).
 
 ) ALERTS IN GENERAL:
   - Volunteers should receive alerts for events they may be
@@ -56,6 +59,8 @@ Story (INCOMPLETE, MISSING TESTS): Veronica the Volunteer logs into Unter.
         decline to volunteer.
   - Volunteers should receive reminder alerts for events to which
     they've committed an hour or so prior to the event.
+  - Volunteers should never receive alerts for events from which
+	they have decomitted.
   * This will require a monitor process somewhere. Maybe just a
 	cron job that pokes a URL on the web service every five
 	minutes or something.
