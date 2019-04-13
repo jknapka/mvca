@@ -68,6 +68,8 @@ class TestNeedEvent(TestController):
         try:
             self.session = self.setupDB()
         except:
+            import sys
+            print("ABORTING TRANSACTION: {}".format(sys.exc_info(),file=sys.stderr))
             transaction.abort()
         else:
             transaction.commit()
@@ -195,101 +197,53 @@ class TestNeedEvent(TestController):
         session = model.DBSession
 
         # Create the entities that support our test stories.
-
         # Users:
-        g = session.query(model.Group).filter_by(group_name='coordinators').first()
-        u = model.User(user_name='carla',display_name='Carla',email_address='carla@nowhere.com')
-        g.users.append(u)
-        session.flush()
-        v = model.VolunteerInfo(user_id=u.user_id,zipcode='79900',phone='9150010001',
-                description='Carla the coordinator')
-        u.vinfo = v
+        u = self.createUser(user_name='carla',email='carla@nowhere.com',
+                phone="9150010001",desc="Carla the coordinator",
+                groups=["coordinators"])
         session.flush()
 
-        g = session.query(model.Group).filter_by(group_name='volunteers').first()
         phone = 9150010001
         for uname in ('Vincent','Veronica','Velma','Vernon','Vaughn'):
             phone += 1
-            u = model.User(user_name=uname.lower(),display_name=uname,email_address=uname+'@nowhere.com')
-            g.users.append(u)
+            u = self.createUser(user_name=uname.lower(),display_name=uname,email=uname+'@nowhere.com',
+                    phone=str(phone),
+                    desc='{} the volunteer'.format(uname),
+                    groups=["volunteers"])
             session.flush()
-            v = model.VolunteerInfo(user_id=u.user_id,zipcode='79900',phone=str(phone),
-                    description='{} the volunteer')
-            u.vinfo = v
 
         # Availabilities:
         
         # Vincent, Veronica and Velma available at 10:00 AM Sunday.
-        av = model.VolunteerAvailability(start_time=9*60+15,end_time=12*60+45,
-                dow_monday=0,
-                dow_tuesday=0,
-                dow_wednesday=0,
-                dow_thursday=0,
-                dow_friday=0,
-                dow_saturday=0,
-                dow_sunday=1)
-        av.user = self.getUser(session,'vincent')
-        session.add(av)
+        av =self.createAvailability(self.getUser(session,'vincent'),
+                start_time=9*60+15,end_time=12*60+45,
+                days=["su"])
 
-        av = model.VolunteerAvailability(start_time=6*60,end_time=18*60,
-                dow_monday=0,
-                dow_tuesday=0,
-                dow_wednesday=0,
-                dow_thursday=0,
-                dow_friday=1,
-                dow_saturday=1,
-                dow_sunday=1)
-        av.user = self.getUser(session,'veronica')
-        session.add(av)
+        av = self.createAvailability(user=self.getUser(session,'veronica'),
+                start_time=6*60,end_time=18*60,
+                days=["f","s","su"])
 
-        av = model.VolunteerAvailability(start_time=9*60+15,end_time=12*60+45,
-                dow_monday=1,
-                dow_tuesday=0,
-                dow_wednesday=0,
-                dow_thursday=0,
-                dow_friday=0,
-                dow_saturday=0,
-                dow_sunday=1)
-        av.user = self.getUser(session,'velma')
-        session.add(av)
+        av = self.createAvailability(user=self.getUser(session,'velma'),
+                start_time=9*60+15,end_time=12*60+45,
+                days=["su","m"])
 
-        av = model.VolunteerAvailability(start_time=9*60+15,end_time=12*60+45,
-                dow_monday=1,
-                dow_tuesday=0,
-                dow_wednesday=0,
-                dow_thursday=0,
-                dow_friday=0,
-                dow_saturday=0,
-                dow_sunday=0)
-        av.user = self.getUser(session,'velma')
-        session.add(av)
+        av = self.createAvailability(user=self.getUser(session,'velma'),
+                start_time=9*60+15,end_time=12*60+45,
+                days=["m"])
 
-        av = model.VolunteerAvailability(start_time=9*60+15,end_time=12*60+45,
-                dow_monday=0,
-                dow_tuesday=0,
-                dow_wednesday=0,
-                dow_thursday=0,
-                dow_friday=0,
-                dow_saturday=1,
-                dow_sunday=0)
-        av.user = self.getUser(session,'vaughn')
-        session.add(av)
+        # Vaughn available only on Saturday.
+        av = self.createAvailability(user=self.getUser(session,'vaughn'),
+                start_time=9*60+15,end_time=12*60+45,
+                days=["s"])
 
         # Need events: Vincent is committed to a bus-station
         # event.
-        vne = model.NeedEvent()
-        vne.ev_type = model.NeedEvent.EV_TYPE_BUS 
-        vne.date_of_need = dt.datetime(2019,3,31).timestamp()
-        vne.time_of_need = 60*10+15
-        vne.duration = 65
-        vne.volunteer_count = 1
-        vne.affected_persons = 2
-        vne.location = 'La Quinta West'
-        vne.notes = 'Test - Vincent'
-        vne.complete = 0
-        vne.created_by = self.getUser(session,'carla')
-        session.add(vne)
-
+        vne = self.createEvent(created_by=self.getUser(session,'carla'),
+                date_of_need=dt.datetime(2019,3,31),
+                time_of_need=60*10+15,
+                duration=65,
+                location="La Quinta West",
+                notes='Test - Vincent')
 
         # Commit Vincent to the bus-station event.
         user = self.getUser(session,'vincent')
@@ -299,6 +253,3 @@ class TestNeedEvent(TestController):
         session.add(vcom)
 
         return session
-
-    def getUser(self,session,uname):
-        return session.query(model.User).filter_by(user_name=uname).first()

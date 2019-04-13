@@ -13,9 +13,9 @@ class VolunteerInfo(DeclarativeBase):
 
     viid = Column(Integer, primary_key=True)
     description = Column(Unicode(2048), nullable=False)
-    phone = Column(Unicode(32),nullable=True)
-    text_alerts_ok = Column(Integer,nullable=True,default=1)
-    zipcode = Column(Unicode(5),nullable=True,default='')
+    phone = Column(Unicode(32),nullable=False,default='')
+    text_alerts_ok = Column(Integer,nullable=False,default=1)
+    zipcode = Column(Unicode(5),nullable=False,default='')
 
     user_id = Column(Integer, ForeignKey('tg_user.user_id'), index=True)
     user = relationship('User', uselist=False,
@@ -93,7 +93,7 @@ class NeedEvent(DeclarativeBase):
 
     # If non-null and non-zero, this event has been
     # cancelled.
-    cancelled = Column(Integer,nullable=True)
+    cancelled = Column(Integer,nullable=False,default=0)
 
     # Non-null and non-zero if the event is complete.
     complete = Column(Integer,nullable=False,default=0)
@@ -126,7 +126,7 @@ class VolunteerResponse(DeclarativeBase):
     # The event being served by this volunteer.
     neid = Column(Integer,ForeignKey('need_event.neid'),nullable=False)
     need_event = relationship('NeedEvent',uselist=False,
-                        backref=backref('need_event',
+                        backref=backref('event_response',
                                         cascade='all, delete-orphan'))
 
 class VolunteerDecommitment(DeclarativeBase):

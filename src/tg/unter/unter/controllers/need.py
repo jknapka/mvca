@@ -2,9 +2,15 @@
 Code for matching need events with volunteers.
 '''
 import datetime as dt
+import logging
+import sys
 
 import unter.model as model
 import unter.controllers.alerts as alerts
+from unter.controllers.util import Thing
+
+def debug(msg):
+    logging.getLogger(__name__).debug(msg)
 
 def checkOneEvent(dbsession,ev_id,honorLastAlertTime=True):
     print("Checking need event {}".format(ev_id))
@@ -16,16 +22,32 @@ def checkOneEvent(dbsession,ev_id,honorLastAlertTime=True):
 def checkValidEvents(dbsession,when):
     print("Checking need events at {}".format(when))
 
-def decommit_volunteer(dbsession,vresp):
+def decommit_volunteer(dbsession,vcom=None,user=None,ev=None):
     '''
     When a volunteer de-commits from an event, call this
     to manage the response and decommitment rows in the DB.
+
+    vcom: if specified, the VolunteerResponse object to decommit.
+    This implies both user and event.
+
+    user: if specified (and vcom not), the user to decommit.
+
+    ev: if specified (and vcom not), the event to decommit from.
     '''
+    vresp = Thing()
+    if vcom is not None:
+        vresp.user = vcom.user
+        vresp.need_event = vcom.need_event
+        dbsession.delete(vcom)
+    else:
+        vresp.user = user
+        vresp.need_event = ev
+    if vresp.user is None or vresp.need_event is None:
+        raise Exception("Cannot decommit - user or event missing.")
     decommit = model.VolunteerDecommitment()
     decommit.user = vresp.user
     decommit.need_event = vresp.need_event
     dbsession.add(decommit)
-    dbsession.delete(vresp)
 
 def getDowCheck(nev):
     '''
@@ -44,7 +66,7 @@ def getDowCheck(nev):
             6:lambda x: x.dow_sunday == 1,
             }[dow]
 
-def getAvailableVolunteers(dbsession,nev):
+def getAvailableVolunteers(dbsession,nev,allVols=None):
     '''
     Get volunteers who have indicated they are available at the
     time and for the duration of the given event. This method
@@ -53,7 +75,8 @@ def getAvailableVolunteers(dbsession,nev):
     '''
     result = []
 
-    allVols = dbsession.query(model.User).all()
+    if allVols is None:
+        allVols = dbsession.query(model.User).all()
     dowCheck = getDowCheck(nev)
     for vol in allVols:
         if 'respond_to_need' not in [p.permission_name for p in vol.permissions]:
@@ -67,11 +90,42 @@ def getAvailableVolunteers(dbsession,nev):
 
     return result
 
+def getAvailableEventsForVolunteer(dbsession,vol):
+    '''
+    Get the events that a given volunteer is available for.
+    '''
+    result = []
+
+    allEvs = dbsession.query(model.NeedEvent).filter_by(complete=0).filter_by(cancelled=0)
+    committedEvs = [vr.need_event for vr in vol.volunteer_response]
+    committedEvs = [ev for ev in committedEvs if ev.complete == 0 and ev.cancelled == 0]
+    committedEvIDs = [ev.neid for ev in committedEvs]
+    allEvs = [ev for ev in allEvs if ev.neid not in committedEvIDs and not isFullyServed(dbsession,ev)]
+    for eachEv in allEvs:
+        if overlapsAny(eachEv,committedEvs):
+            # Cannot be available if committed to overlapping event.
+            continue
+        vols = getAvailableVolunteers(dbsession,eachEv,[vol])
+        if len(vols) == 1:
+            # Available if getAvailableVolunteers() finds this volunteer
+            # when it is the only one supplied.
+            result.append(eachEv)
+    return result
+
+def isFullyServed(dbsession,ev):
+    return ev.volunteer_count <= len(ev.event_response)
+
 def ev2Str(ev):
     date = dt.datetime.fromtimestamp(ev.date_of_need)
     time = "{:02d}:{:02d}".format(int(ev.time_of_need / 60),int(ev.time_of_need%60))
     duration = ev.duration
     return "{}/{}/{} {} {}".format(date.year,date.month,date.day,time,duration)
+
+def overlapsAny(ev,evs):
+    for ev2 in evs:
+        if overlappingEvents(ev,ev2):
+            return True
+    return False
 
 def overlappingEvents(ev1,ev2):
     result = None

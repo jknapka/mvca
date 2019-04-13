@@ -54,7 +54,7 @@
 		</tr>
 	</table>
 
-	<div py:if="len(events) > 0">
+	<div id="events-responded" py:if="len(events) > 0">
 		<h3>Events you plan to serve</h3>
 		<table border="1">
 			<thead>
@@ -79,6 +79,34 @@
 			</tbody>
 		</table>
 	</div>
+
+
+	<div id="events-available"  py:if="len(events_available) > 0">
+		<h3>Events for which you may be available</h3>
+		<table border="1">
+			<thead>
+				<tr>
+					<th>Type</th>
+					<th>Date</th>
+					<th>Time</th>
+					<th>Location</th>
+					<th>Coordinator</th>
+					<th>Respond</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr py:for="ev in events_available">
+					<td>${ev.ev_str}</td>
+					<td>${ev.date_str}</td>
+					<td>${ev.time_str}</td>
+					<td>${ev.ev.location}</td>
+					<td>${ev.ev.created_by.display_name} (${ev.ev.created_by.vinfo.phone})</td>
+					<td><a href="${tg.url('/respond',dict(neid=ev.ev.neid))}">I'll be there!</a></td>
+				</tr>
+			</tbody>
+		</table>
+	</div>
+
       </div>
     </div>
   </body>

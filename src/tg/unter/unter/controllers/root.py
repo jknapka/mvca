@@ -147,19 +147,23 @@ class RootController(BaseController):
     @expose('unter.templates.volunteer_info')
     @require(predicates.not_anonymous())
     def volunteer_info(self,**kwargs):
-        if not request.identity:
-            login_counter = request.environ.get('repoze.who.logins', 0) + 1
-            redirect('/login',
-                     params=dict(came_from="/volunteer_info",__logins=login_counter))
+        #if not request.identity:
+        #    login_counter = request.environ.get('repoze.who.logins', 0) + 1
+        #    redirect('/login',
+        #             params=dict(came_from="/volunteer_info",__logins=login_counter))
         user,vinfo = self.getVolunteerIdentity()
         if vinfo is None:
             # Not actually a volunteer - probably manager.
             redirect(lurl('/'),dict(message="No volunteer info for {}".format(user.user_name)))
         availabilities = [self.toRawAvailability(av) for av in user.volunteer_availability]
-        events = [vr.need_event for vr in user.volunteer_response if vr.need_event.complete == 0]
-        events = [toWrappedEvent(ev) for ev in events]
+        events_responded = [vr.need_event for vr in user.volunteer_response if vr.need_event.complete == 0]
+        events_responded = [toWrappedEvent(ev) for ev in events_responded]
+        events_available = need.getAvailableEventsForVolunteer(model.DBSession,user)
+        events_available = [toWrappedEvent(ev) for ev in events_available]
 
-        return dict(user=user,volunteer_info=vinfo,availabilities=availabilities,events=events)
+        return dict(user=user,volunteer_info=vinfo,availabilities=availabilities,
+                events=events_responded,
+                events_available=events_available)
 
     @expose()
     def remove_availability(self,vaid):
