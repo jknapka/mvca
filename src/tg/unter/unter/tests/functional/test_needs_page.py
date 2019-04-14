@@ -51,7 +51,7 @@ class TestNeedEventsPage(TestController):
         # dreference the UUIDs and figure out which neids they
         # refer to.
         try:
-            self.createResponse('veronica','Veronica only bus')
+            self.createResponse('veronica','Veronica only bus 1')
             self.createResponse('velma','Veronica or Velma airport')
         except:
             transaction.abort()
@@ -63,17 +63,21 @@ class TestNeedEventsPage(TestController):
                 status=302)
         
         # We should have alerted for all events except
-        # "Veronica only bus".
+        # "Veronica only bus 1" and "... bus 2" (the second
+        # because those two events overlap and Veronica
+        # cannot do both).
         alertLog = self.getAlertLog()
         evs = model.DBSession.query(model.NeedEvent).all()
         for ev in evs:
-            if ev.notes == "Veronica only bus":
+            if ev.notes in ["Veronica only bus 1","Veronica only bus 2"]:
                 ok_('&neid={}'.format(ev.neid) not in alertLog,alertLog)
             else:
                 ok_('&neid={}'.format(ev.neid) in alertLog,alertLog)
 
     def setupDB(self):
-        self.setupNeedEventEntities()
+        self.createCoordinatorCarla()
+        self.createVolunteers()
+        self.createAvailabilities()
         self.createEvents()
 
         # Make "Veronica or Velma airport" need 2 volunteers.

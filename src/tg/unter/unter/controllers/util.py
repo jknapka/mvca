@@ -3,6 +3,8 @@ Utility functions used in various places.
 '''
 import datetime
 
+from unter import model
+
 def evTypeToString(evt):
     return {0:"take people to the airport",
             1:"take people to the bus station",
@@ -42,5 +44,24 @@ def toWrappedEvent(ev,now=None):
     thing.last_alert_time = datetime.datetime.fromtimestamp(ev.last_alert_time).ctime()
     return thing
 
+def setupTestUsers(dbsession):
+    coords = dbsession.query(model.Group).filter_by(group_name='coordinators').first()
+    vols = dbsession.query(model.Group).filter_by(group_name='volunteers').first()
+
+    carla = model.User(user_name='carla',email_address='carla@nowhere.net',display_name='Carla',password='carla')
+    carla_vi = model.VolunteerInfo(zipcode='79900',phone='9150010001',description='Carla the Coordinator')
+    carla.vinfo = carla_vi
+    coords.users.append(carla)
+    dbsession.add(carla)
+    
+    phone = 9150010002
+    for uname in ('victor','veronica','velma','vernon','vaughn'):
+        u = model.User(user_name=uname,email_address=uname+'@nowhere.net',display_name=uname[0].upper()+uname[1:],password=uname)
+        v = model.VolunteerInfo(zipcode='79900',phone=""+str(phone),description=u.display_name+' the Volunteer')
+        u.vinfo = v
+        vols.users.append(u)
+        dbsession.add(u)
+        phone += 1
+
 __all__ = ['evTypeToString','minutesPastMidnight','minutesPastMidnightToTimeString',
-        'Thing','printDict','toWrappedEvent']
+    'Thing','printDict','toWrappedEvent','setupTestUsers']

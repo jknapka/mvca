@@ -23,6 +23,7 @@ from unter.controllers.forms import NewAcctForm,AvailabilityForm,NeedEventForm
 from unter.controllers.util import *
 import unter.controllers.need as need
 import unter.controllers.alerts as alerts
+import unter.controllers.util as util
 
 from sqlalchemy import or_,text
 

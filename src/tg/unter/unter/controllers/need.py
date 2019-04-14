@@ -17,10 +17,13 @@ def debugTest(msg):
     logging.getLogger("unter.test").debug(msg)
 
 def checkOneEvent(dbsession,ev_id,honorLastAlertTime=True):
-    print("Checking need event {}".format(ev_id))
     nev = dbsession.query(model.NeedEvent).filter_by(neid=ev_id).first()
+    debugTest("Checking need event {} {}".format(ev_id,nev.notes))
+    if isFullyServed(dbsession,nev):
+        debugTest("  This event is fully-served, no alerts necessary.")
+        return
     vols = getAlertableVolunteers(dbsession,nev)
-    debugTest("Alertable vols for {}: {}".format(nev.notes,[v.user_name for v in vols]))
+    debugTest("  Alertable vols for {}: {}".format(nev.notes,[v.user_name for v in vols]))
     alerts.sendAlerts(vols,nev,honorLastAlertTime=honorLastAlertTime)
     dbsession.flush()
 
@@ -100,7 +103,10 @@ def getAvailableVolunteers(dbsession,nev,allVols=None):
                 # Available on the day-of-week.
                 if avail.start_time <= nev.time_of_need and\
                         avail.end_time >= nev.time_of_need+nev.duration:
+                    debugTest('  {} avail {}-{} contains {}+{}'.format(vol.user_name,avail.start_time,
+                        avail.end_time,nev.time_of_need,nev.duration))
                     result.append(vol)
+                    break
 
     return result
 

@@ -5,6 +5,8 @@ from tg.i18n import ugettext as _, lazy_ugettext as l_
 from tg.predicates import has_permission
 
 from unter.lib.base import BaseController
+import unter.model as model
+from unter.controllers import util
 
 __all__ = ['SecureController']
 
@@ -28,3 +30,13 @@ class SecureController(BaseController):
     def some_where(self):
         """Let the user know that this action is protected too."""
         return dict(page='some_where')
+
+    #==================================
+    # Utilities
+    #==================================
+
+    @expose()
+    def setupTestUsers(self):
+        util.setupTestUsers(model.DBSession)
+        return 'Test users created.'
+
