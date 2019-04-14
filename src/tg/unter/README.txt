@@ -100,7 +100,7 @@ Story (INCOMPLETE):
   - (done) Veronica and Velma have not committed to any events that
     overlap the interval from 10:00 AM to 11:00 AM on Sunday 
     morning, so they should receive alerts. 
-  - Alerts are sent via email, and via text (if the volunteer
+  - (pending) Alerts are sent via email, and via text (if the volunteer
     has indicated text alert preference).
   - (done) Volunteer phone numbers are visible on the event
     page to logged-in coordinators, so they can make confirmation
@@ -135,7 +135,7 @@ to the event page (which shows all active event) and:
   - (done) That list should include volunteers who have already committed
     to the event, clearly marked as having committed.
 
-Story (INCOMPLETE): While looking at the event page, Carla notices
+Story (done): While looking at the event page, Carla notices
 that there are some other events on Sunday and Monday
 for which no volunteers have committed.
 
@@ -150,6 +150,8 @@ for which no volunteers have committed.
     Also provide a "today's events only" link.
   - CONSIDER: avoid alerting *volunteers* who have been alerted
     recently, to avoid event fatigue.
+
+) Allow coordinators to see a list of all volunteers.
 
 ) Check that when multiple volunteers respond to an event,
 we confirm the event for only the number of volunteers
