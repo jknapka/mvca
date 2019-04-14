@@ -135,7 +135,7 @@ to the event page (which shows all active event) and:
   - (done) That list should include volunteers who have already committed
     to the event, clearly marked as having committed.
 
-Story (done): While looking at the event page, Carla notices
+Story (INCOMPLETE): While looking at the event page, Carla notices
 that there are some other events on Sunday and Monday
 for which no volunteers have committed.
 
@@ -147,11 +147,34 @@ for which no volunteers have committed.
     she just sent an alert for that specific event, in
     the story above).
   - (done) NOTE: Show events in reverse temporal order on the event page.
-    Also provide a "today's events only" link.
+  - Also provide a "today's events only" link.
+  - The "events for day" page should allow forward and backward navigation
+	by day, and allow choosing a specific day.
   - CONSIDER: avoid alerting *volunteers* who have been alerted
-    recently, to avoid event fatigue.
+    recently, to avoid event fatigue. (This would also allow us to
+	disambiguate text replies to alerts more easily. If we only
+	send one text per hour per volunteer, then it's pretty likely
+    the one they're replying to is the last one we sent.)
 
-) Allow coordinators to see a list of all volunteers.
+) Allow coordinators manage volunteers.
+
+Story (NOT STARTED):
+	- A new person (Vespa) comes to Carla's site to volunteer.
+    - Carla takes their information and uses the "add volunteer"
+	  page to add Vespa to the volunteer DB.
+    - Carla shows Vespa how to log in and manage her available times.
+    - Vespa receives a confirmation email with a "login" link that
+  	  takes her directly to the /login page.
+
+Story (NOT STARTED):
+	- Carla wants to know, in general, which volunteers are available.
+    - From her /coord_page, she can click a link to see a list of all
+	  registered volunteers.
+    - For each volunteer, she can see the number of events the
+	  volunteer is available to serve and the number of events the
+	  volunteer is committed to serve.
+    - She can click a row in the list of volunteers to see the
+      volunteer_info page for the volunteer.
 
 ) Check that when multiple volunteers respond to an event,
 we confirm the event for only the number of volunteers
