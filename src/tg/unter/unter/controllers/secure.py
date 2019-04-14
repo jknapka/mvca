@@ -3,6 +3,7 @@
 from tg import expose, flash
 from tg.i18n import ugettext as _, lazy_ugettext as l_
 from tg.predicates import has_permission
+from tg import request, redirect, tmpl_context
 
 from unter.lib.base import BaseController
 import unter.model as model
@@ -36,7 +37,27 @@ class SecureController(BaseController):
     #==================================
 
     @expose()
+    def testSetup(self):
+        return '''
+        <ul>
+        <li><a href="/secc/setupTestUsers">Set up test users</a></li>
+        <li><a href="/secc/setupTestAvailabilities">Set up test availabilities</a></li>
+        <li><a href="/secc/setupTestEvents">Set up test events</a></li>
+        </ul>
+        '''
+
+    @expose()
     def setupTestUsers(self):
-        util.setupTestUsers(model.DBSession)
-        return 'Test users created.'
+        util.setupTestUsers()
+        redirect("/secc/testSetup")
+
+    @expose()
+    def setupTestAvailabilities(self):
+        util.setupTestAvailabilities()
+        redirect("/secc/testSetup")
+
+    @expose()
+    def setupTestEvents(self):
+        util.setupTestEvents()
+        redirect("/secc/testSetup")
 
