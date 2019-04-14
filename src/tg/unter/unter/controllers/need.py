@@ -4,6 +4,7 @@ Code for matching need events with volunteers.
 import datetime as dt
 import logging
 import sys
+import datetime as dt
 
 import unter.model as model
 import unter.controllers.alerts as alerts
@@ -12,15 +13,22 @@ from unter.controllers.util import Thing
 def debug(msg):
     logging.getLogger(__name__).debug(msg)
 
+def debugTest(msg):
+    logging.getLogger("unter.test").debug(msg)
+
 def checkOneEvent(dbsession,ev_id,honorLastAlertTime=True):
     print("Checking need event {}".format(ev_id))
     nev = dbsession.query(model.NeedEvent).filter_by(neid=ev_id).first()
     vols = getAlertableVolunteers(dbsession,nev)
+    debugTest("Alertable vols for {}: {}".format(nev.notes,[v.user_name for v in vols]))
     alerts.sendAlerts(vols,nev,honorLastAlertTime=honorLastAlertTime)
     dbsession.flush()
 
-def checkValidEvents(dbsession,when):
+def checkValidEvents(dbsession,when=None):
     print("Checking need events at {}".format(when))
+    nevs = dbsession.query(model.NeedEvent).filter_by(complete=0).all()
+    for nev in nevs:
+        checkOneEvent(dbsession,nev.neid)
 
 def decommit_volunteer(dbsession,vcom=None,user=None,ev=None):
     '''

@@ -23,17 +23,11 @@ import logging
 
 # Alerter stub that captures alert information for tests.
 TEST_ALERT_OUTPUT = StringIO()
-def stubSMSAlerter(msg,sourceNumber="+1SOURCE",destNumber="+1DEST"):
-    print("('{}','{}','{}')".format(msg,sourceNumber,destNumber),file=TEST_ALERT_OUTPUT)
-alerts.setSMSAlerter(stubSMSAlerter)
-alerts.SMS_ENABLED = True
 
 class TestCoordPage(TestController):
 
     def setUp(self):
         super().setUp()
-        global TEST_ALERT_OUTPUT
-        TEST_ALERT_OUTPUT = StringIO()
         try:
             self.setupDB()
         except:
@@ -92,7 +86,7 @@ class TestCoordPage(TestController):
 
         # Check that Velma's and Veronica's phone numbers
         # appear in the alert log.
-        alertLog = TEST_ALERT_OUTPUT.getvalue()
+        alertLog = self.getAlertLog()
         ok_('9150010002' in alertLog,alertLog)
         ok_('9150010003' in alertLog,alertLog)
         ok_('Call Carla 9150010001' in alertLog,alertLog)

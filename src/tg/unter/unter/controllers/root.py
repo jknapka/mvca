@@ -326,7 +326,18 @@ class RootController(BaseController):
     @expose()
     @require(predicates.has_permission('manage_events'))
     def send_alert(self,neid,came_from=lurl('/coord_page')):
+        ''' Send an alert for a specific event. '''
         need.checkOneEvent(model.DBSession,neid)
+        redirect(came_from)
+
+    @expose()
+    @require(predicates.has_permission('manage_events'))
+    def check_events(self,came_from=lurl('/need_events?complete=0')):
+        '''
+        Check all events for alert-ability and send alerts for
+        any eligible ones.
+        '''
+        need.checkValidEvents(model.DBSession)
         redirect(came_from)
 
     #==================================

@@ -11,6 +11,7 @@ from tg.util import Bunch
 from unter import model
 
 import datetime as dt
+from io import StringIO
 
 __all__ = ['setup_app', 'setup_db', 'teardown_db', 'TestController']
 
@@ -41,6 +42,18 @@ def teardown_db():
     model.metadata.drop_all(engine)
 
 
+# Alerter stub that captures alert information for tests.
+import unter.controllers.alerts as alerts
+TEST_ALERT_OUTPUT = StringIO()
+
+def setupSMSStub():
+    global TEST_ALERT_OUTPUT
+    def stubSMSAlerter(msg,sourceNumber="+1SOURCE",destNumber="+1DEST"):
+        print("('{}','{}','{}')".format(msg,sourceNumber,destNumber),file=TEST_ALERT_OUTPUT)
+    alerts.setSMSAlerter(stubSMSAlerter)
+    alerts.SMS_ENABLED = True
+    TEST_ALERT_OUTPUT = StringIO()
+
 class TestController(object):
     """Base functional test case for the controllers.
 
@@ -60,6 +73,7 @@ class TestController(object):
 
     def setUp(self):
         """Setup test fixture for each functional test method."""
+        setupSMSStub()
         self.app = load_app(self.application_under_test)
         setup_app()
 
@@ -69,6 +83,10 @@ class TestController(object):
         teardown_db()
 
     # Unter-specific utilities.
+    def getAlertLog(self):
+        global TEST_ALERT_OUTPUT
+        return TEST_ALERT_OUTPUT.getvalue()
+
     def createUser(self,user_name="test",email="test@test.test",
             phone="0010010001",desc="Test user",zipcode="79900",
             display_name=None,

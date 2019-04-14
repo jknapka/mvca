@@ -20,14 +20,18 @@
 			<div class="unter-actions">
 				<span py:if="isCoordinator" >
 					<a style="border-right: 1px solid black"
-						href="/add_need_event_start">New event </a>
+						href="/add_need_event_start">New event&nbsp;</a>
 				</span>
 				<span py:if="isCoordinator">
 					<a  style="border-right: 1px solid black"
-						href="/need_events?completed=0">&nbsp;See active events </a>
+						href="/check_events">&nbsp;Send alerts for all&nbsp;</a>
 				</span>
 				<span py:if="isCoordinator">
-					<a href="/need_events?completed=1">&nbsp;See completed events</a>
+					<a  style="border-right: 1px solid black"
+						href="/need_events?completed=0">&nbsp;See active events&nbsp;</a>
+				</span>
+				<span py:if="isCoordinator">
+					<a href="/need_events?completed=1">&nbsp;See completed events&nbsp;</a>
 				</span>
 			</div>
 
