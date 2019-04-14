@@ -117,7 +117,7 @@ event. That is, we want to be able to issue alerts not only
 for new events, but for existing events that are not
 yet claimed by volunteers.
 
-Story (INCOMPLETE): No volunteers have responded to Carla's Sunday
+Story (done): No volunteers have responded to Carla's Sunday
 morning airport event as of Saturday morning. She goes
 to the event page (which shows all active event) and:
 
@@ -129,24 +129,24 @@ to the event page (which shows all active event) and:
 	alerted "recently" (within the last N hours, for come configurable
 	value of N).
   - (done) Again, Veronica and Velma should recieve alerts.
-  - Carla should be able to click the event to see a list of 
+  - (done) Carla should be able to click the event to see a list of 
     available volunteers for the event time, and their contact
     information.
-  - That list should include volunteers who have already committed
+  - (done) That list should include volunteers who have already committed
     to the event, clearly marked as having committed.
 
-Story (NOT STARTED): While looking at the event page, Carla notices
+Story (INCOMPLETE): While looking at the event page, Carla notices
 that there are some other events on Sunday and Monday
 for which no volunteers have committed.
 
-  - She can issue alerts for all active and under-volunteered
-    events with a single click from the event page.
-  - Alerts are sent only for events that have NOT had alerts sent
+  - (done) She can issue alerts for all active and under-volunteered
+    events with a single click from the event-list page.
+  - (done) Alerts are sent only for events that have NOT had alerts sent
     within the past N hours, so Carla's airport event does
     NOT cause an additional alert to be generated (since
     she just sent an alert for that specific event, in
     the story above).
-  - NOTE: Show events in reverse temporal order on the event page.
+  - (done) NOTE: Show events in reverse temporal order on the event page.
     Also provide a "today's events only" link.
   - CONSIDER: avoid alerting *volunteers* who have been alerted
     recently, to avoid event fatigue.
