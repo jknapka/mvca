@@ -147,12 +147,15 @@ class RootController(BaseController):
 
     @expose('unter.templates.volunteer_info')
     @require(predicates.not_anonymous())
-    def volunteer_info(self,**kwargs):
+    def volunteer_info(self,user_id=None,**kwargs):
         if not request.identity:
             login_counter = request.environ.get('repoze.who.logins', 0) + 1
             redirect('/login',
                      params=dict(came_from="/volunteer_info",__logins=login_counter))
         user,vinfo = self.getVolunteerIdentity()
+        if user_id is not None:
+            if predicates.has_permission('manage_events'):
+                user,vinfo = self.getVolunteerIdentity(userId=user_id)
         if vinfo is None:
             # Not actually a volunteer - probably manager.
             redirect(lurl('/'),dict(message="No volunteer info for {}".format(user.user_name)))
@@ -201,15 +204,20 @@ class RootController(BaseController):
         events = [toWrappedEvent(ev) for ev in events if ev.complete == 0]
         return dict(user=user,events=events)
 
-    def getVolunteerIdentity(self):
-        ''' Get the logged-in user's volunteer identity. '''
-        if request.identity is not None and 'repoze.who.userid' in request.identity:
-            userid = request.identity['repoze.who.userid']
-            user = model.User.by_user_name(userid)
-            vinfo = user.vinfo
-            print("user.vinfo = {}".format(vinfo))
+    def getVolunteerIdentity(self,userId=None):
+        user,vinfo = None,None
+        if userId is None:
+            ''' Get the logged-in user's volunteer identity. '''
+            if request.identity is not None and 'repoze.who.userid' in request.identity:
+                userid = request.identity['repoze.who.userid']
+                user = model.User.by_user_name(userid)
+                vinfo = user.vinfo
+                print("user.vinfo = {}".format(vinfo))
         else:
-            user, vinfo = None,None
+            ''' Get the identity for the given user. '''
+            user = model.DBSession.query(model.User).filter_by(user_id=userId).first()
+            if user is not None:
+                vinfo = user.vinfo
         return user,vinfo
 
     #==================================
