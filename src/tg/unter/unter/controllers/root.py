@@ -169,6 +169,14 @@ class RootController(BaseController):
                 events=events_responded,
                 events_available=events_available)
 
+    @expose('unter.templates.all_volunteers')
+    @require(predicates.has_permission('manage_events'))
+    def all_volunteers(self):
+        users = model.DBSession.query(model.User).all()
+        users = [u for u in users if u.vinfo is not None]
+        user,vinfo = self.getVolunteerIdentity()
+        return dict(all_volunteers=users,user=user)
+
     @expose()
     def remove_availability(self,vaid):
         return "<h1>Not yet implemented</h1>"

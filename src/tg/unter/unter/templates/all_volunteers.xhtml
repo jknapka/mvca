@@ -1,0 +1,63 @@
+<html py:extends="master.xhtml" py:strip="True">
+  <head py:block="head" py:strip="True">
+    <title py:block="master_title">List of volunteer needs</title>
+    <meta name="generator" content="HTML Tidy for Linux/x86 (vers 11 February 2007), see www.w3.org" />
+  </head>
+
+  <body py:block="body" py:strip="True">
+    <?python
+import time
+perms = [p.permission_name for p in user.permissions]
+isCoordinator = 'manage_events' in perms
+all_volunteers.sort(key=lambda u: u.user_name)
+    ?>
+    <div class="row">
+      <div class="col-md-12">
+        <div class="page-header">
+			<h2>All Volunteers</h2>
+        </div>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-md-12">
+		  <h2>All Volunteers</h2>
+			<table py:if="len(all_volunteers) > 0" border="1">
+				<thead>
+					<tr>
+						<th>User name</th>
+						<th>Display name</th>
+						<th>Email</th>
+						<th>Phone</th>
+						<th>Zip</th>
+						<th>Description</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr py:for="u in all_volunteers">
+						<td><a href="${tg.url('/volunteer_info',dict(user_id=u.user_id))}">
+							${u.user_name}
+							</a></td>
+						<td><a href="${tg.url('/volunteer_info',dict(user_id=u.user_id))}">
+							${u.display_name}
+							</a></td>
+						<td><a href="${tg.url('/volunteer_info',dict(user_id=u.user_id))}">
+							${u.email_address}
+							</a></td>
+						<td><a href="${tg.url('/volunteer_info',dict(user_id=u.user_id))}">
+							${u.vinfo.phone}
+							</a></td>
+						<td><a href="${tg.url('/volunteer_info',dict(user_id=u.user_id))}">
+							${u.vinfo.zipcode}
+							</a></td>
+						<td><a href="${tg.url('/volunteer_info',dict(user_id=u.user_id))}">
+							${u.vinfo.description}
+							</a></td>
+					</tr>
+				</tbody>
+			</table>
+	  </div>
+	  </div>
+  </body>
+</html>
+

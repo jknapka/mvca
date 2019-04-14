@@ -2,8 +2,12 @@
 Utility functions used in various places.
 '''
 import datetime as dt
+import logging
 
 from unter import model
+
+def debugTest(msg):
+    logging.getLogger('unter.test').debug(msg)
 
 def evTypeToString(evt):
     return {0:"take people to the airport",
@@ -201,4 +205,4 @@ def setupTestEvents():
 
 __all__ = ['evTypeToString','minutesPastMidnight','minutesPastMidnightToTimeString',
     'Thing','printDict','toWrappedEvent','setupTestUsers','setupTestAvailabilities',
-    'setupTestEvents']
+    'setupTestEvents','debugTest']
