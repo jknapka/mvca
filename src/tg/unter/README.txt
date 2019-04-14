@@ -166,7 +166,7 @@ Story (NOT STARTED):
     - Vespa receives a confirmation email with a "login" link that
   	  takes her directly to the /login page.
 
-Story (NOT STARTED):
+Story (INCOMPLETE):
 	- Carla wants to know, in general, which volunteers are available.
     - From her /coord_page, she can click a link to see a list of all
 	  registered volunteers.
