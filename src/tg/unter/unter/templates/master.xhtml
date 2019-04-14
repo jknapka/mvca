@@ -35,6 +35,7 @@
 	<li py:if="request.identity and 'permissions' in request.identity and 'manage_events' in request.identity['permissions']">
 		<a href="${tg.url('/coord_page')}">Coordinators</a>
 	</li>
+	<li py:if="request.identity"><a href="/need_events?complete=0">Volunteer needs</a></li>
 	<!--
         <li class="${('', 'active')[self.defined('page') and page=='about']}"><a href="${tg.url('/about')}">About</a></li>
         <li class="${('', 'active')[self.defined('page') and page=='data']}"><a href="${tg.url('/data')}">Serving Data</a></li>
