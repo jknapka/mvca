@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# Run all Unter/MVCA tests. This is called by git's pre-commit hook.
+
 # Ensure we're in the root of the source tree.
 pushd ${BASH_SOURCE%/*}
 [[ -e src/tg/unter ]] || {
