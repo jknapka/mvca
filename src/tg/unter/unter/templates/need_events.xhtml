@@ -71,7 +71,15 @@
 			<td>${ev.ev.location}</td>
 			<td>${ev.ev.affected_persons}</td>
 			<td>${ev.ev.volunteer_count}</td>
-			<td>${len(ev.ev.responses)}</td>
+			<td>${len(ev.ev.responses)}
+				<ul py:if="len(ev.ev.responses)>0">
+					<li py:for="vr in ev.ev.responses">
+						<a href="${tg.url('/volunteer_info',dict(user_id=vr.user.user_id))}">
+							${vr.user.display_name}
+						</a>
+					</li>
+				</ul>
+			</td>
 			<td>${ev.last_alert_time}
 				<a py:if="isCoordinator and ev.ev.complete != 1 and time.time() - 3600 > ev.ev.last_alert_time"
 				       href="/send_alert?neid=${ev.ev.neid}"><br/>Send alert</a>

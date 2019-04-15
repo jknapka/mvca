@@ -14,6 +14,7 @@ isCoordinator = 'manage_events' in perms
       <div class="col-md-12">
         <div class="page-header">
 		<h2>Welcome to your Coordinator page, ${user.display_name}.</h2>
+		<span id="message-span" py:if="message">${message}</span>
         </div>
       </div>
     </div>
@@ -31,7 +32,15 @@ isCoordinator = 'manage_events' in perms
 						href="/need_events?completed=0">&nbsp;See all active events </a>
 				</span>
 				<span>
-					<a href="/need_events?completed=1">&nbsp;See all completed events</a>
+					<a  style="border-right: 1px solid black"
+						href="/add_volunteer_start">&nbsp;Add volunteer </a>
+				</span>
+				<span>
+					<a  style="border-right: 1px solid black"
+						href="/all_volunteers">&nbsp;See all volunteers </a>
+				</span>
+				<span>
+					<a href="/need_events?completed=1">&nbsp;See completed events</a>
 				</span>
 			</div>
 	      
@@ -46,7 +55,7 @@ isCoordinator = 'manage_events' in perms
 					<th>Service</th>
 					<th>Location</th>
 					<th>Notes</th>
-					<th>Available volunteers</th>
+					<th>Volunteers</th>
 					<th>Last alert sent</th>
 				</tr>
 			</thead>
@@ -58,7 +67,16 @@ isCoordinator = 'manage_events' in perms
 					<td><a href="${tg.url('/event_details',dict(neid=ev.ev.neid))}">${ev.ev_str}</a></td>
 					<td><a href="${tg.url('/event_details',dict(neid=ev.ev.neid))}">${ev.ev.location}</a></td>
 					<td><a href="${tg.url('/event_details',dict(neid=ev.ev.neid))}">${ev.ev.notes}</a></td>
-					<td><a href="${tg.url('/event_details',dict(neid=ev.ev.neid))}">See volunteers</a></td>
+					<td>
+						<ul py:if="ev.ev.responses">
+							<li py:for="vr in ev.ev.responses">
+								<a href="${tg.url('/volunteer_info',dict(user_id=vr.user.user_id))}">
+									${vr.user.display_name}
+								</a>
+							</li>
+						</ul>
+						<a href="${tg.url('/event_details',dict(neid=ev.ev.neid))}">See volunteers</a>
+					</td>
 					<td id="alert-time-neid-${ev.ev.neid}">${ev.last_alert_time}
 						<a py:if="isCoordinator and ev.ev.complete != 1 and time.time() - 3600 > ev.ev.last_alert_time"
 							   href="/send_alert?neid=${ev.ev.neid}"><br/>Send alert</a>

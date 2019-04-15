@@ -68,12 +68,9 @@ class RootController(BaseController):
         ''' Try to create a new volunteer. '''
         form = NewAcctForm(request.POST)
         if not form.validate():
-            print("form.errors = {}".format(form.errors))
             return self.add_volunteer_start(form=form)
             #redirect(lurl('/add_volunteer_start',dict(form=form)))
         else:
-            print("Form data is valid.")
-
             thing = Thing()
             form.populate_obj(thing)
             thing.print()
@@ -89,7 +86,7 @@ class RootController(BaseController):
                 return self.add_volunteer_start(form=form,error_msg='Account %s already exists'%user_name)
             existingUser = model.User.by_email_address(email)
             if existingUser is not None:
-                return self.add_volunteer_start(form=form,error_msg='Email address %s is in use, please us a different one'%email)
+                return self.add_volunteer_start(form=form,error_msg='Email address %s is in use, please use a different one'%email)
 
             acct = model.User(user_name=user_name, email_address=email,display_name=form.display_name.data)
             acct.password = pwd
@@ -108,7 +105,17 @@ class RootController(BaseController):
             volGroup = DBSession.query(model.Group).filter_by(group_name='volunteers').first()
             volGroup.users.append(acct)
 
-            redirect(lurl('/login'),dict(message='Please log in and let us know when you are available.'))
+            if not request.identity:
+                redirect(lurl('/login'),dict(message='Please log in and let us know when you are available.'))
+            else:
+                flash("Volunteer {} added".format(user_name))
+                user,vinfo = self.getVolunteerIdentity()
+                if 'manage_events' in [p.permission_name for p in user.permissions]:
+                    page = '/coord_page'
+                else:
+                    # Hmm, we might not want to allow this :-/
+                    page = '/volunteer_info'
+                redirect(lurl(page,dict(message="Volunteer {} added".format(user_name))))
 
     @expose('unter.templates.add_availability_start')
     @require(predicates.not_anonymous())
@@ -143,7 +150,7 @@ class RootController(BaseController):
                     end_time = minutesPastMidnight(obj.end_time))
             DBSession.add(avail)
 
-            redirect('/volunteer_info',dict())
+            redirect('/volunteer_info',dict(message=''))
 
     @expose('unter.templates.volunteer_info')
     @require(predicates.not_anonymous())
@@ -167,7 +174,8 @@ class RootController(BaseController):
 
         return dict(user=user,volunteer_info=vinfo,availabilities=availabilities,
                 events=events_responded,
-                events_available=events_available)
+                events_available=events_available,
+                message='')
 
     @expose('unter.templates.all_volunteers')
     @require(predicates.has_permission('manage_events'))
@@ -178,8 +186,26 @@ class RootController(BaseController):
         return dict(all_volunteers=users,user=user)
 
     @expose()
-    def remove_availability(self,vaid):
-        return "<h1>Not yet implemented</h1>"
+    @require(predicates.not_anonymous())
+    def remove_availability(self,vaid,came_from=lurl('/volunteer_info')):
+        av = model.DBSession.query(model.VolunteerAvailability).filter_by(vaid=vaid).first()
+        if av is not None:
+            model.DBSession.delete(av)
+            flash("Available time removed.")
+        else:
+            flash("No such available time found.")
+        redirect(came_from)
+
+    @expose()
+    def decommit(self,neid,came_from=lurl('/volunteer_info')):
+        user,vinfo = self.getVolunteerIdentity()
+        vr = model.DBSession.query(model.VolunteerResponse).filter_by(neid=neid).filter_by(user_id=user.user_id).first()
+        if vr is not None:
+            flash("Commitment cancelled. Thanks for letting us know!")
+            need.decommit_volunteer(model.DBSession,vcom=vr)
+        else:
+            flash("No such commitment found for {}.".format(user.display_name))
+        redirect(came_from)
 
     def toRawAvailability(self,av):
         ''' Convert a model VolunteerAvailability object to a plain ol' Python
@@ -210,7 +236,7 @@ class RootController(BaseController):
             redirect(lurl('/login'))
         events = model.DBSession.query(model.NeedEvent).filter_by(created_by=user).all()
         events = [toWrappedEvent(ev) for ev in events if ev.complete == 0]
-        return dict(user=user,events=events)
+        return dict(user=user,events=events,message='')
 
     def getVolunteerIdentity(self,userId=None):
         user,vinfo = None,None
@@ -239,7 +265,7 @@ class RootController(BaseController):
             redirect(lurl('/login'))
         vresp = model.VolunteerResponse(user_id=user.user_id,neid=neid)
         model.DBSession.add(vresp)
-        redirect(lurl('/volunteer_info',dict(user_id=user.user_id)))
+        redirect(lurl('/volunteer_info',dict(user_id=user.user_id,message='')))
 
     @expose('unter.templates.add_need_event_start')
     @require(predicates.has_permission('manage_events'))
@@ -400,6 +426,8 @@ class RootController(BaseController):
     @expose('unter.templates.login')
     def login(self, came_from=lurl('/'), failure=None, login='', message=''):
         """Start the user login."""
+        if request.identity:
+            redirect(lurl('/post_login'))
         if failure is not None:
             if failure == 'user-not-found':
                 flash(_('User not found'), 'error')
@@ -433,9 +461,9 @@ class RootController(BaseController):
         # Do not use tg.redirect with tg.url as it will add the mountpoint
         # of the application twice.
         if predicates.in_group('volunteers'):
-            came_from = lurl('/volunteer_info',params=dict())
+            came_from = lurl('/volunteer_info',params=dict(message=''))
         if predicates.in_group('coordinators'):
-            came_from = lurl('/coord_page',params=dict())
+            came_from = lurl('/coord_page',params=dict(message=''))
         return HTTPFound(location=came_from)
 
     @expose()

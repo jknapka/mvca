@@ -22,10 +22,12 @@
         <span class="icon-bar"></span>
         <span class="icon-bar"></span>
       </button>
+	  <!--
       <a class="navbar-brand" href="${tg.url('/')}">
-		  <!-- <img src="${tg.url('/img/turbogears_logo.png')}" height="20" alt="TurboGears 2"/> -->
+		  <img src="${tg.url('/img/turbogears_logo.png')}" height="20" alt="TurboGears 2"/>
         ${getattr(tmpl_context, 'project_name', 'turbogears2')}
       </a>
+	  -->
     </div>
 
     <div class="collapse navbar-collapse" id="navbar-content">
@@ -70,7 +72,8 @@
     <a class="pull-right" href="http://www.turbogears.org">
 		<!-- <img style="vertical-align:middle;" src="${tg.url('/img/under_the_hood_blue.png')}" alt="TurboGears 2" /> -->
 	  </a>
-    <p>Copyright &copy; ${getattr(tmpl_context, 'project_name', 'TurboGears2')} ${h.current_year()}</p>
+	  <!-- <p>Copyright &copy; ${getattr(tmpl_context, 'project_name', 'TurboGears2')} ${h.current_year()}</p> -->
+	  <p>Copyright &copy; Joseph Knapka ${h.current_year()}</p>
   </footer>
 
   <script src="http://code.jquery.com/jquery.js"></script>

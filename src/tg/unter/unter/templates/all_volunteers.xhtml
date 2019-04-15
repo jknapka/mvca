@@ -1,6 +1,6 @@
 <html py:extends="master.xhtml" py:strip="True">
   <head py:block="head" py:strip="True">
-    <title py:block="master_title">List of volunteer needs</title>
+    <title py:block="master_title">List of all volunteers</title>
     <meta name="generator" content="HTML Tidy for Linux/x86 (vers 11 February 2007), see www.w3.org" />
   </head>
 
@@ -20,8 +20,7 @@ all_volunteers.sort(key=lambda u: u.user_name)
     </div>
 
     <div class="row">
-      <div class="col-md-12">
-		  <h2>All Volunteers</h2>
+      <div class="col-md-12" id="volunteer-list">
 			<table py:if="len(all_volunteers) > 0" border="1">
 				<thead>
 					<tr>
