@@ -167,13 +167,13 @@ Story (NOT STARTED):
   	  takes her directly to the /login page.
 
 Story (INCOMPLETE):
-	- Carla wants to know, in general, which volunteers are available.
-    - From her /coord_page, she can click a link to see a list of all
+	- (done) Carla wants to know, in general, which volunteers are available.
+    - (done) From her /coord_page, she can click a link to see a list of all
 	  registered volunteers.
     - For each volunteer, she can see the number of events the
 	  volunteer is available to serve and the number of events the
 	  volunteer is committed to serve.
-    - She can click a row in the list of volunteers to see the
+    - (done) She can click a row in the list of volunteers to see the
       volunteer_info page for the volunteer.
 
 ) Check that when multiple volunteers respond to an event,
