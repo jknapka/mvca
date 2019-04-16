@@ -160,6 +160,7 @@ class RootController(BaseController):
             redirect('/login',
                      params=dict(came_from="/volunteer_info",__logins=login_counter))
         user,vinfo = self.getVolunteerIdentity()
+        requesting_user = user
         if user_id is not None:
             if predicates.has_permission('manage_events'):
                 user,vinfo = self.getVolunteerIdentity(userId=user_id)
@@ -172,7 +173,9 @@ class RootController(BaseController):
         events_available = need.getAvailableEventsForVolunteer(model.DBSession,user)
         events_available = [toWrappedEvent(ev) for ev in events_available]
 
-        return dict(user=user,volunteer_info=vinfo,availabilities=availabilities,
+        return dict(user=user,volunteer_info=vinfo,
+                requesting_user=requesting_user,
+                availabilities=availabilities,
                 events=events_responded,
                 events_available=events_available,
                 message='')

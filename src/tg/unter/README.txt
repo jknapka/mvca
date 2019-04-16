@@ -6,6 +6,32 @@ something like the "Migrant Volunteer Coordination Assistant",
 but I was thinking of "Unter" as a pun on the Uber ride-
 sharing service.
 
+QUESTIONS:
+
+1) Should coordinators be able to de-commit a volunteer from
+an event? If so this has to be made to work, and if not,
+removed. [(done) For now, remove "decommit" links if the logged-in
+user is not the owner of the commitment.]
+
+2) Should coordinators be allowed to respond to serve at
+events (if they are also regular volunteers)? [Yes, probably.
+(done, default behavior)]
+
+3) Should volunteers be able to respond to events that
+DO NOT occur during their available times? Eg just by clicking
+the "Respond" link on the event list? Why not, if they
+happen to know they're contingently available? Well, they
+might accidentally commit to an event they actually are
+not available for. [But we should allow this, maybe with
+an additional confirmation. (done, default behavior, except
+no confirmation)]
+
+4) When logged in as themselves, should coordinators be able
+to respond to events for *other* volunteers? Probably not?
+[Disallow for now (done).]
+
+----------
+
 Unter supports the following functions:
 
 * Registering volunteers and allowing volunteers to indicate
