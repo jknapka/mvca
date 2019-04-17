@@ -2,10 +2,13 @@
 Utilities for sending alerts.
 '''
 import datetime as dt
+import logging
 
 from twilio.rest import Client as TwiCli
 
 from unter.controllers.util import *
+
+import tg
 
 # Alert no more than every 4 hours for any particular event.
 MIN_ALERT_SECONDS = 3600 * 4
@@ -13,7 +16,8 @@ MIN_ALERT_SECONDS = 3600 * 4
 SMS_ENABLED = False
 EMAIL_ENABLED = False
 
-MVCA_SITE = "https://127.0.0.1"
+# The base site URL to use in alerts.
+MVCA_SITE = tg.config.get('mvca.site','https://127.0.0.1')
 
 def sendAlerts(volunteers,nev,honorLastAlertTime=True):
     '''
@@ -26,7 +30,7 @@ def sendAlerts(volunteers,nev,honorLastAlertTime=True):
                     nev.neid))
             return False
     for vol in volunteers:
-        print("ALERTING {} for need event {}".format(vol.user_name,nev.neid))
+        logging.getLogger("unter").info("ALERTING {} for need event {}".format(vol.user_name,nev.neid))
         if SMS_ENABLED:
             if vol.vinfo.text_alerts_ok == 1:
                 sendSmsForEvent(nev,vol)
@@ -80,21 +84,52 @@ def sendSmsForEvent(nev,vol,source="MVCA"):
             location, coord_name, coord_num, link,dlink)
     sendSMS(msg,destNumber=destNumber)
 
+#####################
 # An SMS alerter that really sends an SMS, via Twilio.
-def sendSMS(message,sourceNumber="+10159743307",destNumber="+19155495098"):
-    sid = 'xxxx'
-    auth_tok = 'xxxx'
+#####################
+TWILIO_SID = None
+TWILIO_AUTH_TOK = None
+
+def sendSMSUsingTwilio(message,sourceNumber="+10159743307",destNumber="+19155495098"):
+    if TWILIO_SID is None:
+        loadTwilioAuthData()
+    if TWILIO_SID is None or TWILIO_AUTH_TOK is None:
+        logging.getLogger('unter').error("Cannot send SMS via Twilio.")
+        stubSMSAlerter(message,sourceNumber,destNumber)
+        return
    
-    cli = TwiCli(sid,auth_tok)
+    cli = TwiCli(TWILIO_SID,TWILIO_AUTH_TOK)
     message = cli.messages.create(body=message,
             from_=sourceNumber,
             to=destNumber)
     print(message.sid)
 
+def loadTwilioAuthData():
+    global TWILIO_SID,TWILIO_AUTH_TOK
+    tw_sid_filename = tg.config.get('twilio.sid.filename')
+    tw_auth_filename = tg.config.get('twilio.auth.filename')
+
+    if tw_sid_filename is not None:
+        with open(tw_sid_filename,'r') as inf:
+            TWILIO_SID = inf.read().strip()
+    else:
+        logging.getLogger('unter').error("No twilio.sid.filename defined in [app:main]")
+
+    if tw_auth_filename is not None:
+        with open(tw_auth_filename,'r') as inf:
+            TWILIO_AUTH_TOK = inf.read().strip()
+    else:
+        logging.getLogger('unter').error("No twilio.auth.filename defined in [app:main]")
+
+#####################
 # An SMS alerter that just logs the alert.
+#####################
 def stubSMSAlerter(message,sourceNumber="+10159743307",destNumber="+19155495098"):
     print("CALLING stubSMSAlerter({},{},{})".format(message,sourceNumber,destNumber))
 
+#####################
+# Alert settings.
+#####################
 SMS_ALERTER = stubSMSAlerter
 EMAIL_ALERTER = sendEmailForEvent
 
@@ -114,5 +149,24 @@ def setEmailAlerter(alerter):
     global EMAIL_ALERTER
     EMAIL_ALERTER = alerter
 
-__all__ = ["getSMSAlerter","setSMSAlerter","sendAlerts","SMS_ENABLED","EMAIL_ENABLED","MVCA_SITE"]
+def configureSMSAlerts():
+    '''
+    Get the SMS alerter name from tg.config. Configure this
+    in the [app:main] section of the .ini file, using
+      sms.alerter = package.methodName
+    eg
+      sms.alerter = unter.controllers.alerts.sendSMSUsingTwilio
+    '''
+    smsAlerter = tg.config.get('sms.alerter')
+    if smsAlerter is not None:
+        pkg = '.'.join(smsAlerter.split('.')[:-1])
+        method = smsAlerter.split('.')[-1]
+        pkgModule = __import__(pkg)
+        meth = pkgModule['method']
+        setSMSAlerter(meth)
+    else:
+        setSMSAlerter(stubSMSAlerter)
+
+__all__ = ["sendSMSUsingTwilio","stubSMSAlerter","getSMSAlerter","setSMSAlerter",
+    "sendAlerts","SMS_ENABLED","EMAIL_ENABLED","MVCA_SITE","configureSMSAlerts"]
 
