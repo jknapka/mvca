@@ -37,13 +37,13 @@
 				<table border="1">
 					<tr py:for="av in availabilities">
 						<td>
-							<div py:if="av.dow_monday==1">Mon </div>
-							<div py:if="av.dow_tuesday==1">Tue </div>
-							<div py:if="av.dow_wednesday==1">Wed </div>
-							<div py:if="av.dow_thursday==1">Thu </div>
-							<div py:if="av.dow_friday==1">Fri </div>
-							<div py:if="av.dow_saturday==1">Sat </div>
-							<div py:if="av.dow_sunday==1">Sun</div>
+							<span py:if="av.dow_monday==1">Mon </span>
+							<span py:if="av.dow_tuesday==1">Tue </span>
+							<span py:if="av.dow_wednesday==1">Wed </span>
+							<span py:if="av.dow_thursday==1">Thu </span>
+							<span py:if="av.dow_friday==1">Fri </span>
+							<span py:if="av.dow_saturday==1">Sat </span>
+							<span py:if="av.dow_sunday==1">Sun</span>
 						</td>
 						<td>From ${av.start_time} to ${av.end_time}</td>
 						<td><a href="${tg.url('/remove_availability?vaid=%s'%av.av.vaid)}">Remove</a></td>
