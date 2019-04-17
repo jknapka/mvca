@@ -47,6 +47,7 @@ unter/templates/about.xhtml
 unter/templates/add_availability_start.xhtml
 unter/templates/add_need_event_start.xhtml
 unter/templates/add_volunteer_start.xhtml
+unter/templates/all_volunteers.xhtml
 unter/templates/coord_page.xhtml
 unter/templates/data.xhtml
 unter/templates/environ.xhtml
@@ -60,8 +61,10 @@ unter/templates/master.xhtml
 unter/templates/need_events.xhtml
 unter/templates/template.xhtml.template
 unter/templates/volunteer_info.xhtml
+unter/templates/__pycache__/__init__.cpython-35.pyc
 unter/tests/__init__.py
 unter/tests/functional/__init__.py
+unter/tests/functional/test_all_volunteers.py
 unter/tests/functional/test_authentication.py
 unter/tests/functional/test_commitment.py
 unter/tests/functional/test_coordinators.py
