@@ -44,6 +44,19 @@ ISSUES
      - Whether the logged-in user is committed to the event,
 		in which case a "Break commitment" link should be available.
 
+2) (done) "Respond" URIs in text messages are (a) very easy to guess and
+(b) require a login. What we need to do is:
+	1) Generate "respond" and "reject" UUIDs and associate them
+	with the corresponding user ID and neID.
+	2) Provide an exposed URI that doesn't require a login.
+	3) When called with /respond?uuid=skjfghkljsfhglzfdg,
+	look up the URI and perform the appropriate action on the
+	user and neid.
+	4) The UUIDs probably don't absolutely need to be persistent,
+	so could use an in-memory cache. But then response handling
+	would not survive a restart.
+	5) If persistent, we need to clean the DB of old UUIDs
+	periodically.
 ----------
 
 Unter supports the following functions:

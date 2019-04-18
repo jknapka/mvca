@@ -4,10 +4,13 @@ Utilities for sending alerts.
 import datetime as dt
 import logging
 import importlib
+import uuid
 
 from twilio.rest import Client as TwiCli
 
 from unter.controllers.util import *
+
+import unter.model as model
 
 import tg
 
@@ -73,8 +76,9 @@ def sendSmsForEvent(nev,vol,source="MVCA"):
     location = nev.location
     coord_num = nev.created_by.vinfo.phone
     coord_name = nev.created_by.display_name
-    link = "{}/respond?user_id={}&neid={}".format(MVCA_SITE,vol.user_id,nev.neid)
-    dlink = "{}/decommit?user_id={}&neid={}".format(MVCA_SITE,vol.user_id,nev.neid)
+    uuid = makeUUIDForAlert(nev,vol)
+    link = "{}/sms_response?uuid={}&action=accept".format(MVCA_SITE,uuid)
+    dlink = "{}/sms_response?uuid={}&action=refuse".format(MVCA_SITE,uuid)
     msg = ("This is {}. We have a need for {} volunteer(s) at {} {}. Purpose: {}. "\
             +"Location: {}. Can you help? Call {} {} or click link to commit: {}. "\
             +"Or click to ignore: {}").format(source,\
@@ -85,49 +89,95 @@ def sendSmsForEvent(nev,vol,source="MVCA"):
             location, coord_name, coord_num, link,dlink)
     sendSMS(msg,destNumber=destNumber)
 
+def makeUUIDForAlert(nev,vol):
+    '''
+    Create an entry in the AlertUUID table for the given
+    event and volunteer.
+    '''
+    auuid = model.AlertUUID(user_id=vol.user_id,neid=nev.neid,uuid=str(uuid.uuid4()))
+    result = auuid.uuid
+    model.DBSession.add(auuid)
+    model.DBSession.flush()
+    return result
+
+def getUserAndEventForUUID(uuid):
+    '''
+    Get the user and event associated with a UUID. Return the (user,event) tuple,
+    or (None,None) if the UUID doesn't exist.
+    '''
+    result = None,None
+    auuid = model.DBSession.query(model.AlertUUID).filter_by(uuid=uuid).first()
+    if auuid is not None:
+        result = auuid.user,auuid.need_event
+        logging.getLogger('unter.alerts').info('Responding to alert UUID {} for user {} event {}'\
+                .format(auuid.uuid,auuid.user.user_name,auuid.need_event.neid))
+        # Don't delete. This allows the user to click on the
+        # "decommit" link in the SMS to change their mind. We
+        # should delete these when we vacuum old events out of
+        # the DB.
+        # model.DBSession.delete(auuid)
+    else:
+        logging.getLogger('unter.alerts').info('No such UUID {} for alert response.'.format(uuid))
+    return result
+
 #####################
 # An SMS alerter that really sends an SMS, via Twilio.
+# Note that we must configure a callable as the SMS alerter
+# in the .ini file. That callable is sendSMSUsingTwilio(),
+# below. It creates a TwilioSMSAlerter instance the first
+# time it is called. (Do we need to make this thread-local?)
 #####################
-TWILIO_SID = None
-TWILIO_AUTH_TOK = None
+class TwilioSMSAlerter:
 
+    def __init__(self):
+        self.TWILIO_SID = None
+        self.TWILIO_AUTH_TOK = None
+        self.session = model.DBSession
+
+        tw_sid_filename = tg.config.get('twilio.sid.filename')
+        tw_auth_filename = tg.config.get('twilio.auth.filename')
+
+        if tw_sid_filename is not None:
+            with open(tw_sid_filename,'r') as inf:
+                self.TWILIO_SID = inf.read().strip()
+        else:
+            logging.getLogger('unter').error("No twilio.sid.filename defined in [app:main]")
+
+        if tw_auth_filename is not None:
+            with open(tw_auth_filename,'r') as inf:
+                self.TWILIO_AUTH_TOK = inf.read().strip()
+        else:
+            logging.getLogger('unter').error("No twilio.auth.filename defined in [app:main]")
+
+    def __call__(self,message,sourceNumber=None,destNumber=None):
+        logging.getLogger('unter.alerts').info("Sending SMS alert to {} using Twilio.".format(destNumber))
+        if self.TWILIO_SID is None or self.TWILIO_AUTH_TOK is None:
+            logging.getLogger('unter').error("Cannot send SMS via Twilio.")
+            stubSMSAlerter(message,sourceNumber,destNumber)
+            return
+       
+        try:
+            cli = TwiCli(self.TWILIO_SID,self.TWILIO_AUTH_TOK)
+            message = cli.messages.create(body=message,
+                    from_=sourceNumber,
+                    to=destNumber)
+            print(message.sid)
+            logging.getLogger('unter.alerts').info("   Message sent to {}".format(destNumber))
+        except:
+            logging.getLogger('unter.alerts').warn("   Message NOT sent to {}".format(destNumber))
+
+
+TWILIO_SMS_ALERTER = None
 def sendSMSUsingTwilio(message,sourceNumber="+19159743306",destNumber="+19155495098"):
-    logging.getLogger('unter.alerts').info("Sending SMS alert to {} using Twilio.".format(destNumber))
-    if TWILIO_SID is None:
-        loadTwilioAuthData()
-    if TWILIO_SID is None or TWILIO_AUTH_TOK is None:
-        logging.getLogger('unter').error("Cannot send SMS via Twilio.")
-        stubSMSAlerter(message,sourceNumber,destNumber)
-        return
-   
-    cli = TwiCli(TWILIO_SID,TWILIO_AUTH_TOK)
-    message = cli.messages.create(body=message,
-            from_=sourceNumber,
-            to=destNumber)
-    print(message.sid)
-    logging.getLogger('unter.alerts').info("   Message sent to {}".format(destNumber))
-
-def loadTwilioAuthData():
-    global TWILIO_SID,TWILIO_AUTH_TOK
-    tw_sid_filename = tg.config.get('twilio.sid.filename')
-    tw_auth_filename = tg.config.get('twilio.auth.filename')
-
-    if tw_sid_filename is not None:
-        with open(tw_sid_filename,'r') as inf:
-            TWILIO_SID = inf.read().strip()
-    else:
-        logging.getLogger('unter').error("No twilio.sid.filename defined in [app:main]")
-
-    if tw_auth_filename is not None:
-        with open(tw_auth_filename,'r') as inf:
-            TWILIO_AUTH_TOK = inf.read().strip()
-    else:
-        logging.getLogger('unter').error("No twilio.auth.filename defined in [app:main]")
+    global TWILIO_SMS_ALERTER
+    if TWILIO_SMS_ALERTER is None:
+        TWILIO_SMS_ALERTER = TwilioSMSAlerter()
+    TWILIO_SMS_ALERTER(message,sourceNumber,destNumber)
 
 #####################
 # An SMS alerter that just logs the alert.
 #####################
-def stubSMSAlerter(message,sourceNumber="+10159743307",destNumber="+19155495098"):
+def stubSMSAlerter(message,sourceNumber="+19159743306",destNumber="+19155495098"):
     print("CALLING stubSMSAlerter({},{},{})".format(message,sourceNumber,destNumber))
 
 #####################

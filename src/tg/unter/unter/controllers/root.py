@@ -2,6 +2,7 @@
 """Main Controller"""
 
 import datetime
+import logging
 
 from tg import expose, flash, require, url, lurl
 from tg import request, redirect, tmpl_context
@@ -263,12 +264,39 @@ class RootController(BaseController):
 
     @expose()
     def respond(self,neid):
+        '''
+        Called when a user clicks a response link on the web page.
+        '''
         user,vinfo = self.getVolunteerIdentity()
         if user is None:
             redirect(lurl('/login'))
         vresp = model.VolunteerResponse(user_id=user.user_id,neid=neid)
         model.DBSession.add(vresp)
         redirect(lurl('/volunteer_info',dict(user_id=user.user_id,message='')))
+
+    @expose()
+    def sms_response(self,uuid,action):
+        '''
+        Called when a volunteer clicks a response link in an SMS message.
+        The UUID points to an AlertUUID row giving us the user and event,
+        and the action is either "accept" or "refuse".
+        '''
+        user,nev = alerts.getUserAndEventForUUID(uuid)
+        if user is not None and nev is not None:
+            if action == 'accept':
+                # Only add response if one does not already exist.
+                vcom = model.DBSession.query(model.VolunteerResponse).filter_by(user_id=user.user_id).filter_by(neid=nev.neid).first()
+                if vcom is None:
+                    logging.getLogger('unter.root').info('Adding response for {} event {}.'.format(user.user_name,nev.neid))
+                    vresp = model.VolunteerResponse(user_id=user.user_id,neid=nev.neid)
+                    model.DBSession.add(vresp)
+                else:
+                    logging.getLogger('unter.root').info('Response {} already present for {} event {}.'.format(vcom.vrid,user.user_name,nev.neid))
+                return "Thank you for responding. You will receive a reminder one hour prior to the event."
+            if action == 'refuse':
+                logging.getLogger('unter.root').info('Removing response for {} event {}.'.format(user.user_name,nev.neid))
+                need.decommit_volunteer(model.DBSession,user=user,ev=nev)
+        return 'Thank you for responding.'
 
     @expose('unter.templates.add_need_event_start')
     @require(predicates.has_permission('manage_events'))

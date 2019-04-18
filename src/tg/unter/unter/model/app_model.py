@@ -152,5 +152,32 @@ class VolunteerDecommitment(DeclarativeBase):
                         backref=backref('decommitted_event',
                                         cascade='all, delete-orphan'))
 
-__all__ = ['VolunteerInfo','VolunteerAvailability','NeedEvent','VolunteerResponse','VolunteerDecommitment']
+class AlertUUID(DeclarativeBase):
+    '''
+    When sending an alert, we embed a UUID in the response link
+    sent with the alert. The UUID is a hard-to-guess token
+    that hides the user_id and neid being responded to.
+    Those associations are stored in this table.
+    '''
+    __tablename__ = "alert_uuid"
+
+    auid = Column(Integer,primary_key=True)
+
+    # The volunteer to whom the alert was sent.
+    user_id = Column(Integer,ForeignKey('tg_user.user_id'),nullable=False)
+    user = relationship('User', uselist=False,
+                        backref=backref('user_alerts',
+                                        cascade='all, delete-orphan'))
+
+    # The event for which the alert was sent.
+    neid = Column(Integer,ForeignKey('need_event.neid'),nullable=False)
+    need_event = relationship('NeedEvent',uselist=False,
+                        backref=backref('event_alerts',
+                                        cascade='all, delete-orphan'))
+
+    # The UUID generated for this user/event combination.
+    uuid = Column(String(128),nullable=False,index=True)
+
+__all__ = ['VolunteerInfo','VolunteerAvailability','NeedEvent','VolunteerResponse','VolunteerDecommitment',
+        'AlertUUID']
 

@@ -53,6 +53,9 @@ def decommit_volunteer(dbsession,vcom=None,user=None,ev=None):
     else:
         vresp.user = user
         vresp.need_event = ev
+        vcoms = dbsession.query(model.VolunteerResponse).filter_by(user_id=user.user_id).filter_by(neid=ev.neid).all()
+        for vcom in vcoms:
+            dbsession.delete(vcom)
     if vresp.user is None or vresp.need_event is None:
         raise Exception("Cannot decommit - user or event missing.")
     decommit = model.VolunteerDecommitment()
