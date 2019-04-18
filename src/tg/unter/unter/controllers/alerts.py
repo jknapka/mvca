@@ -3,6 +3,7 @@ Utilities for sending alerts.
 '''
 import datetime as dt
 import logging
+import importlib
 
 from twilio.rest import Client as TwiCli
 
@@ -13,8 +14,8 @@ import tg
 # Alert no more than every 4 hours for any particular event.
 MIN_ALERT_SECONDS = 3600 * 4
 
-SMS_ENABLED = False
-EMAIL_ENABLED = False
+SMS_ENABLED = True
+EMAIL_ENABLED = True
 
 # The base site URL to use in alerts.
 MVCA_SITE = tg.config.get('mvca.site','https://127.0.0.1')
@@ -90,7 +91,8 @@ def sendSmsForEvent(nev,vol,source="MVCA"):
 TWILIO_SID = None
 TWILIO_AUTH_TOK = None
 
-def sendSMSUsingTwilio(message,sourceNumber="+10159743307",destNumber="+19155495098"):
+def sendSMSUsingTwilio(message,sourceNumber="+19159743306",destNumber="+19155495098"):
+    logging.getLogger('unter.alerts').info("Sending SMS alert to {} using Twilio.".format(destNumber))
     if TWILIO_SID is None:
         loadTwilioAuthData()
     if TWILIO_SID is None or TWILIO_AUTH_TOK is None:
@@ -103,6 +105,7 @@ def sendSMSUsingTwilio(message,sourceNumber="+10159743307",destNumber="+19155495
             from_=sourceNumber,
             to=destNumber)
     print(message.sid)
+    logging.getLogger('unter.alerts').info("   Message sent to {}".format(destNumber))
 
 def loadTwilioAuthData():
     global TWILIO_SID,TWILIO_AUTH_TOK
@@ -149,6 +152,10 @@ def setEmailAlerter(alerter):
     global EMAIL_ALERTER
     EMAIL_ALERTER = alerter
 
+#####################
+# Configuration handler called from unter/config/app_config.py
+# to configure SMS on app startup.
+#####################
 def configureSMSAlerts():
     '''
     Get the SMS alerter name from tg.config. Configure this
@@ -158,13 +165,22 @@ def configureSMSAlerts():
       sms.alerter = unter.controllers.alerts.sendSMSUsingTwilio
     '''
     smsAlerter = tg.config.get('sms.alerter')
+    logging.getLogger('unter.alerts').info("SMS alerter sms.alerter = {}".format(smsAlerter))
     if smsAlerter is not None:
-        pkg = '.'.join(smsAlerter.split('.')[:-1])
-        method = smsAlerter.split('.')[-1]
-        pkgModule = __import__(pkg)
-        meth = pkgModule['method']
-        setSMSAlerter(meth)
+        try:
+            pkg = '.'.join(smsAlerter.split('.')[:-1])
+            method = smsAlerter.split('.')[-1]
+            logging.getLogger('unter.alerts').info("  pkg {}, method {}".format(pkg,method))
+            pkgModule = importlib.import_module(pkg)
+            logging.getLogger('unter.alerts').info("  pkgModule {}".format(pkgModule))
+            meth = pkgModule.__dict__[method]
+            logging.getLogger('unter.alerts').info("  meth {}".format(meth))
+            setSMSAlerter(meth)
+        except:
+            import sys
+            logging.getLogger('unter.alerts').info("   meth deref exception: {}".format(sys.exc_info()))
     else:
+        logging.getLogger('unter.alerts').info("No SMS alerter configured, using stub. Configure sms.alerter in .ini file.")
         setSMSAlerter(stubSMSAlerter)
 
 __all__ = ["sendSMSUsingTwilio","stubSMSAlerter","getSMSAlerter","setSMSAlerter",

@@ -6,6 +6,7 @@ This file complements development/deployment.ini.
 
 """
 from tg.configuration import AppConfig
+import tg.configuration.milestones
 
 import unter
 from unter import model, lib
@@ -47,7 +48,7 @@ base_config.DBSession = unter.model.DBSession
 # Configure the authentication backend
 base_config.auth_backend = 'sqlalchemy'
 # YOU MUST CHANGE THIS VALUE IN PRODUCTION TO SECURE YOUR APP
-base_config.sa_auth.cookie_secret = "8129530b-36d7-4168-ba85-676dfc2bde13"
+base_config.sa_auth.cookie_secret = "9021030b-36d7-4168-ba85-676dfc2bde13"
 # what is the class you want to use to search for users in the database
 base_config.sa_auth.user_class = model.User
 
@@ -133,6 +134,7 @@ base_config.sa_auth.post_login_url = '/post_login'
 # You may optionally define a page where you want users to be redirected to
 # on logout:
 base_config.sa_auth.post_logout_url = '/post_logout'
+
 try:
     # Enable DebugBar if available, install tgext.debugbar to turn it on
     #from tgext.debugbar import enable_debugbar
@@ -140,3 +142,12 @@ try:
     pass
 except ImportError:
     pass
+
+# Configure volunteer alerts when the configuration is loaded.
+import logging
+def configureAlerts():
+    logging.getLogger("unter").info("Configuring SMS alerts...")
+    import unter.controllers.alerts as alerts
+    alerts.configureSMSAlerts()
+tg.configuration.milestones.environment_loaded.register(configureAlerts)
+
