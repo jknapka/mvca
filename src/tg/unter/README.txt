@@ -31,6 +31,20 @@ to respond to events for *other* volunteers? Probably not?
 [Disallow for now (done).]
 
 ----------
+ISSUES
+
+1) Make event rendering consistent across all pages. We need
+   - An "event_renderer" template that we can include.
+   - That template should be sensitive to:
+     - Whether the logged-in user is the same as the user that
+       created the event, in which case a "Cancel" link should
+       be available.
+     - Whether the logged-in user is available for the event,
+       in which case a "Respond" link should be available.
+     - Whether the logged-in user is committed to the event,
+		in which case a "Break commitment" link should be available.
+
+----------
 
 Unter supports the following functions:
 
