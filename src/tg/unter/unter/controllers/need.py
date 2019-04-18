@@ -18,7 +18,13 @@ def debugTest(msg):
 
 def checkOneEvent(dbsession,ev_id,honorLastAlertTime=True):
     nev = dbsession.query(model.NeedEvent).filter_by(neid=ev_id).first()
-    debugTest("Checking need event {} {}".format(ev_id,nev.notes))
+    if nev is not None:
+        notes = nev.notes
+    else:
+        notes = "NO SUCH EVENT"
+    debugTest("Checking need event {} {}".format(ev_id,notes))
+    if nev is None:
+        logging.getLogger('unter.alerts').warn("checkOneEvent(): no such event {}".format(ev_id))
     if isFullyServed(dbsession,nev):
         debugTest("  This event is fully-served, no alerts necessary.")
         return
@@ -32,6 +38,25 @@ def checkValidEvents(dbsession,when=None):
     nevs = dbsession.query(model.NeedEvent).filter_by(complete=0).all()
     for nev in nevs:
         checkOneEvent(dbsession,nev.neid)
+
+def commit_volunteer(dbsession,user,nev):
+    '''
+    When a user accepts a need event, call this to manage the
+    VolunteerResponse and VolunteerDecommitment rows.
+    '''
+    # Only add response if one does not already exist.
+    vcom = model.DBSession.query(model.VolunteerResponse).filter_by(user_id=user.user_id).filter_by(neid=nev.neid).first()
+    if vcom is None:
+        logging.getLogger('unter.root').info('Adding response for {} event {}.'.format(user.user_name,nev.neid))
+        vresp = model.VolunteerResponse(user_id=user.user_id,neid=nev.neid)
+        model.DBSession.add(vresp)
+    else:
+        logging.getLogger('unter.root').info('Response {} already present for {} event {}.'.format(vcom.vrid,user.user_name,nev.neid))
+    vdcs = model.DBSession.query(model.VolunteerDecommitment).filter_by(user_id=user.user_id).filter_by(neid=nev.neid).all()
+    if len(vdcs) > 0:
+        logging.getLogger('unter.root').info('Removing decommitment for {} event {}.'.format(user.user_name,nev.neid))
+    for vdc in vdcs:
+        model.DBSession.delete(vdc)
 
 def decommit_volunteer(dbsession,vcom=None,user=None,ev=None):
     '''
@@ -58,10 +83,13 @@ def decommit_volunteer(dbsession,vcom=None,user=None,ev=None):
             dbsession.delete(vcom)
     if vresp.user is None or vresp.need_event is None:
         raise Exception("Cannot decommit - user or event missing.")
-    decommit = model.VolunteerDecommitment()
-    decommit.user = vresp.user
-    decommit.need_event = vresp.need_event
-    dbsession.add(decommit)
+    existingDecommit = dbsession.query(model.VolunteerDecommitment).filter_by(user_id=vresp.user.user_id).\
+            filter_by(neid=vresp.need_event.neid).first()
+    if existingDecommit is None:
+        decommit = model.VolunteerDecommitment()
+        decommit.user = vresp.user
+        decommit.need_event = vresp.need_event
+        dbsession.add(decommit)
 
 def getDowCheck(nev):
     '''

@@ -143,19 +143,27 @@ class TestNeedEvent(TestController):
         nev = self.createAirportNeed(self.getUser(self.session,'carla'))
         volunteers = need.getAlertableVolunteers(self.session,nev)
 
-        # We should send alerts now, because the event is new.
-        alertsSent = alerts.sendAlerts(volunteers,nev,honorLastAlertTime=True)
-        ok_(alertsSent)
+        # Alerts now create DB rows, so we need to protect this
+        # code's transaction state.
+        try:
+            # We should send alerts now, because the event is new.
+            alertsSent = alerts.sendAlerts(volunteers,nev,honorLastAlertTime=True)
+            ok_(alertsSent)
 
-        # We should NOT send alerts now, because the event
-        # was alerted recently.
-        alertsSent = alerts.sendAlerts(volunteers,nev,honorLastAlertTime=True)
-        ok_(not alertsSent)
+            # We should NOT send alerts now, because the event
+            # was alerted recently.
+            alertsSent = alerts.sendAlerts(volunteers,nev,honorLastAlertTime=True)
+            ok_(not alertsSent)
 
-        # Back-date the alert time on nev so we can alert again.
-        nev.last_alert_time = nev.last_alert_time - (3600*5)
-        alertsSent = alerts.sendAlerts(volunteers,nev,honorLastAlertTime=True)
-        ok_(alertsSent)
+            # Back-date the alert time on nev so we can alert again.
+            nev.last_alert_time = nev.last_alert_time - (3600*5)
+            alertsSent = alerts.sendAlerts(volunteers,nev,honorLastAlertTime=True)
+            ok_(alertsSent)
+        except:
+            logging.getLogger('unter.test').error("ABORTING TRANSACTION in tes_4_AlertAirportNeed")
+            transaction.abort()
+        else:
+            transaction.commit()
 
     def test_5_0_coordEventPage(self):
         ''' Coordinators can see event details. '''

@@ -45,11 +45,6 @@ class TestNeedEventsPage(TestController):
 
     def test_1_alerts1(self):
         ''' Check that we alert only non-fully-staffed events. '''
-        # NOTE: if we switch to using UUIDs rather than raw event
-        # IDs and user IDs in the response URLs, this test is going
-        # to have to change a lot. Minimally, it will need to
-        # dreference the UUIDs and figure out which neids they
-        # refer to.
         try:
             self.createResponse('veronica','Veronica only bus 1')
             self.createResponse('velma','Veronica or Velma airport')
@@ -61,7 +56,13 @@ class TestNeedEventsPage(TestController):
         env = {'REMOTE_USER':'carla'}
         resp = self.app.get('/check_events',extra_environ=env,
                 status=302)
-        
+
+        def getUuidForEventFromUUIDTable(neid):
+            auuid = model.DBSession.query(model.AlertUUID).filter_by(neid=neid).first()
+            if auuid is None:
+                return None
+            return auuid.uuid
+
         # We should have alerted for all events except
         # "Veronica only bus 1" and "... bus 2" (the second
         # because those two events overlap and Veronica
@@ -70,9 +71,14 @@ class TestNeedEventsPage(TestController):
         evs = model.DBSession.query(model.NeedEvent).all()
         for ev in evs:
             if ev.notes in ["Veronica only bus 1","Veronica only bus 2"]:
-                ok_('&neid={}'.format(ev.neid) not in alertLog,alertLog)
+                # There should not be a UUID entry for this event.
+                uuid = getUuidForEventFromUUIDTable(ev.neid)
+                ok_(uuid is None)
             else:
-                ok_('&neid={}'.format(ev.neid) in alertLog,alertLog)
+                # There should be a UUID for this event and it should
+                # appear in the alert texts.
+                uuid = getUuidForEventFromUUIDTable(ev.neid)
+                ok_('?uuid={}'.format(uuid) in alertLog,alertLog)
 
     def setupDB(self):
         self.createCoordinatorCarla()

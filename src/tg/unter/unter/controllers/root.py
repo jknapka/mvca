@@ -270,7 +270,9 @@ class RootController(BaseController):
         user,vinfo = self.getVolunteerIdentity()
         if user is None:
             redirect(lurl('/login'))
-        vresp = model.VolunteerResponse(user_id=user.user_id,neid=neid)
+        nev = model.DBSession.query(model.NeedEvent).filter_by(neid=neid).first()
+        if nev is not None:
+            need.commit_volunteer(model.DBSession,user,nev)
         model.DBSession.add(vresp)
         redirect(lurl('/volunteer_info',dict(user_id=user.user_id,message='')))
 
@@ -284,14 +286,8 @@ class RootController(BaseController):
         user,nev = alerts.getUserAndEventForUUID(uuid)
         if user is not None and nev is not None:
             if action == 'accept':
-                # Only add response if one does not already exist.
-                vcom = model.DBSession.query(model.VolunteerResponse).filter_by(user_id=user.user_id).filter_by(neid=nev.neid).first()
-                if vcom is None:
-                    logging.getLogger('unter.root').info('Adding response for {} event {}.'.format(user.user_name,nev.neid))
-                    vresp = model.VolunteerResponse(user_id=user.user_id,neid=nev.neid)
-                    model.DBSession.add(vresp)
-                else:
-                    logging.getLogger('unter.root').info('Response {} already present for {} event {}.'.format(vcom.vrid,user.user_name,nev.neid))
+                logging.getLogger('unter.root').info("Accepting event {} for user {}.".format(nev.neid,user.user_id))
+                need.commit_volunteer(model.DBSession,user=user,nev=nev)
                 return "Thank you for responding. You will receive a reminder one hour prior to the event."
             if action == 'refuse':
                 logging.getLogger('unter.root').info('Removing response for {} event {}.'.format(user.user_name,nev.neid))
