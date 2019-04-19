@@ -9,7 +9,7 @@ def create_entities(session):
     u.user_name = 'manager'
     u.display_name = 'Site Manager'
     u.email_address = 'jaknapka+mvca.manager@gmail.com'
-    u.password = 'E1 9aso 2019'
+    u.password = 'managepass'
 
     vi = model.VolunteerInfo()
     vi.phone="9155495098"
