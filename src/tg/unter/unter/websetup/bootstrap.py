@@ -7,15 +7,25 @@ from unter import model
 def create_entities(session):
     u = model.User()
     u.user_name = 'manager'
-    u.display_name = 'Example manager'
-    u.email_address = 'manager@somedomain.com'
-    u.password = 'managepass'
+    u.display_name = 'Site Manager'
+    u.email_address = 'jaknapka+mvca.manager@gmail.com'
+    u.password = 'E1 9aso 2019'
+
+    vi = model.VolunteerInfo()
+    vi.phone="9155495098"
+    vi.description = "Site manager"
+    vi.text_alerts_ok = 1
+    vi.zipcode = '79902'
+    u.vinfo = vi
 
     g = model.Group()
     g.group_name = 'managers'
     g.display_name = 'Managers Group'
 
     g.users.append(u)
+    
+    # Save for later.
+    managers_group = g
 
     session.add(g)
 
@@ -44,6 +54,7 @@ def create_entities(session):
     p.permission_name = 'manage_events'
     p.description = 'Permission to create and manage volunteer need events.'
     p.groups.append(g)
+    p.groups.append(managers_group)
 
     session.add(p)
     session.add(g)
@@ -56,7 +67,6 @@ def create_entities(session):
     u1.password = 'editpass'
 
     session.add(u1)
-    #session.flush()
     transaction.commit()
 
 def bootstrap(command, conf, vars):

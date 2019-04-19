@@ -107,6 +107,7 @@ class NeedEvent(DeclarativeBase):
                                         cascade='all, delete-orphan'))
 
     responses = relationship('VolunteerResponse')
+    refusers = relationship('VolunteerDecommitment')
 
 class VolunteerResponse(DeclarativeBase):
     '''

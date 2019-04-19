@@ -7,12 +7,6 @@ import wtforms_components as wtfc
 import re
 import datetime
 
-SAFE_USER_NAME_RE = re.compile('^[A-Za-z1-9]*$')
-SAFE_EMAIL_RE = re.compile('^[^@]+@[a-zA-Z0-9-.]+.[a-zA-Z0-9-.]+[^.]$')
-SAFE_DISPLAY_NAME_RE = re.compile('^[A-Za-z0-9 ]*$')
-SAFE_DESCRIPTION_RE = re.compile('^[-.,A-Za-z0-9 ]*$')
-MIN_PWD_LEN = 1
-
 class NeedEventForm(wtf.Form):
 	''' WTForm definition to add a need event. '''
 	date_of_need = wtfc.DateField("Date")
@@ -72,13 +66,20 @@ class NewAcctForm(wtf.Form):
 	def validate_pwd(self, field):
 		if field.data != self.pwd2.data:
 			raise wtf.ValidationError("The paswords do not match.")
-		if len(field.data) < MIN_PWD_LEN:
+		if len(field.data) > 0 and len(field.data) < MIN_PWD_LEN:
 			raise wtf.ValidationError("Your password must be at least {} characters long.".format(MIN_PWD_LEN))
 	
 	def validate_email(self, field):
 		if not isSafeEmail(field.data):
 			raise wtf.ValidationError("This does not appear to be a valid email address.")
-	
+
+# Validation methods.
+SAFE_USER_NAME_RE = re.compile('^[A-Za-z1-9]*$')
+SAFE_EMAIL_RE = re.compile('^[-a-zA-Z0-9+.]+@[a-zA-Z0-9-.]+.[a-zA-Z0-9-.]+[^.]$')
+SAFE_DISPLAY_NAME_RE = re.compile('^[A-Za-z0-9 ]*$')
+SAFE_DESCRIPTION_RE = re.compile('^[-.,A-Za-z0-9 ]*$')
+MIN_PWD_LEN = 1
+
 def isSafe(s,re):
 	m = re.match(s)
 	return m is not None

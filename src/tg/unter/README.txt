@@ -33,7 +33,9 @@ to respond to events for *other* volunteers? Probably not?
 ----------
 ISSUES
 
-1) Make event rendering consistent across all pages. We need
+) Need to allow users to edit their data.
+
+) (done) Make event rendering consistent across all pages. We need
    - An "event_renderer" template that we can include.
    - That template should be sensitive to:
      - Whether the logged-in user is the same as the user that
@@ -44,7 +46,7 @@ ISSUES
      - Whether the logged-in user is committed to the event,
 		in which case a "Break commitment" link should be available.
 
-2) (done) "Respond" URIs in text messages are (a) very easy to guess and
+) (done) "Respond" URIs in text messages are (a) very easy to guess and
 (b) require a login. What we need to do is:
 	1) Generate "respond" and "reject" UUIDs and associate them
 	with the corresponding user ID and neID.

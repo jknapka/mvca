@@ -1,0 +1,106 @@
+<py:def function="renderEvent(ev,user,complete=0,renderHeader=False,viewedUser=None)">
+<!--
+   ev is a wrapped event, with an ev.ev member referencing the
+	original NeedEvent object.
+
+	user is the logged-in user, a model.User object.
+
+	complete is the value of ev.ev.complete for events we want
+	to render. This is an int since we don't store booleans
+	in the DB.
+
+	If renderHeader is True, render a header row appropriate
+	for the logged-in user, rather than rendering ev
+	(which should be None).
+
+	If the user whose associated events are being viewed is
+	not the same as the logged-in user, viewedUser will
+	be a reference to the model.User object for the user
+	being viewed. Normally in this case the logged-in user
+	is a coordinator or administrator.
+-->
+<?python
+import time
+if viewedUser is None:
+	viewedUser = user
+isViewedUser = (user.user_id == viewedUser.user_id)
+perms = [p.permission_name for p in user.permissions]
+complete = (complete == 1)
+isCoordinator = ('manage_events' in perms)
+isVolunteer = ('respond_to_need' in perms)
+respondents = []
+if ev is not None:
+    respondents = [vr.user.user_id for vr in ev.ev.responses]
+isRespondent = (user.user_id in respondents)
+?>
+	<tr py:if="renderHeader"
+		style="border-bottom: 4px solid black">
+		<th>Created by</th>
+		<th>Date</th>
+		<th>Time</th>
+		<th>Type</th>
+		<th>Estimated duration</th>
+		<th>Location</th>
+		<th>Affected persons</th>
+		<th>Volunteers needed</th>
+		<th>Volunteers responding</th>
+		<th>Last alert</th>
+		<th py:if="isCoordinator">Completed?</th>
+		<th py:if="isVolunteer and not complete">
+			Respond
+		</th>
+		<th py:if="isCoordinator">
+			Cancel this event
+		</th>
+	</tr>
+	<tr py:if="not renderHeader"
+		id="nev-div-${ev.ev.neid}"
+	 	class="unter-need-event-row"
+		style="border-left: 4px solid black">
+		<td>${ev.ev.created_by.display_name}</td>
+		<td><a href="/event_details?neid=${ev.ev.neid}">
+			${ev.date_str}
+			</a>
+		</td>
+		<td>${ev.time_str}</td>
+		<td>${ev.ev_str}</td>
+		<td>${ev.ev.duration}</td>
+		<td>${ev.ev.location}</td>
+		<td>${ev.ev.affected_persons}</td>
+		<td>${ev.ev.volunteer_count}</td>
+		<td>${len(ev.ev.responses)}
+			<ul py:if="len(ev.ev.responses)>0">
+				<li py:for="vr in ev.ev.responses">
+					<a href="${tg.url('/volunteer_info',dict(user_id=vr.user.user_id))}">
+						${vr.user.display_name}
+					</a>
+				</li>
+			</ul>
+		</td>
+		<td>${ev.last_alert_time}
+			<a py:if="isCoordinator and (not complete) and time.time() - 3600 > ev.ev.last_alert_time"
+				   href="/send_alert?neid=${ev.ev.neid}"><br/>Send alert</a>
+		</td>
+		<td py:if="isCoordinator"><a py:if="not complete"
+				href="/event_complete?neid=${ev.ev.neid}">Mark complete</a>
+			<span py:if="complete">Already complete</span>
+		</td>
+		<td py:if="isVolunteer and (not complete) and isViewedUser">
+			<a href="/respond?neid=${ev.ev.neid}">Commit to serve</a>
+			<br/>
+			<a href="/decommit?neid=${ev.ev.neid}">Sorry, can't make it</a>
+			<span> </span>
+		</td>
+		<td py:if="isCoordinator">
+			<a href="/cancel?neid=${ev.ev.neid}">Cancel</a>
+		</td>
+		</tr>
+		<tr py:if="not renderHeader"
+			border="1"
+			style="border-bottom: 4px solid black; border-left: 4px solid black">
+		<td border="0"></td>
+		<td colspan="100">${ev.ev.notes}</td>
+	</tr>
+
+</py:def>
+

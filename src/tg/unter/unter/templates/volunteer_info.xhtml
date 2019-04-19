@@ -5,17 +5,20 @@
   </head>
 
   <body py:block="body" py:strip="True">
+	<py:import href="event_renderer.xhtml" alias="er"/>
     <div class="row">
       <div class="col-md-12">
         <div class="page-header">
 		<h2>Volunteer account for ${user.display_name}</h2>
-		<h2 py:if="user.user_name != request.identity['repoze.who.userid']">&nbsp;&nbsp;(viewed by ${request.identity['repoze.who.userid']})</h2>
+		<h2 py:if="user.user_name != requesting_user.user_name">&nbsp;&nbsp;(viewed by ${requesting_user.display_name})</h2>
 		<span id="message-span" py:if="message">${message}</span>
         </div>
 
 
 	<div class="unter-actions">
 		<a href="/need_events?complete=0&amp;staffed=0">See volunteer needs</a>
+		|
+		<a href="/add_volunteer_start?user_id=${user.user_id}">Edit volunteer info</a>
 	</div>
 
 	<table>
@@ -60,28 +63,12 @@
 		<h3>Events you plan to serve</h3>
 		<table border="1">
 			<thead>
-				<tr>
-					<th>Type</th>
-					<th>Date</th>
-					<th>Time</th>
-					<th>Location</th>
-					<th>Coordinator</th>
-					<th>Break commitment</th>
-				</tr>
+				${er.renderEvent(None,user=requesting_user,renderHeader=True,viewedUser=user)}
 			</thead>
 			<tbody>
-				<tr py:for="ev in events">
-					<td>${ev.ev_str}</td>
-					<td>${ev.date_str}</td>
-					<td>${ev.time_str}</td>
-					<td>${ev.ev.location}</td>
-					<td>${ev.ev.created_by.display_name} (${ev.ev.created_by.vinfo.phone})</td>
-					<td><a py:if="request.identity['repoze.who.userid'] in [er.user.user_name for er in ev.ev.event_response]"
-							href="${tg.url('/decommit',dict(neid=ev.ev.neid))}">Sorry, can't make it :-(</a><span py:else="">
-							(You are not ${user.display_name}.)
-						</span>
-					</td>
-				</tr>
+				<div py:for="ev in events">
+				${er.renderEvent(ev,user=requesting_user,viewedUser=user)}
+				</div>
 			</tbody>
 		</table>
 	</div>
@@ -91,28 +78,14 @@
 		<h3>Events for which you may be available</h3>
 		<table border="1">
 			<thead>
-				<tr>
-					<th>Type</th>
-					<th>Date</th>
-					<th>Time</th>
-					<th>Location</th>
-					<th>Coordinator</th>
-					<th>Respond</th>
-				</tr>
+				${er.renderEvent(None,user=requesting_user,renderHeader=True,viewedUser=user)}
 			</thead>
 			<tbody>
-				<tr py:for="ev in events_available">
-					<td>${ev.ev_str}</td>
-					<td>${ev.date_str}</td>
-					<td>${ev.time_str}</td>
-					<td>${ev.ev.location}</td>
-					<td>${ev.ev.created_by.display_name} (${ev.ev.created_by.vinfo.phone})</td>
-					<td><a py:if="user.user_name == request.identity['repoze.who.userid']"
-							href="${tg.url('/respond',dict(neid=ev.ev.neid))}">I'll be there!</a><span py:else="">
-						(You are not ${user.display_name}.)
-						</span>
-					</td>
-				</tr>
+				<div py:for="ev in events_available">
+				   <div py:if="user.user_id not in [vd.user.user_id for vd in ev.ev.refusers]">
+					${er.renderEvent(ev,user=requesting_user,viewedUser=user)}
+				   </div>
+				</div>
 			</tbody>
 		</table>
 	</div>
