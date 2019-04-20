@@ -313,6 +313,13 @@ def configureSMSAlerts():
 # to configure email on app startup.
 #####################
 def configureEmailAlerter():
+    '''
+    Get the email alerter name from tg.config. Configure
+    this in the [app:main] section of the .ini file, using
+      email.alerter = package.methodName
+    eg
+      email.alerter = unter.controllers.alerts.stubEmailAlerter
+    '''
     configHandler('email.alerter',stubEmailAlerter,setEmailAlerter)
 
 # Generic configuration handler.
@@ -334,5 +341,5 @@ def configHandler(alerterOpt,stubAlerter,assignmentLambda):
             logging.getLogger('unter.alerts').info("   meth deref exception: {}".format(sys.exc_info()))
     else:
         logging.getLogger('unter.alerts').info("No alerter configured, using stub. Configure {} in .ini file.".format(alerterOpt))
-        assignmentLamber(stubAlerter)
+        assignmentLambda(stubAlerter)
 

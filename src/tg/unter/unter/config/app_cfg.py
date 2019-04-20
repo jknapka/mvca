@@ -149,5 +149,6 @@ def configureAlerts():
     logging.getLogger("unter").info("Configuring SMS alerts...")
     import unter.controllers.alerts as alerts
     alerts.configureSMSAlerts()
+    alerts.configureEmailAlerter()
 tg.configuration.milestones.environment_loaded.register(configureAlerts)
 
