@@ -103,3 +103,30 @@ class TestPromotions(TestController):
         # Note: user 'manager' is also a coordinator.
         ok_('Promote volunteer to coordinator' not in resp.text,resp.text)
         ok_('Promote volunteer to manager' not in resp.text,resp.text)
+
+    def test_7_unpromoteCoord(self):
+        ''' Test that we can remove Carla the Coordinator's coord privilege. '''
+        resp = self.app.get('/unpromote?user_id=3',
+                extra_environ={'REMOTE_USER':'manager'},
+                status=302)
+        u = model.DBSession.query(model.User).filter_by(user_id=3).first()
+        eq_('carla',u.user_name,u.user_name)
+        ok_('manage_events' not in [p.permission_name for p in u.permissions],u.permissions)
+
+    def test_8_unpromoteManager(self):
+        ''' Test that we can promote Carla to manager, then remove her admin privileges. '''
+        u = model.DBSession.query(model.User).filter_by(user_id=3).first()
+        ok_('manage' not in [p.permission_name for p in u.permissions],u.permissions)
+        resp = self.app.get("/promote_to_manager?user_id=3",
+                extra_environ={'REMOTE_USER':'manager'},
+                status=302)
+        u = model.DBSession.query(model.User).filter_by(user_id=3).first()
+        ok_('manage' in [p.permission_name for p in u.permissions],u.permissions)
+
+        resp = self.app.get('/unpromote?user_id=3',
+                extra_environ={'REMOTE_USER':'manager'},
+                status=302)
+        u = model.DBSession.query(model.User).filter_by(user_id=3).first()
+        eq_('carla',u.user_name,u.user_name)
+        ok_('manage_events' not in [p.permission_name for p in u.permissions],u.permissions)
+        ok_('manage' not in [p.permission_name for p in u.permissions],u.permissions)

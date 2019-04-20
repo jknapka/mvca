@@ -185,6 +185,28 @@ class RootController(BaseController):
     def promote_to_manager(self,user_id):
         self.promote(user_id,'managers')
 
+    @expose()
+    @require(predicates.has_permission('manage'))
+    def unpromote(self,user_id):
+        log = logging.getLogger('unter.root')
+        log.info("Trying to un-promote {}".format(user_id))
+        u = model.DBSession.query(model.User).filter_by(user_id=user_id).first()
+        if u is not None:
+            for g in u.groups:
+                if g.group_name == 'managers':
+                    try:
+                        g.users.remove(u)
+                        log.info("  Removed user from managers group.")
+                    except ValueError:
+                        pass
+                if g.group_name == 'coordinators':
+                    try:
+                        g.users.remove(u)
+                        log.info("  Removed user from coordinators group.")
+                    except ValueError:
+                        pass
+        redirect(lurl("/volunteer_info"),dict(user_id=user_id))
+
     def promote(self,user_id,groupName):
         log = logging.getLogger('unter.root')
         log.info("Trying to promote {} to group {}".format(user_id,groupName))
