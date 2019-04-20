@@ -62,8 +62,10 @@ class RootController(BaseController):
         ''' Show the "Add a volunteer" page. '''
         editing = False
         user = None
+        loggedInUser,vinfo = None,None
         if user_id is not None and request.identity:
             # We want to edit an existing volunteer.
+            loggedInUser,vinfo = self.getVolunteerIdentity()
             user = model.DBSession.query(model.User).filter_by(user_id=user_id).first()
             if user is not None:
                 form = self.getExistingVolunteerForm(user)
@@ -71,7 +73,7 @@ class RootController(BaseController):
         if form is None:
             form = NewAcctForm()
         return dict(page='add_volunteer_start',form=form,url='/add_volunteer_post',
-                error_msg=error_msg,editing=editing,user=user)
+                error_msg=error_msg,editing=editing,user=user,requesting_user=loggedInUser)
 
     def getExistingVolunteerForm(self,user):
         if user is None:
@@ -172,6 +174,33 @@ class RootController(BaseController):
         vinfo.zipcode = attribs.zipcode
         vinfo.text_alerts_ok = {True:1,False:0,1:1,0:0}[attribs.text_alerts_ok]
         redirect(lurl("/volunteer_info"),dict(user_id=user.user_id))
+
+    @expose()
+    @require(predicates.has_permission('manage'))
+    def promote_to_coordinator(self,user_id):
+        self.promote(user_id,'coordinators')
+
+    @expose()
+    @require(predicates.has_permission('manage'))
+    def promote_to_manager(self,user_id):
+        self.promote(user_id,'managers')
+
+    def promote(self,user_id,groupName):
+        log = logging.getLogger('unter.root')
+        log.info("Trying to promote {} to group {}".format(user_id,groupName))
+        u = model.DBSession.query(model.User).filter_by(user_id=user_id).first()
+        if u is not None:
+            group = model.DBSession.query(model.Group).filter_by(group_name=groupName).first()
+            if group is not None:
+                group.users.append(u)
+                log.info('  Promoted {} to {}.'.format(u.user_name,groupName))
+                redirect(lurl('/volunteer_info'),dict(user_id=user_id))
+            else:
+                log.error("  Could not promote to non-existing group {}".format(groupName))
+                redirect(lurl('/volunteer_info'),dict(user_id=user_id))
+        else:
+            log.error("  Could not promote non-existing user_id {}".format(user_id))
+            redirect(lurl('/volunteer_info'))
 
     @expose('unter.templates.add_availability_start')
     @require(predicates.not_anonymous())
