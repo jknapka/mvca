@@ -54,6 +54,17 @@ def setupSMSStub():
     alerts.SMS_ENABLED = True
     TEST_ALERT_OUTPUT = StringIO()
 
+# Email stub that captures email alert info for tests.
+TEST_EMAIL_OUTPUT = StringIO()
+def setupEmailStub():
+    global TEST_EMAIL_OUTPUT
+    def testEmailAlerter(message,toAddr,fromAddr=None):
+        print("Sending email:\n  from: {}\n  to: {}\n{}\nEND".format(toAddr,fromAddr,message),
+                file=TEST_EMAIL_OUTPUT)
+    alerts.setEmailAlerter(testEmailAlerter)
+    alerts.EMAIL_ENABLED = True
+    TEST_EMAIL_OUTPUT = StringIO()
+
 class TestController(object):
     """Base functional test case for the controllers.
 
@@ -73,9 +84,12 @@ class TestController(object):
 
     def setUp(self):
         """Setup test fixture for each functional test method."""
-        setupSMSStub()
         self.app = load_app(self.application_under_test)
         setup_app()
+
+        # Override app config with test alerters.
+        setupSMSStub()
+        setupEmailStub()
 
     def tearDown(self):
         """Tear down test fixture for each functional test method."""
@@ -86,6 +100,10 @@ class TestController(object):
     def getAlertLog(self):
         global TEST_ALERT_OUTPUT
         return TEST_ALERT_OUTPUT.getvalue()
+
+    def getEmailLog(self):
+        global TEST_EMAIL_OUTPUT
+        return TEST_EMAIL_OUTPUT.getvalue()
 
     def createUser(self,user_name="test",email="test@test.test",
             phone="0010010001",desc="Test user",zipcode="79900",

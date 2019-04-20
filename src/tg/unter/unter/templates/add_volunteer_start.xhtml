@@ -9,13 +9,16 @@
     <div class="row">
       <div class="col-md-12">
         <div class="page-header">
-          <h2>Create a new volunteer account</h2>
+			<h2 py:if="editing">Edit volunteer account for ${user.user_name}
+			</h2><h2 py:else="">Create a new volunteer account</h2>
         </div>
 
 	<div class="unter-error" py-if="error_msg">${error_msg}</div>
-
-        <p>Enter your information to sign up as a volunteer for migrant assistance.
+		<p py:if="not editing">Enter your information to sign up as a volunteer for migrant assistance.
 	All fields are required.</p>
+		<p>After you create an account and log in, you can tell us what days and times
+		you are available to help. We will notify you when an event is scheduled
+		at a time when you are available.</p>
 
 	<div>${fr.renderForm(form,url)}</div>
       </div>

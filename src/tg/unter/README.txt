@@ -33,7 +33,9 @@ to respond to events for *other* volunteers? Probably not?
 ----------
 ISSUES
 
-) Need to allow users to edit their data.
+) Need a "password reset" function.
+
+) (done) Need to allow users to edit their data.
 
 ) (done) Make event rendering consistent across all pages. We need
    - An "event_renderer" template that we can include.

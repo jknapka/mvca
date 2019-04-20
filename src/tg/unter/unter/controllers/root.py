@@ -60,15 +60,20 @@ class RootController(BaseController):
     @expose('unter.templates.add_volunteer_start')
     def add_volunteer_start(self,form=None,error_msg=None,user_id=None):
         ''' Show the "Add a volunteer" page. '''
+        editing = False
+        user = None
         if user_id is not None and request.identity:
             # We want to edit an existing volunteer.
-            form = self.getExistingVolunteerForm(user_id)
+            user = model.DBSession.query(model.User).filter_by(user_id=user_id).first()
+            if user is not None:
+                form = self.getExistingVolunteerForm(user)
+                editing = True
         if form is None:
             form = NewAcctForm()
-        return dict(page='add_volunteer_start',form=form,url='/add_volunteer_post',error_msg=error_msg)
+        return dict(page='add_volunteer_start',form=form,url='/add_volunteer_post',
+                error_msg=error_msg,editing=editing,user=user)
 
-    def getExistingVolunteerForm(self,user_id):
-        user = model.DBSession.query(model.User).filter_by(user_id=user_id).first()
+    def getExistingVolunteerForm(self,user):
         if user is None:
             return None
         form = NewAcctForm()
@@ -161,7 +166,7 @@ class RootController(BaseController):
         user.email_address = attribs.email
         user.display_name = attribs.display_name
         if len(attribs.pwd) > 0:
-            user.password = pwd
+            user.password = attribs.pwd
         vinfo.description = attribs.description
         vinfo.phone = attribs.phone
         vinfo.zipcode = attribs.zipcode

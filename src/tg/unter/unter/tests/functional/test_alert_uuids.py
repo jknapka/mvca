@@ -40,6 +40,7 @@ class TestAlertUUIDs(TestController):
 
     def setUp(self):
         super().setUp()
+
         try:
             self.createCoordinatorCarla()
             self.createVolunteers()
@@ -51,6 +52,9 @@ class TestAlertUUIDs(TestController):
             transaction.abort()
         else:
             transaction.commit()
+
+        # Avoid creating UUIDs for emails.
+        alerts.EMAIL_ENABLED = False
 
     def createAvailabilities(self):
         ''' Simplified vs super: only one availability for Veronica. '''

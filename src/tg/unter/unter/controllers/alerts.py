@@ -14,6 +14,9 @@ import unter.model as model
 
 import tg
 
+__all__ = ["sendSMSUsingTwilio","stubSMSAlerter","getSMSAlerter","setSMSAlerter",
+    "sendAlerts","SMS_ENABLED","EMAIL_ENABLED","MVCA_SITE","configureSMSAlerts"]
+
 # Alert no more than every 4 hours for any particular event.
 MIN_ALERT_SECONDS = 3600 * 4
 
@@ -34,11 +37,13 @@ def sendAlerts(volunteers,nev,honorLastAlertTime=True):
                     nev.neid))
             return False
     for vol in volunteers:
-        logging.getLogger("unter").info("ALERTING {} for need event {}".format(vol.user_name,nev.neid))
+        logging.getLogger("unter.alerts").info("ALERTING {} for need event {}".format(vol.user_name,nev.neid))
         if SMS_ENABLED:
             if vol.vinfo.text_alerts_ok == 1:
+                logging.getLogger('unter.alerts').info('  Alerting via SMS')
                 sendSmsForEvent(nev,vol)
         if EMAIL_ENABLED:
+            logging.getLogger('unter.alerts').info('  Alerting via email')
             sendEmailForEvent(nev,vol)
     nev.last_alert_time = int(dt.datetime.now().timestamp())
     return True
@@ -47,8 +52,91 @@ def sendEmailForEvent(nev,vol,source="MVCA"):
     '''
     Send an email using the configured EMAIL_ALERTER.
     '''
-    print("FIX ME: implement email. Trying to send email to {} for neid {}".format(\
-            vol.email_address,nev.neid))
+    emailAlerter = getEmailAlerter()
+    toAddr = vol.email_address
+    msg = makeMessageForEvent(nev,vol)
+    emailAlerter(message=msg,toAddr=toAddr)
+
+def stubEmailAlerter(message,toAddr,fromAddr="none@nowhere"):
+    '''
+    Default email alerter - merely logs an attempt to send email.
+    '''
+    logging.getLogger('unter.alerts').info("STUB email alert:\n  from: {}\n  to: {}\n{}".\
+            format(fromAddr,toAddr,message))
+
+SMTP_ALERTER = None
+def sendEmailUsingSMTP(message,toAddr,fromAddr=None):
+    '''
+    An alerter that sends via a configured SMTP server.
+    '''
+    global SMTP_ALERTER
+    if SMTP_ALERTER is None:
+        SMTP_ALERTER = SMTPAlerter()
+    SMTP_ALERTER.send_email(message,toAddr,fromAddr)
+
+class SMTPAlerter:
+    '''
+    Send email using the configured SMTP account. The configuration
+    options needed in the [app:main] section of the .ini file are:
+    
+    smtp.from = the from: address to use in outgoing messages.
+    smtp.user.file = the file containing the SMTP user to log in as.
+    smtp.pwd.file = the file containing the SMTP user's password.
+    smtp.smtp.server = the name or IP of the SMTP SMTP server.
+
+    Note that the credential files should NEVER be commited to
+    version control.
+    '''
+
+    def __init__(self):
+        self.ready = self.loadSMTPCredentials()
+
+    def loadSMTPCredentials(self):
+        '''
+        Load the smtp login credentials. Return True if that
+        succeeds, False otherwise.
+        '''
+        result = False
+        userFname = tg.config.get('smtp.user.file',None)
+        pwdFname = tg.config.get('smtp.pwd.file',None)
+        
+        if userFname is not None and pwdFname is not None:
+            try:
+                with open(userFname,'r') as inf:
+                    self.user = inf.read().strip()
+            except:
+                logging.getLogger('unter.alerts').error("Could not load smtp user from file {}".format(userFname))
+                return False
+            try:
+                with open(pwdFname,'r') as inf:
+                    self.pwd = inf.read().strip()
+            except:
+                logging.getLogger('unter.alerts').error("Could not load smtp user from file {}".format(userFname))
+                return False
+
+        self.fromAddr = tg.config.get('smtp.from','mvca@mvca.org')
+        self.smtpServer = tg.config.get('smtp.smtp.server','smtp.smtp.com:587')
+
+        return True
+
+    def send_email(message,toAddr,fromAddr=None):
+        if not self.ready:
+            logging.getLogger('unter.alerts').error('SMTP alerter not ready - not sending to {}'.format(toAddr))
+            return
+        if fromAddr is None:
+            fromAddr = self.fromAddr
+
+        # Credentials (if needed)
+        username = self.user
+        password = self.pwd
+      
+        # The actual mail send  
+        server = smtplib.SMTP(self.smtpServer)
+        server.ehlo()
+        server.starttls()
+        server.login(username,password)
+        server.sendmail(fromAddr, toAddr, msg)
+        server.quit()
 
 def makeValidSMSPhoneNumber(num):
     if len(num) == 7:
@@ -69,6 +157,10 @@ def sendSmsForEvent(nev,vol,source="MVCA"):
     sendSMS = getSMSAlerter()
 
     destNumber = makeValidSMSPhoneNumber(vol.vinfo.phone)
+    msg = makeMessageForEvent(nev,vol)
+    sendSMS(msg,destNumber=destNumber)
+
+def makeMessageForEvent(nev,vol,source='MVCA'):
     n_vols = nev.volunteer_count
     at_time=nev.time_of_need
     at_date=str(dt.date.fromtimestamp(nev.date_of_need))
@@ -87,7 +179,7 @@ def sendSmsForEvent(nev,vol,source="MVCA"):
             at_date,
             evTypeToString(ev_type),\
             location, coord_name, coord_num, link,dlink)
-    sendSMS(msg,destNumber=destNumber)
+    return msg
 
 def makeUUIDForAlert(nev,vol):
     '''
@@ -178,13 +270,13 @@ def sendSMSUsingTwilio(message,sourceNumber="+19159743306",destNumber="+19155495
 # An SMS alerter that just logs the alert.
 #####################
 def stubSMSAlerter(message,sourceNumber="+19159743306",destNumber="+19155495098"):
-    print("CALLING stubSMSAlerter({},{},{})".format(message,sourceNumber,destNumber))
+    logging.getLogger('unter.alerts').info("CALLING stubSMSAlerter({},{},{})".format(message,sourceNumber,destNumber))
 
 #####################
 # Alert settings.
 #####################
 SMS_ALERTER = stubSMSAlerter
-EMAIL_ALERTER = sendEmailForEvent
+EMAIL_ALERTER = stubEmailAlerter
 
 # Get/set the SMS alert callable.
 def getSMSAlerter():
@@ -214,25 +306,33 @@ def configureSMSAlerts():
     eg
       sms.alerter = unter.controllers.alerts.sendSMSUsingTwilio
     '''
-    smsAlerter = tg.config.get('sms.alerter')
-    logging.getLogger('unter.alerts').info("SMS alerter sms.alerter = {}".format(smsAlerter))
-    if smsAlerter is not None:
+    configHandler('sms.alerter',stubSMSAlerter,setSMSAlerter)
+
+#####################
+# Configuration handler called from unter/config/app_config.py
+# to configure email on app startup.
+#####################
+def configureEmailAlerter():
+    configHandler('email.alerter',stubEmailAlerter,setEmailAlerter)
+
+# Generic configuration handler.
+def configHandler(alerterOpt,stubAlerter,assignmentLambda):
+    alerter = tg.config.get(alerterOpt,None)
+    logging.getLogger('unter.alerts').info("Alerter {} = {}".format(alerterOpt,alerter))
+    if alerter is not None:
         try:
-            pkg = '.'.join(smsAlerter.split('.')[:-1])
-            method = smsAlerter.split('.')[-1]
+            pkg = '.'.join(alerter.split('.')[:-1])
+            method = alerter.split('.')[-1]
             logging.getLogger('unter.alerts').info("  pkg {}, method {}".format(pkg,method))
             pkgModule = importlib.import_module(pkg)
             logging.getLogger('unter.alerts').info("  pkgModule {}".format(pkgModule))
             meth = pkgModule.__dict__[method]
             logging.getLogger('unter.alerts').info("  meth {}".format(meth))
-            setSMSAlerter(meth)
+            assignmentLambda(meth)
         except:
             import sys
             logging.getLogger('unter.alerts').info("   meth deref exception: {}".format(sys.exc_info()))
     else:
-        logging.getLogger('unter.alerts').info("No SMS alerter configured, using stub. Configure sms.alerter in .ini file.")
-        setSMSAlerter(stubSMSAlerter)
-
-__all__ = ["sendSMSUsingTwilio","stubSMSAlerter","getSMSAlerter","setSMSAlerter",
-    "sendAlerts","SMS_ENABLED","EMAIL_ENABLED","MVCA_SITE","configureSMSAlerts"]
+        logging.getLogger('unter.alerts').info("No alerter configured, using stub. Configure {} in .ini file.".format(alerterOpt))
+        assignmentLamber(stubAlerter)
 
