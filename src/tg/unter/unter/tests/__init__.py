@@ -59,7 +59,7 @@ TEST_EMAIL_OUTPUT = StringIO()
 def setupEmailStub():
     global TEST_EMAIL_OUTPUT
     def testEmailAlerter(message,toAddr,fromAddr=None):
-        print("Sending email:\n  from: {}\n  to: {}\n{}\nEND".format(toAddr,fromAddr,message),
+        print("Sending email:\n  to: {}\n  from: {}\n{}\nEND".format(toAddr,fromAddr,message),
                 file=TEST_EMAIL_OUTPUT)
     alerts.setEmailAlerter(testEmailAlerter)
     alerts.EMAIL_ENABLED = True
