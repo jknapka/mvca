@@ -21,13 +21,23 @@ viewingManager = ('manage' in uperms)
         </div>
 
 	<div class="unter-error" py-if="error_msg">${error_msg}</div>
-		<p py:if="not editing">Enter your information to sign up as a volunteer for migrant assistance.
-	All fields are required.</p>
-		<p>After you create an account and log in, you can tell us what days and times
-		you are available to help. We will notify you when an event is scheduled
-		at a time when you are available.</p>
+		<div py:if="not editing">
+			<p> Enter your information to sign up as a volunteer for migrant assistance.
+			All fields are required.</p>
+			<p>After you create an account and log in, you can tell us what days and times
+			you are available to help. We will notify you when an event is scheduled
+			at a time when you are available.</p>
+		</div>
+
+		<div py:if="editing">
+			<p>
+			You are editing this user, while logged in as ${requesting_user.display_name}.
+			</p>
+		</div>
 
 	<div>${fr.renderForm(form,url)}</div>
+		<span py:if="viewingCoord">This user is a Coordinator. </span>
+		<span py:if="viewingManager">This user is a Manager.</span>
 		<a py:if="isManager and not viewingCoord" href="/promote_to_coordinator?user_id=${user.user_id}">
 			| Promote volunteer to coordinator
 		</a>
@@ -37,7 +47,12 @@ viewingManager = ('manage' in uperms)
 		<a py:if="isManager and (viewingCoord or viewingManager)" href="/unpromote?user_id=${user.user_id}">
 			| Remove volunteer admin privileges
 		</a>
-      </div>
+		<a py:if="isManager or (not viewingManager and not viewingCoord and  requesting_user.user_id == user.user_id)"
+															href="/remove_user?user_id=${user.user_id}">
+			| Delete volunteer account.
+		</a>
+    
+	  </div>
     </div>
   </body>
 </html>
