@@ -390,11 +390,16 @@ class RootController(BaseController):
         Called when a user clicks a response link on the web page.
         '''
         user,vinfo = self.getVolunteerIdentity()
+        logging.getLogger('unter.root').info('Responding to event {} on behalf of {}'.\
+                format(neid,user))
         if user is None:
             redirect(lurl('/login'))
         nev = model.DBSession.query(model.NeedEvent).filter_by(neid=neid).first()
         if nev is not None:
             need.commit_volunteer(model.DBSession,user,nev)
+        else:
+            logging.getLogger('unter.root').warn('Cannot respond to nonexisting event {}'.\
+                    format(nev.neid))
         redirect(lurl('/volunteer_info',dict(user_id=user.user_id,message='')))
 
     @expose()

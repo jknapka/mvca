@@ -21,10 +21,9 @@ def checkOneEvent(dbsession,ev_id,honorLastAlertTime=True):
     if nev is not None:
         notes = nev.notes
     else:
-        notes = "NO SUCH EVENT"
+        logging.getLogger('unter.need').info("No such event ID {}".format(ev_id))
+        return
     debugTest("Checking need event {} {}".format(ev_id,notes))
-    if nev is None:
-        logging.getLogger('unter.alerts').warn("checkOneEvent(): no such event {}".format(ev_id))
     if isFullyServed(dbsession,nev):
         debugTest("  This event is fully-served, no alerts necessary.")
         return
@@ -44,14 +43,28 @@ def commit_volunteer(dbsession,user,nev):
     When a user accepts a need event, call this to manage the
     VolunteerResponse and VolunteerDecommitment rows.
     '''
-    # Only add response if one does not already exist.
-    vcom = model.DBSession.query(model.VolunteerResponse).filter_by(user_id=user.user_id).filter_by(neid=nev.neid).first()
+    # Only add response if one does not already exist
+    # for this user+event.
+    vcom = dbsession.query(model.VolunteerResponse).filter_by(user_id=user.user_id).filter_by(neid=nev.neid).first()
     if vcom is None:
-        logging.getLogger('unter.root').info('Adding response for {} event {}.'.format(user.user_name,nev.neid))
-        vresp = model.VolunteerResponse(user_id=user.user_id,neid=nev.neid)
-        model.DBSession.add(vresp)
+        # Only respond if the event is not already fully-served.
+        if len(nev.responses) < nev.volunteer_count:
+            logging.getLogger('unter.root').info('Adding response for {} event {}.'.format(user.user_name,nev.neid))
+            vresp = model.VolunteerResponse(user_id=user.user_id,neid=nev.neid)
+            model.DBSession.add(vresp)
+            alerts.sendConfirmationAlert(user,nev,confirming=True)
+        else:
+            alerts.sendConfirmationAlert(user,nev,confirming=False)
     else:
         logging.getLogger('unter.root').info('Response {} already present for {} event {}.'.format(vcom.vrid,user.user_name,nev.neid))
+
+    # Remove any decommitments for this user/event.
+    # Even if a volunteer is redundant (because the event is
+    # already fully-served), we'll remove any decommitment
+    # because they have indicated a willingness to serve.
+    # If we lose volunteers from this event, we may want
+    # to alert them again, and this person *should* be
+    # alerted in that case.
     vdcs = model.DBSession.query(model.VolunteerDecommitment).filter_by(user_id=user.user_id).filter_by(neid=nev.neid).all()
     if len(vdcs) > 0:
         logging.getLogger('unter.root').info('Removing decommitment for {} event {}.'.format(user.user_name,nev.neid))

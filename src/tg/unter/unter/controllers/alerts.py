@@ -26,6 +26,9 @@ EMAIL_ENABLED = True
 # The base site URL to use in alerts.
 MVCA_SITE = tg.config.get('mvca.site','https://127.0.0.1')
 
+def getLogger():
+    return logging.getLogger('unter.allerts')
+
 def sendAlerts(volunteers,nev,honorLastAlertTime=True):
     '''
     Send alerts to the given volunteers for need event nev.
@@ -40,13 +43,47 @@ def sendAlerts(volunteers,nev,honorLastAlertTime=True):
         logging.getLogger("unter.alerts").info("ALERTING {} for need event {}".format(vol.user_name,nev.neid))
         if SMS_ENABLED:
             if vol.vinfo.text_alerts_ok == 1:
-                logging.getLogger('unter.alerts').info('  Alerting via SMS')
+                getLogger().info('  Alerting via SMS')
                 sendSmsForEvent(nev,vol)
         if EMAIL_ENABLED:
-            logging.getLogger('unter.alerts').info('  Alerting via email')
+            getLogger().info('  Alerting via email')
             sendEmailForEvent(nev,vol)
     nev.last_alert_time = int(dt.datetime.now().timestamp())
     return True
+
+def sendConfirmationAlert(vol,nev,confirming=True):
+    '''
+    Send a "Thanks for confirming" alert to the volunteer
+    for the given event. Note that because we don't need
+    or expect a response, there's no need to generate
+    an alert UUID for this event.
+    '''
+    getLogger().info("Confirming event {} to volunteer {}".\
+            format(nev.neid,vol.user_name))
+    msgText = makeConfirmationMsgForEvent(vol,nev,confirming)
+    if SMS_ENABLED:
+        if vol.vinfo.text_alerts_ok == 1:
+            getLogger().info("  Confirming via SMS")
+            sendSMS = getSMSAlerter()
+            destNumber = makeValidSMSPhoneNumber(vol.vinfo.phone)
+            sendSMS(msgText,destNumber=destNumber)
+    if EMAIL_ENABLED:
+        getLogger().info("  Confirming via email")
+        sendEmail = getEmailAlerter()
+        sendEmail(message=msg,toAddr=vol.email_address)
+
+def makeConfirmationMsgForEvent(vol,ev,confirming):
+    txt = "Thank you for responding, {}. ".format(vol.display_name)
+    if confirming:
+        ev_date = dt.datetime.fromtimestamp(ev.date_of_need)
+        txt += "Please go to {} at {} on {}. You will receive a reminder one hour beforehand.".\
+                format(ev.location,minutesPastMidnightToTimeString(ev.time_of_need),\
+                str(dt.date(ev_date.year,ev_date.month,ev_date.day)))
+    else:
+        txt += "Enough volunteers have responded already, so you do not need to attend this event. "
+        txt += "If someone cancels, we may contact you again. Thank you for being "
+        txt += "willing to help!"
+    return txt
 
 def sendEmailForEvent(nev,vol,source="MVCA"):
     '''
@@ -61,7 +98,7 @@ def stubEmailAlerter(message,toAddr,fromAddr="none@nowhere"):
     '''
     Default email alerter - merely logs an attempt to send email.
     '''
-    logging.getLogger('unter.alerts').info("STUB email alert:\n  from: {}\n  to: {}\n{}".\
+    getLogger().info("STUB email alert:\n  from: {}\n  to: {}\n{}".\
             format(fromAddr,toAddr,message))
 
 SMTP_ALERTER = None
@@ -105,13 +142,13 @@ class SMTPAlerter:
                 with open(userFname,'r') as inf:
                     self.user = inf.read().strip()
             except:
-                logging.getLogger('unter.alerts').error("Could not load smtp user from file {}".format(userFname))
+                getLogger().error("Could not load smtp user from file {}".format(userFname))
                 return False
             try:
                 with open(pwdFname,'r') as inf:
                     self.pwd = inf.read().strip()
             except:
-                logging.getLogger('unter.alerts').error("Could not load smtp user from file {}".format(userFname))
+                getLogger().error("Could not load smtp user from file {}".format(userFname))
                 return False
 
         self.fromAddr = tg.config.get('smtp.from','mvca@mvca.org')
@@ -121,7 +158,7 @@ class SMTPAlerter:
 
     def send_email(message,toAddr,fromAddr=None):
         if not self.ready:
-            logging.getLogger('unter.alerts').error('SMTP alerter not ready - not sending to {}'.format(toAddr))
+            getLogger().error('SMTP alerter not ready - not sending to {}'.format(toAddr))
             return
         if fromAddr is None:
             fromAddr = self.fromAddr
@@ -201,7 +238,7 @@ def getUserAndEventForUUID(uuid):
     auuid = model.DBSession.query(model.AlertUUID).filter_by(uuid=uuid).first()
     if auuid is not None:
         result = auuid.user,auuid.need_event
-        logging.getLogger('unter.alerts').info('Responding to alert UUID {} for user {} event {}'\
+        getLogger().info('Responding to alert UUID {} for user {} event {}'\
                 .format(auuid.uuid,auuid.user.user_name,auuid.need_event.neid))
         # Don't delete. This allows the user to click on the
         # "decommit" link in the SMS to change their mind. We
@@ -209,7 +246,7 @@ def getUserAndEventForUUID(uuid):
         # the DB.
         # model.DBSession.delete(auuid)
     else:
-        logging.getLogger('unter.alerts').info('No such UUID {} for alert response.'.format(uuid))
+        getLogger().info('No such UUID {} for alert response.'.format(uuid))
     return result
 
 #####################
@@ -242,7 +279,7 @@ class TwilioSMSAlerter:
             logging.getLogger('unter').error("No twilio.auth.filename defined in [app:main]")
 
     def __call__(self,message,sourceNumber=None,destNumber=None):
-        logging.getLogger('unter.alerts').info("Sending SMS alert to {} using Twilio.".format(destNumber))
+        getLogger().info("Sending SMS alert to {} using Twilio.".format(destNumber))
         if self.TWILIO_SID is None or self.TWILIO_AUTH_TOK is None:
             logging.getLogger('unter').error("Cannot send SMS via Twilio.")
             stubSMSAlerter(message,sourceNumber,destNumber)
@@ -254,9 +291,9 @@ class TwilioSMSAlerter:
                     from_=sourceNumber,
                     to=destNumber)
             print(message.sid)
-            logging.getLogger('unter.alerts').info("   Message sent to {}".format(destNumber))
+            getLogger().info("   Message sent to {}".format(destNumber))
         except:
-            logging.getLogger('unter.alerts').warn("   Message NOT sent to {}".format(destNumber))
+            getLogger().warn("   Message NOT sent to {}".format(destNumber))
 
 
 TWILIO_SMS_ALERTER = None
@@ -270,7 +307,7 @@ def sendSMSUsingTwilio(message,sourceNumber="+19159743306",destNumber="+19155495
 # An SMS alerter that just logs the alert.
 #####################
 def stubSMSAlerter(message,sourceNumber="+19159743306",destNumber="+19155495098"):
-    logging.getLogger('unter.alerts').info("CALLING stubSMSAlerter({},{},{})".format(message,sourceNumber,destNumber))
+    getLogger().info("CALLING stubSMSAlerter({},{},{})".format(message,sourceNumber,destNumber))
 
 #####################
 # Alert settings.
@@ -325,21 +362,21 @@ def configureEmailAlerter():
 # Generic configuration handler.
 def configHandler(alerterOpt,stubAlerter,assignmentLambda):
     alerter = tg.config.get(alerterOpt,None)
-    logging.getLogger('unter.alerts').info("Alerter {} = {}".format(alerterOpt,alerter))
+    getLogger().info("Alerter {} = {}".format(alerterOpt,alerter))
     if alerter is not None:
         try:
             pkg = '.'.join(alerter.split('.')[:-1])
             method = alerter.split('.')[-1]
-            logging.getLogger('unter.alerts').info("  pkg {}, method {}".format(pkg,method))
+            getLogger().info("  pkg {}, method {}".format(pkg,method))
             pkgModule = importlib.import_module(pkg)
-            logging.getLogger('unter.alerts').info("  pkgModule {}".format(pkgModule))
+            getLogger().info("  pkgModule {}".format(pkgModule))
             meth = pkgModule.__dict__[method]
-            logging.getLogger('unter.alerts').info("  meth {}".format(meth))
+            getLogger().info("  meth {}".format(meth))
             assignmentLambda(meth)
         except:
             import sys
-            logging.getLogger('unter.alerts').info("   meth deref exception: {}".format(sys.exc_info()))
+            getLogger().info("   meth deref exception: {}".format(sys.exc_info()))
     else:
-        logging.getLogger('unter.alerts').info("No alerter configured, using stub. Configure {} in .ini file.".format(alerterOpt))
+        getLogger().info("No alerter configured, using stub. Configure {} in .ini file.".format(alerterOpt))
         assignmentLambda(stubAlerter)
 

@@ -2,6 +2,7 @@
 """Unit and functional test suite for unter."""
 
 from os import getcwd
+import logging
 from paste.deploy import loadapp
 from webtest import TestApp
 from gearbox.commands.setup_app import SetupAppCommand
@@ -48,6 +49,7 @@ TEST_ALERT_OUTPUT = StringIO()
 
 def setupSMSStub():
     global TEST_ALERT_OUTPUT
+    logging.getLogger('unter.test').info('Setting up test SMS alerter. Use self.getAlertLog() to read alert data.')
     def stubSMSAlerter(msg,sourceNumber="+1SOURCE",destNumber="+1DEST"):
         print("('{}','{}','{}')".format(msg,sourceNumber,destNumber),file=TEST_ALERT_OUTPUT)
     alerts.setSMSAlerter(stubSMSAlerter)
@@ -58,6 +60,7 @@ def setupSMSStub():
 TEST_EMAIL_OUTPUT = StringIO()
 def setupEmailStub():
     global TEST_EMAIL_OUTPUT
+    logging.getLogger('unter.test').info('Setting up test email alerter. Use self.getEmailLog() to read alert data.')
     def testEmailAlerter(message,toAddr,fromAddr=None):
         print("Sending email:\n  to: {}\n  from: {}\n{}\nEND".format(toAddr,fromAddr,message),
                 file=TEST_EMAIL_OUTPUT)
@@ -101,9 +104,17 @@ class TestController(object):
         global TEST_ALERT_OUTPUT
         return TEST_ALERT_OUTPUT.getvalue()
 
+    def resetAlertLog(self):
+        global TEST_ALERT_OUTPUT
+        TEST_ALERT_OUTPUT = StringIO()
+
     def getEmailLog(self):
         global TEST_EMAIL_OUTPUT
         return TEST_EMAIL_OUTPUT.getvalue()
+
+    def resetEmailLog(self):
+        global TEST_EMAIL_OUTPUT
+        TEST_EMAIL_OUTPUT = StringIO()
 
     def createUser(self,user_name="test",email="test@test.test",
             phone="0010010001",desc="Test user",zipcode="79900",
@@ -132,6 +143,8 @@ class TestController(object):
             start_time=6*60+3,
             end_time=18*60+4):
         tf={True:1,False:0}
+        if type(user) == str:
+            user = self.getUser(model.DBSession,user)
         av = model.VolunteerAvailability(start_time=start_time,
                 end_time=end_time,
                 dow_monday=tf['m' in days],
@@ -155,7 +168,7 @@ class TestController(object):
             location="Nowhere",
             complete=0):
         if date_of_need is None:
-            date_of_need = dt.date.today() + dt.timedelta(days=1)
+            date_of_need = dt.datetime.now() + dt.timedelta(days=1)
         vne = model.NeedEvent()
         vne.ev_type = ev_type
         vne.date_of_need = date_of_need.timestamp()
