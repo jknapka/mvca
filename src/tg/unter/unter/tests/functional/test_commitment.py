@@ -4,11 +4,13 @@ Test that we can commit and de-commit volunteers from events.
 import sqlalchemy as sql
 import sqlalchemy.orm as orm
 import transaction
+import logging
 import unter.model as model
 import unter.controllers.need as need
 import unter.controllers.alerts as alerts
 import datetime as dt
 import sys
+import traceback
 
 from unter.tests import TestController
 
@@ -18,12 +20,7 @@ class TestCommitment(TestController):
 
     def setUp(self):
         super().setUp()
-        try:
-            self.setupDB()
-        except:
-            transaction.abort()
-        else:
-            transaction.commit()
+        self.setupDB()
 
     def test_decommit(self):
         '''
@@ -43,7 +40,12 @@ class TestCommitment(TestController):
             need.decommit_volunteer(model.DBSession,vcom=vcom)
         except:
             transaction.abort()
-            ok_(False,"TRANSACTION ABORTED: {}".format(sys.exc_info()))
+            import traceback
+            from io import StringIO
+            einfo = sys.exc_info()
+            sio = StringIO()
+            traceback.print_tb(einfo[2],file=sio)
+            ok_(False,"TRANSACTION ABORTED: {} {} {}".format(einfo[0],einfo[1],sio.getvalue()))
         else:
             transaction.commit()
 
@@ -108,7 +110,7 @@ class TestCommitment(TestController):
             e.ev_type = 0
             e.duration=70
             e.created_by = u
-            e.date_of_need = dt.date.today() + dt.timedelta(days=1)
+            e.date_of_need = int((dt.datetime.now() + dt.timedelta(days=1)).timestamp())
             e.time_of_need = 10*60
             e.volunteer_count = 2
             e.affected_persons = 2
@@ -127,7 +129,7 @@ class TestCommitment(TestController):
             e.ev_type = 0
             e.duration=70
             e.created_by = u
-            e.date_of_need = dt.date.today() + dt.timedelta(days=2)
+            e.date_of_need = int((dt.datetime.now() + dt.timedelta(days=1)).timestamp())
             e.time_of_need = 10*60
             e.volunteer_count = 1
             e.affected_persons = 3
@@ -137,6 +139,14 @@ class TestCommitment(TestController):
 
             session.flush()
         except:
+            ei = sys.exc_info()
+            from io import StringIO
+            sio = StringIO()
+            traceback.print_tb(ei[2],file=sio)
+            logging.getLogger('unter.test').error('ABORTING TRANSACTION: {} {}\n{}'.\
+                    format(ei[0],ei[1],sio.getvalue()))
+            print(sio.getvalue())
+            transaction.abort()
             transaction.abort()
         else:
             transaction.commit()

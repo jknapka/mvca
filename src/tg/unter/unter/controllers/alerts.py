@@ -85,6 +85,30 @@ def makeConfirmationMsgForEvent(vol,ev,confirming):
         txt += "willing to help!"
     return txt
 
+def sendCoordDecommitAlert(vol,ev):
+    getLogger().info("Alerting coordinator {} of volunteer decommitment.".\
+            format(ev.created_by.user_name))
+    msg = makeCoordDecommitMsg(vol,ev)
+    if SMS_ENABLED:
+        getLogger().info("  Alerting via SMS.")
+        sendSMS = getSMSAlerter()
+        destNumber = makeValidSMSPhoneNumber(ev.created_by.vinfo.phone)
+        sendSMS(msg,destNumber=destNumber)
+    if EMAIL_ENABLED:
+        getLogger().info("  Alerting via email.")
+        sendEmail = getEmailAlerter()
+        sendEmail(message=msg,toAddr=ev.created_by.email_address)
+
+def makeCoordDecommitMsg(vol,ev):
+    getLogger().debug("ev.date_of_need is a {}".format(type(ev.date_of_need)))
+    getLogger().debug("ev.date_of_need is {}".format(ev.date_of_need))
+    txt = "Volunteer {} cannot serve at your event {} {} at {}".\
+            format(vol.display_name,
+                    dt.date.fromtimestamp(ev.date_of_need),
+                    minutesPastMidnightToTimeString(ev.time_of_need),
+                    ev.location)
+    return txt
+
 def sendEmailForEvent(nev,vol,source="MVCA"):
     '''
     Send an email using the configured EMAIL_ALERTER.
