@@ -179,6 +179,23 @@ class AlertUUID(DeclarativeBase):
     # The UUID generated for this user/event combination.
     uuid = Column(String(128),nullable=False,index=True)
 
+class PasswordUUID(DeclarativeBase):
+    '''
+    This table stores UUIDs generated for password reset actions.
+    '''
+    __tablename__ = "password_reset"
+
+    prid = Column(Integer,primary_key=True)
+
+    user_id = Column(Integer,ForeignKey('tg_user.user_id'),nullable=False)
+    user = relationship('User', uselist=False,
+            backref=backref('user_password_resets',
+                cascade='all, delete-orphan'))
+
+    uuid = Column(String(128),nullable=False)
+
+    create_time = Column(Integer,nullable=False)
+
 __all__ = ['VolunteerInfo','VolunteerAvailability','NeedEvent','VolunteerResponse','VolunteerDecommitment',
-        'AlertUUID']
+        'AlertUUID','PasswordUUID']
 

@@ -15,7 +15,8 @@ import unter.model as model
 import tg
 
 __all__ = ["sendSMSUsingTwilio","stubSMSAlerter","getSMSAlerter","setSMSAlerter",
-    "sendAlerts","SMS_ENABLED","EMAIL_ENABLED","MVCA_SITE","configureSMSAlerts"]
+    "sendAlerts","SMS_ENABLED","EMAIL_ENABLED","MVCA_SITE","configureSMSAlerts",
+    "MIN_PWD_RESET_INTERVAL"]
 
 # Alert no more than every 4 hours for any particular event.
 MIN_ALERT_SECONDS = 3600 * 4
@@ -25,6 +26,9 @@ EMAIL_ENABLED = True
 
 # The base site URL to use in alerts.
 MVCA_SITE = tg.config.get('mvca.site','https://127.0.0.1')
+
+MAX_PWD_RESET_INTERVAL = 3600
+MIN_PWD_RESET_INTERVAL = None
 
 def getLogger():
     return logging.getLogger('unter.allerts')

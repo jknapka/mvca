@@ -8,6 +8,9 @@
 
   <div class="row">
     <h2>${message}</h2>
+	<div id="unter-pwd-reset-div">
+		<a href="/forgot_pwd">Forgot your password?</a>
+	</div>
     <div class="col-md-8 col-md-offset-1">
       <form action="${tg.url('/login_handler', params=dict(came_from=came_from, __logins=login_counter))}"
             method="post" accept-charset="UTF-8" class="form-horizontal">

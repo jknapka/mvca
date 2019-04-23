@@ -1,0 +1,23 @@
+<html py:extends="master.xhtml" py:strip="True">
+  <head py:block="head" py:strip="True">
+    <title py:block="master_title">Forgotten password</title>
+    <meta name="generator" content="HTML Tidy for Linux/x86 (vers 11 February 2007), see www.w3.org" />
+  </head>
+
+  <body py:block="body" py:strip="True">
+    <div class="row">
+      <div class="col-md-12">
+        <div class="page-header">
+			<h2>Request a password reset</h2>
+			Enter your email address to receive a password reset link.
+			<form method="post" action="/forgot_pwd_post">
+				<input type="text" name="email_addr"></input>
+				<input type="submit" name="submit"></input>
+			</form>
+        </div>
+	  </div>
+	</div>
+  </body>
+</html>
+
+

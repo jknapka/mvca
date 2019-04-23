@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
 """Main Controller"""
 
+import time
 import datetime
 import logging
+import uuid
 
 from tg import expose, flash, require, url, lurl
 from tg import request, redirect, tmpl_context
@@ -349,6 +351,82 @@ class RootController(BaseController):
         result.end_time = minutesPastMidnightToTimeString(av.end_time)
         result.av = av
         return result
+
+    #==================================
+    # Password reset handling.
+    #==================================
+    @expose('unter.templates.forgot_pwd')
+    def forgot_pwd(self):
+        if request.identity:
+            redirect('/',status=403)
+        return dict()
+
+    @expose()
+    def forgot_pwd_post(self,email_addr):
+        u = model.User.by_email_address(email_addr)
+        if u is not None:
+            emailer = alerts.getEmailAlerter()
+            uid = str(uuid.uuid4())
+            puuid = model.PasswordUUID()
+            puuid.user = u
+            puuid.uuid = uid
+            puuid.create_time = time.time()
+            model.DBSession.add(puuid)
+            model.DBSession.flush()
+            link = lurl('{}/reset_pwd?uuid={}&user_id={}'.format(alerts.MVCA_SITE,uid,u.user_id))
+            msg = "Someone, perhaps you, requested a reset of your"+\
+                " Migrant Volunteer Coordination Assistant password."+\
+                " If you did request a password reset, click the link"+\
+                " in order to reset your password.<br/>{}".format(link)
+            emailer(message=msg,toAddr=email_addr)
+        return "If you entered a known email address, you will receive a"+\
+            " password reset link message at that address."
+    
+    @expose('unter.templates.reset_pwd')
+    def reset_pwd(self,uuid,user_id):
+        now = time.time()
+        ruuid = model.DBSession.query(model.PasswordUUID).filter_by(uuid=uuid).first()
+        
+        if ruuid is None or ruuid.user_id != int(user_id):
+            logging.getLogger('unter.warning').warn('Password reset attempted with invalid UUID {} for user ID {}'.format(uuid,user_id))
+            return 'You are not authorized to reset this password.'
+        if now - alerts.MAX_PWD_RESET_INTERVAL > ruuid.create_time:
+            return 'This reset link has expired. Visit <a href="/forgot_pwd">the reset page</a>'+\
+                    'to request a new one.'
+        if alerts.MIN_PWD_RESET_INTERVAL is not None:
+            if now - alerts.MIN_PWD_RESET_INTERVAL < ruuid.create_time:
+                return 'This reset link is too new. Please try again in one minute.'
+
+        return dict(uuid=uuid)
+
+    @expose()
+    def reset_pwd_post(self,pwd,pwd2,uuid):
+        now = time.time()
+        ruuid = model.DBSession.query(model.PasswordUUID).filter_by(uuid=uuid).first()
+        
+        if ruuid is None:
+            logging.getLogger('unter.warning').warn('Password reset POST attempted with invalid UUID {}'.format(uuid))
+            return 'You are not authorized to reset this password.'
+        if now - alerts.MAX_PWD_RESET_INTERVAL > ruuid.create_time:
+            return 'This reset link has expired. Visit <a href="/forgot_pwd">the reset page</a>'+\
+                    'to request a new one.'
+        if alerts.MIN_PWD_RESET_INTERVAL is not None:
+            if now - alerts.MIN_PWD_RESET_INTERVAL < ruuid.create_time:
+                return 'This reset link is too new. Please try again in one minute.'
+        if pwd != pwd2:
+            flash("The passwords to not match.")
+            redirect("/forgot_pwd")
+        u = model.DBSession.query(model.User).filter_by(user_id=ruuid.user_id).first()
+        if u is None:
+            logging.getLogger('unter.warning').warn('Password reset POST attempted with nonexistent user {}'.format(ruuid.user_id))
+            return 'You are not authorized to reset this password.'
+
+        # Looks like everything is OK, we can actually
+        # change the password now.
+        u.password = pwd
+        flash('Your password has been changed.')
+        redirect('/login')
+        
 
     #==================================
     # Coordinator pages.
