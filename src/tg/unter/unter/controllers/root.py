@@ -391,6 +391,7 @@ class RootController(BaseController):
             logging.getLogger('unter.warning').warn('Password reset attempted with invalid UUID {} for user ID {}'.format(uuid,user_id))
             return 'You are not authorized to reset this password.'
         if now - alerts.MAX_PWD_RESET_INTERVAL > ruuid.create_time:
+            model.DBSession.delete(ruuid)
             return 'This reset link has expired. Visit <a href="/forgot_pwd">the reset page</a>'+\
                     'to request a new one.'
         if alerts.MIN_PWD_RESET_INTERVAL is not None:

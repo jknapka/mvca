@@ -293,6 +293,10 @@ class TestPasswordResets(TestController):
         resp = self.app.get(resetLink,status=200)
         ok_('has expired' in resp.text,resp.text)
 
+        # ... And the UUID row should be deleted.
+        ruuids = model.DBSession.query(model.PasswordUUID).all()
+        eq_(0,len(ruuids),"There's a stray password UUID left.")
+
     def test_5_passwordResetLinksUsableOnceOnly(self):
         ''' Check that password reset links are usable only once. '''
         v = self.getUser(model.DBSession,'veronica')
