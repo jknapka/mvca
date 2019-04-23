@@ -422,7 +422,10 @@ class RootController(BaseController):
             return 'You are not authorized to reset this password.'
 
         # Looks like everything is OK, we can actually
-        # change the password now.
+        # change the password now. First we must delete
+        # the UUID row so that the link cannot be used
+        # again.
+        model.DBSession.delete(ruuid)
         u.password = pwd
         flash('Your password has been changed.')
         redirect('/login')
