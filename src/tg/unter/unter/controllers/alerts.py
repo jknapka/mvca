@@ -5,6 +5,7 @@ import datetime as dt
 import logging
 import importlib
 import uuid
+import smtplib
 
 from twilio.rest import Client as TwiCli
 
@@ -16,7 +17,7 @@ import tg
 
 __all__ = ["sendSMSUsingTwilio","stubSMSAlerter","getSMSAlerter","setSMSAlerter",
     "sendAlerts","SMS_ENABLED","EMAIL_ENABLED","MVCA_SITE","configureSMSAlerts",
-    "MIN_PWD_RESET_INTERVAL"]
+    "MIN_PWD_RESET_INTERVAL","MIN_PWD_EMAIL_INTERVAL"]
 
 # Alert no more than every 4 hours for any particular event.
 MIN_ALERT_SECONDS = 3600 * 4
@@ -74,7 +75,7 @@ def sendConfirmationAlert(vol,nev,confirming=True):
     if EMAIL_ENABLED:
         getLogger().info("  Confirming via email")
         sendEmail = getEmailAlerter()
-        sendEmail(message=msg,toAddr=vol.email_address)
+        sendEmail(message=msg,toAddr=vol.email_address,subject="Event confirmation")
 
 def makeConfirmationMsgForEvent(vol,ev,confirming):
     txt = "Thank you for responding, {}. ".format(vol.display_name)
@@ -101,7 +102,7 @@ def sendCoordDecommitAlert(vol,ev):
     if EMAIL_ENABLED:
         getLogger().info("  Alerting via email.")
         sendEmail = getEmailAlerter()
-        sendEmail(message=msg,toAddr=ev.created_by.email_address)
+        sendEmail(message=msg,toAddr=ev.created_by.email_address,subject="A volunteer has cancelled")
 
 def makeCoordDecommitMsg(vol,ev):
     getLogger().debug("ev.date_of_need is a {}".format(type(ev.date_of_need)))
@@ -120,24 +121,26 @@ def sendEmailForEvent(nev,vol,source="MVCA"):
     emailAlerter = getEmailAlerter()
     toAddr = vol.email_address
     msg = makeMessageForEvent(nev,vol)
-    emailAlerter(message=msg,toAddr=toAddr)
+    emailAlerter(message=msg,toAddr=toAddr,subject="Volunteers needed")
 
-def stubEmailAlerter(message,toAddr,fromAddr="none@nowhere"):
+def stubEmailAlerter(message,toAddr,fromAddr="none@nowhere",subject="Volunteer alert"):
     '''
     Default email alerter - merely logs an attempt to send email.
     '''
-    getLogger().info("STUB email alert:\n  from: {}\n  to: {}\n{}".\
-            format(fromAddr,toAddr,message))
+    getLogger().info("STUB email alert:\n  from: {}\n  to: {}\n  subject: {}\n{}".\
+            format(fromAddr,toAddr,subject,message))
 
 SMTP_ALERTER = None
-def sendEmailUsingSMTP(message,toAddr,fromAddr=None):
+def sendEmailUsingSMTP(message,toAddr,fromAddr=None,subject="Volunteer alert"):
     '''
     An alerter that sends via a configured SMTP server.
     '''
     global SMTP_ALERTER
     if SMTP_ALERTER is None:
         SMTP_ALERTER = SMTPAlerter()
-    SMTP_ALERTER.send_email(message,toAddr,fromAddr)
+    getLogger().info("Sending email via SMPTP:\nTo: {}\nFrom: {}\n\n{}".\
+            format(toAddr,fromAddr,message))
+    SMTP_ALERTER.send_email(message,toAddr,fromAddr,subject)
 
 class SMTPAlerter:
     '''
@@ -184,7 +187,7 @@ class SMTPAlerter:
 
         return True
 
-    def send_email(message,toAddr,fromAddr=None):
+    def send_email(self,message,toAddr,fromAddr=None,subject=None):
         if not self.ready:
             getLogger().error('SMTP alerter not ready - not sending to {}'.format(toAddr))
             return
@@ -195,12 +198,19 @@ class SMTPAlerter:
         username = self.user
         password = self.pwd
       
+        # Append subject.
+        if subject is not None:
+            message = 'subject:' +subject+'\n\n'+message
+        else:
+            message = '\n'+message
+
         # The actual mail send  
+        getLogger().info("   sending: {}".format(message))
         server = smtplib.SMTP(self.smtpServer)
         server.ehlo()
         server.starttls()
         server.login(username,password)
-        server.sendmail(fromAddr, toAddr, msg)
+        server.sendmail(fromAddr, toAddr, message)
         server.quit()
 
 def makeValidSMSPhoneNumber(num):

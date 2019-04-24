@@ -366,3 +366,50 @@ class TestPasswordResets(TestController):
         resp = self.app.post('/reset_pwd_post',status=200,
                 params={'pwd':'newPWD','pwd2':'newPWD','uuid':uid})
         ok_("not authorized" in resp.text,resp.text)
+
+    def test_6_onlyOnePwdResetPerUser(self):
+        ''' Check that we only allow one password reset attempt to be
+        outstanding for any particular user. '''
+        alerts.MAX_PWD_RESET_INTERVAL = 1
+
+        v = self.getUser(model.DBSession,'veronica')
+        v_pwd = v.password # This is just a hash, but we need to compare it later.
+        email = v.email_address
+
+        resp = self.app.get('/forgot_pwd_post',status=200,
+                params={'email_addr':email})
+        ok_('If you entered a known email address, you will receive a password reset link' in resp.text,
+                resp.text)
+
+        # There should be one reset UUID, for Veronica.
+        ruuids = model.DBSession.query(model.PasswordUUID).all()
+        eq_(len(ruuids),1,"Got {} password UUIDs, expected 1".format(len(ruuids)))
+
+        initialUuid = ruuids[0].uuid
+
+        resp = self.app.get('/forgot_pwd_post',status=200,
+                params={'email_addr':email})
+        # We requested a new reset email before the last one expired,
+        # so the message should be to contact the site manager.
+        ok_('You have already requested a password reset' in resp.text,
+                resp.text)
+
+        # There should still be only one reset UUID.
+        ruuids = model.DBSession.query(model.PasswordUUID).all()
+        eq_(len(ruuids),1,"Got {} password UUIDs, expected 1".format(len(ruuids)))
+        eq_(initialUuid,ruuids[0].uuid,"Unexpectedly generated new UUID for non-expired reset.")
+
+        # If we sleep until the current one expires, we should
+        # be able to request a new one.
+        time.sleep(1.2)
+
+        resp = self.app.get('/forgot_pwd_post',status=200,
+                params={'email_addr':email})
+        ok_('If you entered a known email address, you will receive a password reset link' in resp.text,
+                resp.text)
+
+        # There should still be only one reset UUID, for Veronica. We
+        # should delete the expired one before sending a new link.
+        ruuids = model.DBSession.query(model.PasswordUUID).all()
+        eq_(len(ruuids),1,"Got {} password UUIDs, expected 1".format(len(ruuids)))
+        ok_(not initialUuid == ruuids[0].uuid,"Unexpectedly re-used expired reset UUID.")

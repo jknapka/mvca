@@ -33,7 +33,10 @@ to respond to events for *other* volunteers? Probably not?
 ----------
 ISSUES
 
-) Need a "password reset" function.
+) Provide a configurable site name and use [SITE_NAME] in
+alert emails and SMSs.
+
+) (done) Need a "password reset" function.
 
 ) (done) Need to allow users to edit their data.
 

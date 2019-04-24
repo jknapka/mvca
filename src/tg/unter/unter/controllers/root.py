@@ -363,8 +363,33 @@ class RootController(BaseController):
 
     @expose()
     def forgot_pwd_post(self,email_addr):
+        foundExistingPuuid = False
         u = model.User.by_email_address(email_addr)
+        resultMsg = "If you entered a known email address, you will receive a"+\
+            " password reset link message at that address. Search for 'MVCA' in your inbox."
         if u is not None:
+            existingPuuids = model.DBSession.query(model.PasswordUUID).filter_by(user_id=u.user_id).all()
+            if len(existingPuuids) > 0:
+                now = time.time()
+                for exPuuid in existingPuuids:
+                    if alerts.MAX_PWD_RESET_INTERVAL is not None and \
+                        now - alerts.MAX_PWD_RESET_INTERVAL > exPuuid.create_time:
+                            # This one is expired, delete it.
+                            model.DBSession.delete(exPuuid)
+                    else:
+                        # There is at least one non-expired request, so we
+                        # shouldn't send another.
+                        foundExistingPuuid = True
+                        mgr = model.DBSession.query(model.User).filter_by(user_name='manager').first()
+                        mgrEmail = mgr.email_address
+                        mgrPhone = mgr.vinfo.phone
+                        resultMsg = 'You have already requested a password reset link. If you '+\
+                                'did not receive an email, contact the site manager at '+\
+                                '{} or {} to reset your password.'.format(mgrEmail,mgrPhone)
+
+        if u is not None and not foundExistingPuuid:
+            # We send the reset link email only if the user exists and
+            # has not recently requested a reset email.
             emailer = alerts.getEmailAlerter()
             uid = str(uuid.uuid4())
             puuid = model.PasswordUUID()
@@ -378,9 +403,8 @@ class RootController(BaseController):
                 " Migrant Volunteer Coordination Assistant password."+\
                 " If you did request a password reset, click the link"+\
                 " in order to reset your password.<br/>{}".format(link)
-            emailer(message=msg,toAddr=email_addr)
-        return "If you entered a known email address, you will receive a"+\
-            " password reset link message at that address."
+            emailer(message=msg,toAddr=email_addr,subject="MVCA password reset request - do not reply")
+        return resultMsg
     
     @expose('unter.templates.reset_pwd')
     def reset_pwd(self,uuid,user_id):
@@ -397,7 +421,6 @@ class RootController(BaseController):
         if alerts.MIN_PWD_RESET_INTERVAL is not None:
             if now - alerts.MIN_PWD_RESET_INTERVAL < ruuid.create_time:
                 return 'This reset link is too new. Please try again in one minute.'
-
         return dict(uuid=uuid)
 
     @expose()
@@ -414,6 +437,7 @@ class RootController(BaseController):
         if alerts.MIN_PWD_RESET_INTERVAL is not None:
             if now - alerts.MIN_PWD_RESET_INTERVAL < ruuid.create_time:
                 return 'This reset link is too new. Please try again in one minute.'
+
         if pwd != pwd2:
             flash("The passwords to not match.")
             redirect("/forgot_pwd")

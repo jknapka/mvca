@@ -61,8 +61,8 @@ TEST_EMAIL_OUTPUT = StringIO()
 def setupEmailStub():
     global TEST_EMAIL_OUTPUT
     logging.getLogger('unter.test').info('Setting up test email alerter. Use self.getEmailLog() to read alert data.')
-    def testEmailAlerter(message,toAddr,fromAddr=None):
-        print("Sending email:\n  to: {}\n  from: {}\n{}\nEND".format(toAddr,fromAddr,message),
+    def testEmailAlerter(message,toAddr,fromAddr=None,subject="Volunteer alert"):
+        print("Sending email:\n  to: {}\n  from: {}\n  subject:{}\n{}\nEND".format(toAddr,fromAddr,subject,message),
                 file=TEST_EMAIL_OUTPUT)
     alerts.setEmailAlerter(testEmailAlerter)
     alerts.EMAIL_ENABLED = True
