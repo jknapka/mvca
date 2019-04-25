@@ -11,6 +11,7 @@ from tg import request, redirect, tmpl_context
 from tg.i18n import ugettext as _, lazy_ugettext as l_
 from tg.exceptions import HTTPFound
 from tg import predicates
+from tg import config
 from unter import model
 from unter.controllers.secure import SecureController
 from unter.model import DBSession
@@ -52,7 +53,7 @@ class RootController(BaseController):
     error = ErrorController()
 
     def _before(self, *args, **kw):
-        tmpl_context.project_name = "unter"
+        tmpl_context.project_name = config.get("mvca.site.name","MVCA")
 
 
     #==================================
