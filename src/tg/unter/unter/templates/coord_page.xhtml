@@ -5,6 +5,7 @@
   </head>
 
   <body py:block="body" py:strip="True">
+	<py:import href="event_renderer.xhtml" alias="er"/>
     <?python
 import time
 perms = [p.permission_name for p in user.permissions]
@@ -46,44 +47,19 @@ isCoordinator = 'manage_events' in perms
 	      
 		  <div><h3>Events you have created.</h3></div>
 	      <div class="unter-coord-events">
-		<table border="1">
-			<thead>
-				<tr>
-					<th>Event ID</th>
-					<th>Date</th>
-					<th>Time</th>
-					<th>Service</th>
-					<th>Location</th>
-					<th>Notes</th>
-					<th>Volunteers</th>
-					<th>Last alert sent</th>
-				</tr>
-			</thead>
-			<tbody>
-				<tr py:for="ev in events">
-					<td><a href="${tg.url('/event_details',dict(neid=ev.ev.neid))}">${ev.ev.neid}</a></td>
-					<td><a href="${tg.url('/event_details',dict(neid=ev.ev.neid))}">${ev.date_str}</a></td>
-					<td><a href="${tg.url('/event_details',dict(neid=ev.ev.neid))}">${ev.time_str}</a></td>
-					<td><a href="${tg.url('/event_details',dict(neid=ev.ev.neid))}">${ev.ev_str}</a></td>
-					<td><a href="${tg.url('/event_details',dict(neid=ev.ev.neid))}">${ev.ev.location}</a></td>
-					<td><a href="${tg.url('/event_details',dict(neid=ev.ev.neid))}">${ev.ev.notes}</a></td>
-					<td>
-						<ul py:if="ev.ev.responses">
-							<li py:for="vr in ev.ev.responses">
-								<a href="${tg.url('/volunteer_info',dict(user_id=vr.user.user_id))}">
-									${vr.user.display_name}
-								</a>
-							</li>
-						</ul>
-						<a href="${tg.url('/event_details',dict(neid=ev.ev.neid))}">See volunteers</a>
-					</td>
-					<td id="alert-time-neid-${ev.ev.neid}">${ev.last_alert_time}
-						<a py:if="isCoordinator and ev.ev.complete != 1 and time.time() - 3600 > ev.ev.last_alert_time"
-							   href="/send_alert?neid=${ev.ev.neid}"><br/>Send alert</a>
-					</td>
-				</tr>
-			</tbody>
-		</table>
+
+			<table border="1" id="ev-tab">
+				<thead style="background-color:rgba(255,255,255,1.0); display:table-header-group">
+					${er.renderEvent(None,user,complete=0,renderHeader=True)}
+				</thead>
+
+				<tbody>
+				<div py:for="ev in events">
+					${er.renderEvent(ev,user,brief=True)}
+				</div>
+				</tbody>
+			</table>
+
 	      </div>
       </div>
     </div>
