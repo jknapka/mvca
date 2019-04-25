@@ -489,7 +489,7 @@ class RootController(BaseController):
                 print("user.vinfo = {}".format(vinfo))
         else:
             ''' Get the identity for the given user. '''
-            user_id = int(user_id)
+            userId = int(userId)
             user = model.DBSession.query(model.User).filter_by(user_id=userId).first()
             if user is not None:
                 vinfo = user.vinfo
