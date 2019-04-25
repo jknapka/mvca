@@ -75,7 +75,7 @@ def sendConfirmationAlert(vol,nev,confirming=True):
     if EMAIL_ENABLED:
         getLogger().info("  Confirming via email")
         sendEmail = getEmailAlerter()
-        sendEmail(message=msg,toAddr=vol.email_address,subject="Event confirmation")
+        sendEmail(message=msgText,toAddr=vol.email_address,subject="Event confirmation")
 
 def makeConfirmationMsgForEvent(vol,ev,confirming):
     txt = "Thank you for responding, {}. ".format(vol.display_name)
@@ -94,7 +94,7 @@ def sendCoordDecommitAlert(vol,ev):
     getLogger().info("Alerting coordinator {} of volunteer decommitment.".\
             format(ev.created_by.user_name))
     msg = makeCoordDecommitMsg(vol,ev)
-    if SMS_ENABLED:
+    if SMS_ENABLED and vol.vinfo.text_alerts_ok == 1:
         getLogger().info("  Alerting via SMS.")
         sendSMS = getSMSAlerter()
         destNumber = makeValidSMSPhoneNumber(ev.created_by.vinfo.phone)
@@ -113,6 +113,28 @@ def makeCoordDecommitMsg(vol,ev):
                     minutesPastMidnightToTimeString(ev.time_of_need),
                     ev.location)
     return txt
+
+def sendCancellationAlert(ev,vol):
+    getLogger().info('Alerting volunteer {} of cancelled event {}.'.\
+            format(vol.user_name,ev.neid))
+    msg = makeEventCancellationMsg(ev,vol)
+    if SMS_ENABLED and vol.vinfo.text_alerts_ok == 1:
+        getLogger().info('  Alerting via SMS.')
+        sendSMS = getSMSAlerter()
+        destNumber = makeValidSMSPhoneNumber(vol.vinfo.phone)
+        sendSMS(msg,destNumber=destNumber)
+    if EMAIL_ENABLED:
+        getLogger().info("  Alerting via email.")
+        sendEmail = getEmailAlerter()
+        sendEmail(message=msg,toAddr=vol.email_address,subject="An event has been cancelled")
+
+def makeEventCancellationMsg(ev,vol):
+    msg = 'An event you committed to has been cancelled. '
+    msg += 'You do not need to go to {} at {} on {}. '.\
+            format(ev.location,dt.date.fromtimestamp(ev.date_of_need),\
+                    minutesPastMidnightToTimeString(ev.time_of_need))
+    msg += 'Thank you for being willing to help!'
+    return msg
 
 def sendEmailForEvent(nev,vol,source="MVCA"):
     '''

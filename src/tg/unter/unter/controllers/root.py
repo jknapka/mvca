@@ -33,6 +33,9 @@ from sqlalchemy import or_,text
 
 __all__ = ['RootController']
 
+def getLogger():
+    return logging.getLogger('unter.root')
+
 class RootController(BaseController):
     """
     The root controller for the unter application.
@@ -193,7 +196,7 @@ class RootController(BaseController):
     @expose()
     @require(predicates.has_permission('manage'))
     def unpromote(self,user_id):
-        log = logging.getLogger('unter.root')
+        log = getLogger()
         log.info("Trying to un-promote {}".format(user_id))
         if user_id is not None:
             user_id = int(user_id)
@@ -216,7 +219,7 @@ class RootController(BaseController):
 
     def promote(self,user_id,groupName):
         user_id = int(user_id)
-        log = logging.getLogger('unter.root')
+        log = getLogger()
         log.info("Trying to promote {} to group {}".format(user_id,groupName))
         u = model.DBSession.query(model.User).filter_by(user_id=user_id).first()
         if u is not None:
@@ -421,7 +424,7 @@ class RootController(BaseController):
         ruuid = model.DBSession.query(model.PasswordUUID).filter_by(uuid=uuid).first()
         
         if ruuid is None or ruuid.user_id != int(user_id):
-            logging.getLogger('unter.warning').warn('Password reset attempted with invalid UUID {} for user ID {}'.format(uuid,user_id))
+            getLogger().warn('Password reset attempted with invalid UUID {} for user ID {}'.format(uuid,user_id))
             return 'You are not authorized to reset this password.'
         if now - alerts.MAX_PWD_RESET_INTERVAL > ruuid.create_time:
             model.DBSession.delete(ruuid)
@@ -438,7 +441,7 @@ class RootController(BaseController):
         ruuid = model.DBSession.query(model.PasswordUUID).filter_by(uuid=uuid).first()
         
         if ruuid is None:
-            logging.getLogger('unter.warning').warn('Password reset POST attempted with invalid UUID {}'.format(uuid))
+            getLogger().warn('Password reset POST attempted with invalid UUID {}'.format(uuid))
             return 'You are not authorized to reset this password.'
         if now - alerts.MAX_PWD_RESET_INTERVAL > ruuid.create_time:
             return 'This reset link has expired. Visit <a href="/forgot_pwd">the reset page</a>'+\
@@ -452,7 +455,7 @@ class RootController(BaseController):
             redirect("/forgot_pwd")
         u = model.DBSession.query(model.User).filter_by(user_id=ruuid.user_id).first()
         if u is None:
-            logging.getLogger('unter.warning').warn('Password reset POST attempted with nonexistent user {}'.format(ruuid.user_id))
+            getLogger().warn('Password reset POST attempted with nonexistent user {}'.format(ruuid.user_id))
             return 'You are not authorized to reset this password.'
 
         # Looks like everything is OK, we can actually
@@ -506,7 +509,7 @@ class RootController(BaseController):
         Called when a user clicks a response link on the web page.
         '''
         user,vinfo = self.getVolunteerIdentity()
-        logging.getLogger('unter.root').info('Responding to event {} on behalf of {}'.\
+        getLogger().info('Responding to event {} on behalf of {}'.\
                 format(neid,user))
         if user is None:
             redirect(lurl('/login'))
@@ -514,7 +517,7 @@ class RootController(BaseController):
         if nev is not None:
             need.commit_volunteer(model.DBSession,user,nev)
         else:
-            logging.getLogger('unter.root').warn('Cannot respond to nonexisting event {}'.\
+            getLogger().warn('Cannot respond to nonexisting event {}'.\
                     format(nev.neid))
         redirect(lurl('/volunteer_info',dict(user_id=user.user_id,message='')))
 
@@ -528,11 +531,11 @@ class RootController(BaseController):
         user,nev = alerts.getUserAndEventForUUID(uuid)
         if user is not None and nev is not None:
             if action == 'accept':
-                logging.getLogger('unter.root').info("Accepting event {} for user {}.".format(nev.neid,user.user_id))
+                getLogger().info("Accepting event {} for user {}.".format(nev.neid,user.user_id))
                 need.commit_volunteer(model.DBSession,user=user,nev=nev)
                 return "Thank you for responding. You will receive a reminder one hour prior to the event."
             if action == 'refuse':
-                logging.getLogger('unter.root').info('Removing response for {} event {}.'.format(user.user_name,nev.neid))
+                getLogger().info('Removing response for {} event {}.'.format(user.user_name,nev.neid))
                 need.decommit_volunteer(model.DBSession,user=user,ev=nev)
         return 'Thank you for responding.'
 
@@ -608,6 +611,18 @@ class RootController(BaseController):
         else:
             print("No such need event {}".format(neid))
         redirect(lurl("/need_events"))
+
+    @expose()
+    @require(predicates.has_permission('manage_events'))
+    def cancel_event(self,neid):
+        ev = DBSession.query(model.NeedEvent).filter_by(neid=neid).first()
+        if ev is not None:
+            getLogger().info('Cancelling event {}'.format(neid))
+            need.cancelEvent(model.DBSession,ev,sendAlerts=True)
+            flash('Event cancelled.')
+        else:
+            flash('Cannot find that event.')
+        redirect(lurl('/need_events'))
 
     @expose('json')
     def check_need_events(self,ev_id=None):

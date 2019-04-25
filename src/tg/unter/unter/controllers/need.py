@@ -38,6 +38,13 @@ def checkValidEvents(dbsession,when=None):
     for nev in nevs:
         checkOneEvent(dbsession,nev.neid)
 
+def cancelEvent(dbsession,ev,sendAlerts=True):
+    vols = [r.user for r in ev.event_response]
+    if sendAlerts:
+        for vol in vols:
+            alerts.sendCancellationAlert(ev,vol)
+    ev.cancelled = 1
+
 def commit_volunteer(dbsession,user,nev):
     '''
     When a user accepts a need event, call this to manage the
