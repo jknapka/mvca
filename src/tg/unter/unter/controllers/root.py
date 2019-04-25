@@ -65,6 +65,8 @@ class RootController(BaseController):
         editing = False
         user = None
         loggedInUser,vinfo = None,None
+        if user_id is not None:
+            user_id = int(user_id)
         if user_id is not None and request.identity:
             # We want to edit an existing volunteer.
             loggedInUser,vinfo = self.getVolunteerIdentity()
@@ -192,6 +194,8 @@ class RootController(BaseController):
     def unpromote(self,user_id):
         log = logging.getLogger('unter.root')
         log.info("Trying to un-promote {}".format(user_id))
+        if user_id is not None:
+            user_id = int(user_id)
         u = model.DBSession.query(model.User).filter_by(user_id=user_id).first()
         if u is not None:
             for g in u.groups:
@@ -210,6 +214,7 @@ class RootController(BaseController):
         redirect(lurl("/volunteer_info"),dict(user_id=user_id))
 
     def promote(self,user_id,groupName):
+        user_id = int(user_id)
         log = logging.getLogger('unter.root')
         log.info("Trying to promote {} to group {}".format(user_id,groupName))
         u = model.DBSession.query(model.User).filter_by(user_id=user_id).first()
@@ -231,6 +236,7 @@ class RootController(BaseController):
     def add_availability_start(self,user_id,form=None):
         ''' Present the "add a time slot" form. '''
         if form is None:
+            user_id = int(user_id)
             form = AvailabilityForm(user_id=user_id)
         return dict(page='add_availability_start',form=form,url='/add_availability_post')
 
@@ -269,6 +275,8 @@ class RootController(BaseController):
         is specified) for the logged-in user. Only managers and
         coordinators can view other users' info.
         '''
+        if user_id is not None:
+            user_id = int(user_id)
         if not request.identity:
             login_counter = request.environ.get('repoze.who.logins', 0) + 1
             redirect('/login',
@@ -481,6 +489,7 @@ class RootController(BaseController):
                 print("user.vinfo = {}".format(vinfo))
         else:
             ''' Get the identity for the given user. '''
+            user_id = int(user_id)
             user = model.DBSession.query(model.User).filter_by(user_id=userId).first()
             if user is not None:
                 vinfo = user.vinfo
