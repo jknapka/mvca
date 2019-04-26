@@ -1,0 +1,1300 @@
+# Translations template for unter.
+# Copyright (C) 2019 ORGANIZATION
+# This file is distributed under the same license as the unter project.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2019.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: unter 0.1\n"
+"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
+"POT-Creation-Date: 2019-04-25 22:16-0600\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.6.0\n"
+
+#: unter/controllers/root.py:123
+#, python-format
+msgid "Account %s already exists"
+msgstr ""
+
+#: unter/controllers/root.py:133
+#, python-format
+msgid "Email address %s is in use, please use a different one"
+msgstr ""
+
+#: unter/controllers/root.py:136
+msgid "You must provide a password."
+msgstr ""
+
+#: unter/controllers/root.py:156
+msgid "Please log in and let us know when you are available."
+msgstr ""
+
+#: unter/controllers/root.py:159 unter/controllers/root.py:166
+msgid "Volunteer {} added"
+msgstr ""
+
+#: unter/controllers/root.py:208
+msgid "  Removed user from managers group."
+msgstr ""
+
+#: unter/controllers/root.py:214
+msgid "  Removed user from coordinators group."
+msgstr ""
+
+#: unter/controllers/root.py:222
+msgid "Trying to promote {} to group {}"
+msgstr ""
+
+#: unter/controllers/root.py:228
+msgid "  Promoted {} to {}."
+msgstr ""
+
+#: unter/controllers/root.py:231
+msgid "  Could not promote to non-existing group {}"
+msgstr ""
+
+#: unter/controllers/root.py:234
+msgid "  Could not promote non-existing user_id {}"
+msgstr ""
+
+#: unter/controllers/root.py:253
+msgid "Availability form data is valid."
+msgstr ""
+
+#: unter/controllers/root.py:296
+msgid "You may only view your own volunteer page."
+msgstr ""
+
+#: unter/controllers/root.py:300
+msgid "No volunteer info for {}"
+msgstr ""
+
+#: unter/controllers/root.py:333
+msgid "Available time removed."
+msgstr ""
+
+#: unter/controllers/root.py:335
+msgid "No such available time found."
+msgstr ""
+
+#: unter/controllers/root.py:343
+msgid "Commitment cancelled. Thanks for letting us know!"
+msgstr ""
+
+#: unter/controllers/root.py:346
+msgid "No such commitment found for {}."
+msgstr ""
+
+#: unter/controllers/root.py:379
+msgid ""
+"If you entered a known email address, you will receive a\n"
+"password reset link message at that address. Search for 'MVCA' in your inbox."
+msgstr ""
+
+#: unter/controllers/root.py:397
+msgid ""
+"You have already requested a password reset link. If you\n"
+"did not receive an email, contact the site manager at\n"
+"{} or {} to reset your password."
+msgstr ""
+
+#: unter/controllers/root.py:413
+msgid ""
+"Someone, perhaps you, requested a reset of your\n"
+"Migrant Volunteer Coordination Assistant password.\n"
+"If you did request a password reset, click the link\n"
+"in order to reset your password.<br/>{}"
+msgstr ""
+
+#: unter/controllers/root.py:417
+msgid "MVCA password reset request - do not reply"
+msgstr ""
+
+#: unter/controllers/root.py:426
+msgid "Password reset attempted with invalid UUID {} for user ID {}"
+msgstr ""
+
+#: unter/controllers/root.py:427 unter/controllers/root.py:443
+#: unter/controllers/root.py:456
+msgid "You are not authorized to reset this password."
+msgstr ""
+
+#: unter/controllers/root.py:430 unter/controllers/root.py:445
+msgid ""
+"This reset link has expired. Visit <a href=\"/forgot_pwd\">the reset page</a>"
+" to request a new one."
+msgstr ""
+
+#: unter/controllers/root.py:433 unter/controllers/root.py:448
+msgid "This reset link is too new. Please try again in one minute."
+msgstr ""
+
+#: unter/controllers/root.py:442
+msgid "Password reset POST attempted with invalid UUID {}"
+msgstr ""
+
+#: unter/controllers/root.py:451
+msgid "The passwords to not match."
+msgstr ""
+
+#: unter/controllers/root.py:455
+msgid "Password reset POST attempted with nonexistent user {}"
+msgstr ""
+
+#: unter/controllers/root.py:464
+msgid "Your password has been changed."
+msgstr ""
+
+#: unter/controllers/root.py:508
+msgid "Responding to event {} on behalf of {}"
+msgstr ""
+
+#: unter/controllers/root.py:516
+msgid "Cannot respond to nonexisting event {}"
+msgstr ""
+
+#: unter/controllers/root.py:530
+msgid "Accepting event {} for user {}."
+msgstr ""
+
+#: unter/controllers/root.py:532
+msgid ""
+"Thank you for responding. You will receive a reminder one hour prior to the "
+"event."
+msgstr ""
+
+#: unter/controllers/root.py:534
+msgid "Removing response for {} event {}."
+msgstr ""
+
+#: unter/controllers/root.py:536
+msgid "Thank you for responding."
+msgstr ""
+
+#: unter/controllers/root.py:551
+msgid "Form {} = {}"
+msgstr ""
+
+#: unter/controllers/root.py:553
+msgid "Need event data is NOT valid: {}"
+msgstr ""
+
+#: unter/controllers/root.py:556
+msgid "Need event data is valid"
+msgstr ""
+
+#: unter/controllers/root.py:606
+msgid "No such need event {}"
+msgstr ""
+
+#: unter/controllers/root.py:614
+msgid "Cancelling event {}"
+msgstr ""
+
+#: unter/controllers/root.py:616
+msgid "Event cancelled."
+msgstr ""
+
+#: unter/controllers/root.py:618
+msgid "Cannot find that event."
+msgstr ""
+
+#: unter/controllers/root.py:691
+msgid "Only for managers"
+msgstr ""
+
+#: unter/controllers/root.py:697
+msgid "Only for the editor"
+msgstr ""
+
+#: unter/controllers/root.py:709
+msgid "User not found"
+msgstr ""
+
+#: unter/controllers/root.py:711
+msgid "Invalid Password"
+msgstr ""
+
+#: unter/controllers/root.py:715
+msgid "Wrong credentials"
+msgstr ""
+
+#: unter/controllers/root.py:733
+#, python-format
+msgid "Welcome back, %s!"
+msgstr ""
+
+#: unter/controllers/root.py:752
+msgid "We hope to see you soon!"
+msgstr ""
+
+#: unter/controllers/secure.py:21
+msgid "Only for people with the \"manage\" permission"
+msgstr ""
+
+#: unter/controllers/secure.py:27
+msgid "Secure Controller here"
+msgstr ""
+
+#: unter/templates/about.xhtml:3 unter/templates/data.xhtml:3
+msgid "Learning TurboGears 2.3: Quick guide to the Quickstart pages."
+msgstr ""
+
+#: unter/templates/about.xhtml:11
+msgid "Architectural basics of a quickstart TG2 site."
+msgstr ""
+
+#: unter/templates/about.xhtml:14
+msgid "The TG2 quickstart command produces this basic TG site. Here's how it works."
+msgstr ""
+
+#: unter/templates/about.xhtml:22
+msgid "About Architecture"
+msgstr ""
+
+#: unter/templates/about.xhtml:23
+msgid "Data Model"
+msgstr ""
+
+#: unter/templates/about.xhtml:24
+msgid "URL Structure"
+msgstr ""
+
+#: unter/templates/about.xhtml:25
+msgid "Templates"
+msgstr ""
+
+#: unter/templates/about.xhtml:26
+msgid "Authentication"
+msgstr ""
+
+#: unter/templates/about.xhtml:27
+msgid "Authorization and Authentication"
+msgstr ""
+
+#: unter/templates/about.xhtml:32
+msgid "Code my data model"
+msgstr ""
+
+#: unter/templates/about.xhtml:34
+msgid "When you want a model for storing favorite links or wiki content, the"
+msgstr ""
+
+#: unter/templates/about.xhtml:35
+msgid "/model"
+msgstr ""
+
+#: unter/templates/about.xhtml:35
+msgid "folder in your site is ready to go."
+msgstr ""
+
+#: unter/templates/about.xhtml:37
+msgid ""
+"You can build a dynamic site without any data model at all. There still be a\n"
+"          default data-model template for you if you didn't enable "
+"authentication and\n"
+"          authorization in quickstart. If you have enabled authorization, the"
+" auth\n"
+"          data-model is ready-made."
+msgstr ""
+
+#: unter/templates/about.xhtml:44
+msgid "Design my URL structure"
+msgstr ""
+
+#: unter/templates/about.xhtml:46
+msgid "The \""
+msgstr ""
+
+#: unter/templates/about.xhtml:46
+msgid "root.py"
+msgstr ""
+
+#: unter/templates/about.xhtml:46
+msgid "\" file under the"
+msgstr ""
+
+#: unter/templates/about.xhtml:46
+msgid "/controllers"
+msgstr ""
+
+#: unter/templates/about.xhtml:46
+msgid ""
+"folder has\n"
+"          your URLs. When you called this url ("
+msgstr ""
+
+#: unter/templates/about.xhtml:48
+msgid "about"
+msgstr ""
+
+#: unter/templates/about.xhtml:48
+msgid ""
+"), the command went through the\n"
+"          RootController class to the"
+msgstr ""
+
+#: unter/templates/about.xhtml:49
+msgid "about()"
+msgstr ""
+
+#: unter/templates/about.xhtml:49
+msgid "method."
+msgstr ""
+
+#: unter/templates/about.xhtml:51
+msgid ""
+"Those Python methods are responsible to create the dictionary of variables\n"
+"          that will be used in your web views (template)."
+msgstr ""
+
+#: unter/templates/about.xhtml:56
+msgid "Reuse the web page elements"
+msgstr ""
+
+#: unter/templates/about.xhtml:58
+msgid ""
+"A web page viewed by user could be constructed by single or several reusable\n"
+"                templates under"
+msgstr ""
+
+#: unter/templates/about.xhtml:59
+msgid "/templates"
+msgstr ""
+
+#: unter/templates/about.xhtml:59
+msgid ""
+".\n"
+"                Each projects gets quickstarted with a"
+msgstr ""
+
+#: unter/templates/about.xhtml:60 unter/templates/about.xhtml:76
+msgid "master.html"
+msgstr ""
+
+#: unter/templates/about.xhtml:61
+msgid ""
+"template and a bunch of templates for the pages provided by the "
+"RootController."
+msgstr ""
+
+#: unter/templates/about.xhtml:74
+msgid "The Master Template"
+msgstr ""
+
+#: unter/templates/about.xhtml:76
+msgid "The"
+msgstr ""
+
+#: unter/templates/about.xhtml:76
+msgid ""
+"template\n"
+"        controls the overall design of the page we're looking at. It draws "
+"the headers,\n"
+"        the footer, the notices flash and embeds the content of each page of "
+"your web applications.\n"
+"        Thus the \"master.html\" template provides the overall architecture "
+"for\n"
+"        each page in this site."
+msgstr ""
+
+#: unter/templates/about.xhtml:82
+msgid ""
+"There's more to the \"master.html\" template... study it to see how the\n"
+"        &lt;title&gt; tags and static JS and CSS files are brought into the "
+"page.\n"
+"        Templating with Genshi is a powerful tool and we've only scratched "
+"the surface.\n"
+"        There are also a few little CSS tricks hidden in these pages, like "
+"the use of a\n"
+"        \"clearingdiv\" to make sure that your footer stays below the "
+"sidebars and always\n"
+"        looks right. That's not TG2 at work, just CSS. You'll need all your "
+"skills to\n"
+"        build a fine web app, but TG2 will make the hard parts easier so that"
+" you can\n"
+"        concentrate more on good design and content rather than struggling "
+"with\n"
+"        mechanics."
+msgstr ""
+
+#: unter/templates/about.xhtml:96
+msgid "Authentication &amp; Authorization in a TG2 site."
+msgstr ""
+
+#: unter/templates/about.xhtml:98
+msgid ""
+"If you have access to this page, this means you have enabled authentication\n"
+"        and authorization in the quickstart to create your project."
+msgstr ""
+
+#: unter/templates/about.xhtml:101
+msgid ""
+"The gearbox command will have created a few specific controllers for you. But"
+"\n"
+"        before you go to play with those controllers you'll need to make sure"
+" your\n"
+"        application has been properly bootstapped. This is dead easy, here is"
+" how to do\n"
+"        this:"
+msgstr ""
+
+#: unter/templates/about.xhtml:105
+msgid "gearbox setup-app"
+msgstr ""
+
+#: unter/templates/about.xhtml:107
+msgid ""
+"inside your application's folder and you'll get a database setup (using the\n"
+"        preferences you have set in your development.ini file). This database"
+" will also\n"
+"        have been prepopulated with some default logins/passwords so that you"
+" can test\n"
+"        the secured controllers and methods."
+msgstr ""
+
+#: unter/templates/about.xhtml:112
+msgid ""
+"To change the comportement of this setup-app command you just need to edit\n"
+"        the"
+msgstr ""
+
+#: unter/templates/about.xhtml:113
+msgid "websetup.py"
+msgstr ""
+
+#: unter/templates/about.xhtml:113
+msgid "file."
+msgstr ""
+
+#: unter/templates/about.xhtml:115
+msgid "Now try to visiting the"
+msgstr ""
+
+#: unter/templates/about.xhtml:116
+msgid "manage_permission_only"
+msgstr ""
+
+#: unter/templates/about.xhtml:116
+msgid ""
+"URL. You will\n"
+"        be challenged with a login/password form."
+msgstr ""
+
+#: unter/templates/about.xhtml:119
+msgid ""
+"Only managers are authorized to visit this method. You will need to log-in\n"
+"        using:"
+msgstr ""
+
+#: unter/templates/about.xhtml:121
+msgid ""
+"login: manager\n"
+"password: managepass"
+msgstr ""
+
+#: unter/templates/about.xhtml:124
+msgid "Another protected resource is"
+msgstr ""
+
+#: unter/templates/about.xhtml:125
+msgid "editor_user_only"
+msgstr ""
+
+#: unter/templates/about.xhtml:125
+msgid ""
+". This one is protected by\n"
+"        a different set of permissions. You will need to be"
+msgstr ""
+
+#: unter/templates/about.xhtml:126
+msgid "editor"
+msgstr ""
+
+#: unter/templates/about.xhtml:126
+msgid ""
+"with a\n"
+"        password of"
+msgstr ""
+
+#: unter/templates/about.xhtml:127
+msgid "editpass"
+msgstr ""
+
+#: unter/templates/about.xhtml:127
+msgid "to be able to access it."
+msgstr ""
+
+#: unter/templates/about.xhtml:129
+msgid ""
+"The last kind of protected resource in this quickstarted app is a full so\n"
+"        called"
+msgstr ""
+
+#: unter/templates/about.xhtml:130
+msgid "secure controller"
+msgstr ""
+
+#: unter/templates/about.xhtml:130
+msgid ""
+". This controller is\n"
+"        protected globally. Instead of having a @require decorator on each "
+"method, we\n"
+"        have set an allow_only attribute at the class level. All the methods "
+"in this\n"
+"        controller will require the same level of access. You need to be "
+"manager to\n"
+"        access"
+msgstr ""
+
+#: unter/templates/about.xhtml:134
+msgid "secc"
+msgstr ""
+
+#: unter/templates/about.xhtml:134
+msgid "or"
+msgstr ""
+
+#: unter/templates/about.xhtml:135
+msgid "secc/some_where"
+msgstr ""
+
+#: unter/templates/about.xhtml:135 unter/templates/add_volunteer_start.xhtml:34
+#: unter/templates/coord_page.xhtml:17 unter/templates/data.xhtml:16
+#: unter/templates/need_events.xhtml:16
+msgid "."
+msgstr ""
+
+#: unter/templates/add_availability_start.xhtml:3
+msgid "Add volunteer availability time"
+msgstr ""
+
+#: unter/templates/add_availability_start.xhtml:12
+msgid "Add a time period when you are available to help"
+msgstr ""
+
+#: unter/templates/add_availability_start.xhtml:15
+msgid ""
+"Indicate a time period and the days of the week you are available\n"
+"\tduring that time period.\n"
+"\tYou can do this as many times as necessary to tell us all the times\n"
+"\twhen you are available.\n"
+"\tAll fields are required."
+msgstr ""
+
+#: unter/templates/add_need_event_start.xhtml:3
+msgid "Add a need event"
+msgstr ""
+
+#: unter/templates/add_need_event_start.xhtml:12
+msgid "Add a needed service event"
+msgstr ""
+
+#: unter/templates/add_need_event_start.xhtml:15
+msgid ""
+"Add a need for volunteer services.\n"
+"\tAll fields are required."
+msgstr ""
+
+#: unter/templates/add_volunteer_start.xhtml:3
+msgid "Add a new volunteer for migrant assistance"
+msgstr ""
+
+#: unter/templates/add_volunteer_start.xhtml:19
+msgid "Edit volunteer account for "
+msgstr ""
+
+#: unter/templates/add_volunteer_start.xhtml:20
+msgid "Create a new volunteer account"
+msgstr ""
+
+#: unter/templates/add_volunteer_start.xhtml:25
+msgid ""
+"Enter your information to sign up as a volunteer for migrant assistance.\n"
+"\t\t\tAll fields are required."
+msgstr ""
+
+#: unter/templates/add_volunteer_start.xhtml:27
+msgid ""
+"After you create an account and log in, you can tell us what days and times\n"
+"\t\t\tyou are available to help. We will notify you when an event is "
+"scheduled\n"
+"\t\t\tat a time when you are available."
+msgstr ""
+
+#: unter/templates/add_volunteer_start.xhtml:34
+msgid "You are editing this user, while logged in as "
+msgstr ""
+
+#: unter/templates/add_volunteer_start.xhtml:39
+msgid "This user is a Coordinator."
+msgstr ""
+
+#: unter/templates/add_volunteer_start.xhtml:40
+msgid "This user is a Manager."
+msgstr ""
+
+#: unter/templates/add_volunteer_start.xhtml:42
+msgid "| Promote volunteer to coordinator"
+msgstr ""
+
+#: unter/templates/add_volunteer_start.xhtml:45
+msgid "| Promote volunteer to manager"
+msgstr ""
+
+#: unter/templates/add_volunteer_start.xhtml:48
+msgid "| Remove volunteer admin privileges"
+msgstr ""
+
+#: unter/templates/add_volunteer_start.xhtml:52
+msgid "| Delete volunteer account."
+msgstr ""
+
+#: unter/templates/all_volunteers.xhtml:3
+msgid "List of all volunteers"
+msgstr ""
+
+#: unter/templates/all_volunteers.xhtml:17
+msgid "All Volunteers"
+msgstr ""
+
+#: unter/templates/all_volunteers.xhtml:27 unter/templates/volunteer_info.xhtml:26
+msgid "User name"
+msgstr ""
+
+#: unter/templates/all_volunteers.xhtml:28
+msgid "Display name"
+msgstr ""
+
+#: unter/templates/all_volunteers.xhtml:29 unter/templates/event_details.xhtml:31
+#: unter/templates/event_details.xhtml:47
+msgid "Email"
+msgstr ""
+
+#: unter/templates/all_volunteers.xhtml:30 unter/templates/event_details.xhtml:31
+#: unter/templates/event_details.xhtml:47
+msgid "Phone"
+msgstr ""
+
+#: unter/templates/all_volunteers.xhtml:31
+msgid "Zip"
+msgstr ""
+
+#: unter/templates/all_volunteers.xhtml:32
+msgid "Description"
+msgstr ""
+
+#: unter/templates/all_volunteers.xhtml:33
+msgid "Coordinator?"
+msgstr ""
+
+#: unter/templates/all_volunteers.xhtml:34
+msgid "Site manager?"
+msgstr ""
+
+#: unter/templates/coord_page.xhtml:3 unter/templates/need_events.xhtml:3
+msgid "List of volunteer needs"
+msgstr ""
+
+#: unter/templates/coord_page.xhtml:17
+msgid "Welcome to your Coordinator page, "
+msgstr ""
+
+#: unter/templates/coord_page.xhtml:29 unter/templates/need_events.xhtml:24
+#: unter/templates/need_events.xhtml:58
+msgid "New event"
+msgstr ""
+
+#: unter/templates/coord_page.xhtml:33
+msgid "See all active events"
+msgstr ""
+
+#: unter/templates/coord_page.xhtml:37
+msgid "Add volunteer"
+msgstr ""
+
+#: unter/templates/coord_page.xhtml:41
+msgid "See all volunteers"
+msgstr ""
+
+#: unter/templates/coord_page.xhtml:44 unter/templates/need_events.xhtml:35
+#: unter/templates/need_events.xhtml:64
+msgid "See completed events"
+msgstr ""
+
+#: unter/templates/coord_page.xhtml:48
+msgid "Events you have created."
+msgstr ""
+
+#: unter/templates/data.xhtml:9
+msgid "Content Type Dispatch"
+msgstr ""
+
+#: unter/templates/data.xhtml:11
+msgid ""
+"This page shows how you can provide multiple pages\n"
+"          directly from the same controller method.  This page is generated\n"
+"          from the expose decorator with the template defintion provided.\n"
+"          You can provide a url with parameters and this page will display\n"
+"          the parameters as html, and the json version will express\n"
+"          the entries as"
+msgstr ""
+
+#: unter/templates/data.xhtml:16
+msgid "JSON"
+msgstr ""
+
+#: unter/templates/data.xhtml:19
+msgid "Click here for the"
+msgstr ""
+
+#: unter/templates/data.xhtml:19
+msgid "JSON Version of this page."
+msgstr ""
+
+#: unter/templates/data.xhtml:22
+msgid "The data provided in the template call is:"
+msgstr ""
+
+#: unter/templates/data.xhtml:26
+msgid "Key"
+msgstr ""
+
+#: unter/templates/data.xhtml:27
+msgid "Value"
+msgstr ""
+
+#: unter/templates/environ.xhtml:3
+msgid "Learning TurboGears 2.3: Information about TG and WSGI"
+msgstr ""
+
+#: unter/templates/environ.xhtml:16
+msgid "The WSGI nature of the framework"
+msgstr ""
+
+#: unter/templates/environ.xhtml:18
+msgid ""
+"In this page you can see all the WSGI variables your request object has,\n"
+"             the ones in capital letters are required by the spec, then a "
+"sorted by\n"
+"             component list of variables provided by the Components, and at "
+"last\n"
+"             the \"wsgi.\" namespace with very useful information about your "
+"WSGI Server"
+msgstr ""
+
+#: unter/templates/environ.xhtml:22
+msgid "The keys in the environment are:"
+msgstr ""
+
+#: unter/templates/error.xhtml:3
+msgid "A "
+msgstr ""
+
+#: unter/templates/error.xhtml:3
+msgid " error has Occurred"
+msgstr ""
+
+#: unter/templates/error.xhtml:7
+msgid "Error "
+msgstr ""
+
+#: unter/templates/event_details.xhtml:3
+msgid "Event Details"
+msgstr ""
+
+#: unter/templates/event_details.xhtml:12
+msgid "Event Details for event "
+msgstr ""
+
+#: unter/templates/event_details.xhtml:15
+msgid "Coordinator"
+msgstr ""
+
+#: unter/templates/event_details.xhtml:16
+msgid "Coord. phone"
+msgstr ""
+
+#: unter/templates/event_details.xhtml:17 unter/templates/event_renderer.xhtml:52
+msgid "Type"
+msgstr ""
+
+#: unter/templates/event_details.xhtml:18 unter/templates/event_renderer.xhtml:50
+msgid "Date"
+msgstr ""
+
+#: unter/templates/event_details.xhtml:19 unter/templates/event_renderer.xhtml:51
+msgid "Time"
+msgstr ""
+
+#: unter/templates/event_details.xhtml:20 unter/templates/event_renderer.xhtml:54
+msgid "Location"
+msgstr ""
+
+#: unter/templates/event_details.xhtml:21
+msgid "Persons in need"
+msgstr ""
+
+#: unter/templates/event_details.xhtml:22 unter/templates/event_renderer.xhtml:56
+msgid "Volunteers needed"
+msgstr ""
+
+#: unter/templates/event_details.xhtml:23 unter/templates/volunteer_info.xhtml:34
+msgid "Notes"
+msgstr ""
+
+#: unter/templates/event_details.xhtml:28
+msgid "Committed volunteers"
+msgstr ""
+
+#: unter/templates/event_details.xhtml:31 unter/templates/event_details.xhtml:47
+msgid "Name"
+msgstr ""
+
+#: unter/templates/event_details.xhtml:44
+msgid "Available volunteers"
+msgstr ""
+
+#: unter/templates/event_renderer.xhtml:49
+msgid "Created by"
+msgstr ""
+
+#: unter/templates/event_renderer.xhtml:53
+msgid "Estimated duration"
+msgstr ""
+
+#: unter/templates/event_renderer.xhtml:55
+msgid "Affected persons"
+msgstr ""
+
+#: unter/templates/event_renderer.xhtml:57
+msgid "Volunteers responding"
+msgstr ""
+
+#: unter/templates/event_renderer.xhtml:58
+msgid "Last alert"
+msgstr ""
+
+#: unter/templates/event_renderer.xhtml:59
+msgid "Completed?"
+msgstr ""
+
+#: unter/templates/event_renderer.xhtml:61
+msgid "Respond"
+msgstr ""
+
+#: unter/templates/event_renderer.xhtml:64
+msgid "Cancel this event"
+msgstr ""
+
+#: unter/templates/event_renderer.xhtml:93
+msgid "Send alert"
+msgstr ""
+
+#: unter/templates/event_renderer.xhtml:96
+msgid "Mark complete"
+msgstr ""
+
+#: unter/templates/event_renderer.xhtml:97
+msgid "Already complete"
+msgstr ""
+
+#: unter/templates/event_renderer.xhtml:100
+msgid "Commit to serve"
+msgstr ""
+
+#: unter/templates/event_renderer.xhtml:102
+msgid "Sorry, can't make it"
+msgstr ""
+
+#: unter/templates/event_renderer.xhtml:106
+msgid "Cancel"
+msgstr ""
+
+#: unter/templates/forgot_pwd.xhtml:3 unter/templates/reset_pwd.xhtml:3
+msgid "Forgotten password"
+msgstr ""
+
+#: unter/templates/forgot_pwd.xhtml:11 unter/templates/reset_pwd.xhtml:11
+msgid "Request a password reset"
+msgstr ""
+
+#: unter/templates/forgot_pwd.xhtml:12
+msgid "Enter your email address to receive a password reset link."
+msgstr ""
+
+#: unter/templates/form_renderer.xhtml:10
+msgid "Error: "
+msgstr ""
+
+#: unter/templates/index-original.xhtml:3 unter/templates/index.xhtml:3
+msgid "Welcome to TurboGears 2.3, standing on the shoulders of giants, since 2007"
+msgstr ""
+
+#: unter/templates/index-original.xhtml:10
+msgid "Welcome to TurboGears 2.3"
+msgstr ""
+
+#: unter/templates/index-original.xhtml:11
+msgid "If you see this page it means your installation was successful!"
+msgstr ""
+
+#: unter/templates/index-original.xhtml:12
+msgid ""
+"TurboGears 2 is rapid web application development toolkit designed to make "
+"your life easier."
+msgstr ""
+
+#: unter/templates/index-original.xhtml:15
+msgid " Learn more"
+msgstr ""
+
+#: unter/templates/index-original.xhtml:21
+msgid " TG2 Documentation"
+msgstr ""
+
+#: unter/templates/index-original.xhtml:21
+msgid "new"
+msgstr ""
+
+#: unter/templates/index-original.xhtml:21
+msgid "Get Started"
+msgstr ""
+
+#: unter/templates/index-original.xhtml:23
+msgid " TG2 CookBook"
+msgstr ""
+
+#: unter/templates/index-original.xhtml:23
+msgid "Read the Cookbook"
+msgstr ""
+
+#: unter/templates/index-original.xhtml:25
+msgid " Join the Mail List"
+msgstr ""
+
+#: unter/templates/index-original.xhtml:25
+msgid "for help/discussion"
+msgstr ""
+
+#: unter/templates/index-original.xhtml:27
+msgid " Play on Runnable"
+msgstr ""
+
+#: unter/templates/index-original.xhtml:27
+msgid "for basic examples"
+msgstr ""
+
+#: unter/templates/index-original.xhtml:29
+msgid " Search Stackoverflow"
+msgstr ""
+
+#: unter/templates/index-original.xhtml:29
+msgid "for questions"
+msgstr ""
+
+#: unter/templates/index-original.xhtml:35
+msgid "Code your data model"
+msgstr ""
+
+#: unter/templates/index-original.xhtml:36
+msgid "Design your data"
+msgstr ""
+
+#: unter/templates/index-original.xhtml:36
+msgid "model"
+msgstr ""
+
+#: unter/templates/index-original.xhtml:36
+msgid ", Create the database, and Add some bootstrap data."
+msgstr ""
+
+#: unter/templates/index-original.xhtml:40
+msgid "Design your URL architecture"
+msgstr ""
+
+#: unter/templates/index-original.xhtml:41
+msgid "Decide your URLs, Program your"
+msgstr ""
+
+#: unter/templates/index-original.xhtml:41
+msgid "controller"
+msgstr ""
+
+#: unter/templates/index-original.xhtml:41
+msgid "methods, Design your"
+msgstr ""
+
+#: unter/templates/index-original.xhtml:42
+msgid "templates"
+msgstr ""
+
+#: unter/templates/index-original.xhtml:42
+msgid ", and place some static files (CSS and/or Javascript)."
+msgstr ""
+
+#: unter/templates/index-original.xhtml:46
+msgid "Distribute your app"
+msgstr ""
+
+#: unter/templates/index-original.xhtml:47
+msgid "Test your source, Generate project documents, Build a distribution."
+msgstr ""
+
+#: unter/templates/index-original.xhtml:51
+msgid "Thank you for choosing TurboGears."
+msgstr ""
+
+#: unter/templates/index.xhtml:10
+msgid "Welcome to the Migrant Volunteer Coordinating Assistant"
+msgstr ""
+
+#: unter/templates/index.xhtml:11
+msgid "You can"
+msgstr ""
+
+#: unter/templates/index.xhtml:11
+msgid "register as a new volunteer"
+msgstr ""
+
+#: unter/templates/index.xhtml:11
+msgid ""
+"and then\n"
+"\t    tell us which days and times during the week you are available to help."
+msgstr ""
+
+#: unter/templates/index.xhtml:13
+msgid "If you are already registered, you can"
+msgstr ""
+
+#: unter/templates/index.xhtml:13 unter/templates/index.xhtml:23
+msgid "log in"
+msgstr ""
+
+#: unter/templates/index.xhtml:14
+msgid ""
+"to see your profile and any events you may be able to help with. We often "
+"need volunteers\n"
+"\t    to"
+msgstr ""
+
+#: unter/templates/index.xhtml:17
+msgid "Drive migrants to the airport or bus station from local hotels and shelters."
+msgstr ""
+
+#: unter/templates/index.xhtml:18
+msgid ""
+"Provide interpreter services for other volunteers and migrants (almost always"
+"\n"
+"\t\t\tEnglish/Spanish)."
+msgstr ""
+
+#: unter/templates/index.xhtml:20
+msgid "Help prepare or serve meals for our local migrant population."
+msgstr ""
+
+#: unter/templates/index.xhtml:23
+msgid "If you are an administrator, you can"
+msgstr ""
+
+#: unter/templates/index.xhtml:24
+msgid ""
+"to create new events and send text or email alerts to volunteers who have\n"
+"\t    availability at the appropriate times. You can also check the status of"
+" upcoming\n"
+"\t    events and verify whether enough volunteers are available, and find the"
+" information\n"
+"\t    needed to manually call, text, or email volunteers if needed."
+msgstr ""
+
+#: unter/templates/index.xhtml:30
+msgid "Copyright (c) 2019, Joseph Knapka. Built using"
+msgstr ""
+
+#: unter/templates/index.xhtml:31
+msgid "TurboGears"
+msgstr ""
+
+#: unter/templates/login.xhtml:3 unter/templates/login.xhtml:7
+#: unter/templates/login.xhtml:40 unter/templates/master.xhtml:49
+msgid "Login"
+msgstr ""
+
+#: unter/templates/login.xhtml:12
+msgid "Forgot your password?"
+msgstr ""
+
+#: unter/templates/login.xhtml:18
+msgid "Username:"
+msgstr ""
+
+#: unter/templates/login.xhtml:24
+msgid "Password:"
+msgstr ""
+
+#: unter/templates/login.xhtml:33
+msgid "remember me"
+msgstr ""
+
+#: unter/templates/master.xhtml:20
+msgid "Toggle navigation"
+msgstr ""
+
+#: unter/templates/master.xhtml:36
+msgid "Welcome"
+msgstr ""
+
+#: unter/templates/master.xhtml:37
+msgid "Your Information"
+msgstr ""
+
+#: unter/templates/master.xhtml:39
+msgid "Coordinators"
+msgstr ""
+
+#: unter/templates/master.xhtml:41
+msgid "Volunteer needs"
+msgstr ""
+
+#: unter/templates/master.xhtml:50
+msgid "Logout "
+msgstr ""
+
+#: unter/templates/master.xhtml:51
+msgid "Admin"
+msgstr ""
+
+#: unter/templates/master.xhtml:77
+msgid "Copyright © Joseph Knapka "
+msgstr ""
+
+#: unter/templates/master.xhtml:8
+msgid "Migrant Volunteer Coordinating Assistant"
+msgstr ""
+
+#: unter/templates/need_events.xhtml:13
+msgid "List of Volunteer Needs"
+msgstr ""
+
+#: unter/templates/need_events.xhtml:16
+msgid "Welcome, "
+msgstr ""
+
+#: unter/templates/need_events.xhtml:18
+msgid ""
+"You are a coordinator, and can manage the events below. Thank you for your "
+"time and energy!"
+msgstr ""
+
+#: unter/templates/need_events.xhtml:28
+msgid "Send alerts for all"
+msgstr ""
+
+#: unter/templates/need_events.xhtml:32 unter/templates/need_events.xhtml:61
+msgid "See active events"
+msgstr ""
+
+#: unter/templates/need_events.xhtml:40
+msgid ""
+"You are a volunteer, and can respond to the events below. Thank you for "
+"helping!"
+msgstr ""
+
+#: unter/templates/reset_pwd.xhtml:12
+msgid "Enter your new password and confirmation below:"
+msgstr ""
+
+#: unter/templates/volunteer_info.xhtml:3
+msgid "Volunteer information for "
+msgstr ""
+
+#: unter/templates/volunteer_info.xhtml:12
+msgid "Volunteer account for "
+msgstr ""
+
+#: unter/templates/volunteer_info.xhtml:13
+msgid "(viewed by "
+msgstr ""
+
+#: unter/templates/volunteer_info.xhtml:13
+msgid ")"
+msgstr ""
+
+#: unter/templates/volunteer_info.xhtml:19
+msgid "See volunteer needs"
+msgstr ""
+
+#: unter/templates/volunteer_info.xhtml:20
+msgid "|"
+msgstr ""
+
+#: unter/templates/volunteer_info.xhtml:21
+msgid "Edit volunteer info"
+msgstr ""
+
+#: unter/templates/volunteer_info.xhtml:30
+msgid "Zip code"
+msgstr ""
+
+#: unter/templates/volunteer_info.xhtml:38
+msgid "Available times"
+msgstr ""
+
+#: unter/templates/volunteer_info.xhtml:43
+msgid "Mon"
+msgstr ""
+
+#: unter/templates/volunteer_info.xhtml:44
+msgid "Tue"
+msgstr ""
+
+#: unter/templates/volunteer_info.xhtml:45
+msgid "Wed"
+msgstr ""
+
+#: unter/templates/volunteer_info.xhtml:46
+msgid "Thu"
+msgstr ""
+
+#: unter/templates/volunteer_info.xhtml:47
+msgid "Fri"
+msgstr ""
+
+#: unter/templates/volunteer_info.xhtml:48
+msgid "Sat"
+msgstr ""
+
+#: unter/templates/volunteer_info.xhtml:49
+msgid "Sun"
+msgstr ""
+
+#: unter/templates/volunteer_info.xhtml:51
+msgid "From "
+msgstr ""
+
+#: unter/templates/volunteer_info.xhtml:51
+msgid " to "
+msgstr ""
+
+#: unter/templates/volunteer_info.xhtml:52
+msgid "Remove"
+msgstr ""
+
+#: unter/templates/volunteer_info.xhtml:56
+msgid "Add an available time period"
+msgstr ""
+
+#: unter/templates/volunteer_info.xhtml:63
+msgid "Events you plan to serve"
+msgstr ""
+
+#: unter/templates/volunteer_info.xhtml:78
+msgid "Events for which you may be available"
+msgstr ""
+

@@ -127,11 +127,10 @@ def sendCancellationAlert(ev,vol):
         sendEmail(message=msg,toAddr=vol.email_address,subject="An event has been cancelled")
 
 def makeEventCancellationMsg(ev,vol):
-    msg = 'An event you committed to has been cancelled. '
-    msg += 'You do not need to go to {} at {} on {}. '.\
+    msg = '''An event you committed to has been cancelled. You do not need to go to {} at {} on {}.
+    Thank you for being willing to help!'''.\
             format(ev.location,dt.date.fromtimestamp(ev.date_of_need),\
                     minutesPastMidnightToTimeString(ev.time_of_need))
-    msg += 'Thank you for being willing to help!'
     return msg
 
 def sendEmailForEvent(nev,vol,source="MVCA"):

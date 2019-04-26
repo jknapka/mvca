@@ -114,14 +114,13 @@ class RootController(BaseController):
             email = thing.email
             pwd = thing.pwd
             pwd2 = thing.pwd2
-            print("Email is {}".format(email))
 
             existingUser = model.User.by_user_name(user_name)
             if existingUser is not None:
                 if not request.identity:
                     # It's not OK to try to establish a new account
                     # with the same user name as an existing one.
-                    return self.add_volunteer_start(form=form,error_msg='Account %s already exists'%user_name)
+                    return self.add_volunteer_start(form=form,error_msg=_('Account %s already exists')%user_name)
                 user,vinfo = self.getVolunteerIdentity()
                 if user.user_name == thing.user_name:
                     # It's OK for users to edit their own data.
@@ -131,10 +130,10 @@ class RootController(BaseController):
                     self.edit_volunteer(existingUser,thing)
             existingUser = model.User.by_email_address(email)
             if existingUser is not None:
-                return self.add_volunteer_start(form=form,error_msg='Email address %s is in use, please use a different one'%email)
+                return self.add_volunteer_start(form=form,error_msg=_('Email address %s is in use, please use a different one')%email)
 
             if len(pwd) == 0:
-                return self.add_volunteer_start(form=form,error_msg='You must provide a password.')
+                return self.add_volunteer_start(form=form,error_msg=_('You must provide a password.'))
 
             acct = model.User(user_name=user_name, email_address=email,display_name=form.display_name.data)
             acct.password = pwd
@@ -154,17 +153,17 @@ class RootController(BaseController):
             volGroup.users.append(acct)
 
             if not request.identity:
-                flash("Please log in and let us know when you are available.")
+                flash(_("Please log in and let us know when you are available."))
                 redirect(lurl('/login'))
             else:
-                flash("Volunteer {} added".format(user_name))
+                flash(_("Volunteer {} added").format(user_name))
                 user,vinfo = self.getVolunteerIdentity()
                 if 'manage_events' in [p.permission_name for p in user.permissions]:
                     page = '/coord_page'
                 else:
                     # Hmm, we might not want to allow this :-/
                     page = '/volunteer_info'
-                redirect(lurl(page,dict(message="Volunteer {} added".format(user_name))))
+                redirect(lurl(page,dict(message=_("Volunteer {} added").format(user_name))))
 
     def edit_volunteer(self,user,attribs):
         '''
@@ -206,13 +205,13 @@ class RootController(BaseController):
                 if g.group_name == 'managers':
                     try:
                         g.users.remove(u)
-                        log.info("  Removed user from managers group.")
+                        log.info(_("  Removed user from managers group."))
                     except ValueError:
                         pass
                 if g.group_name == 'coordinators':
                     try:
                         g.users.remove(u)
-                        log.info("  Removed user from coordinators group.")
+                        log.info(_("  Removed user from coordinators group."))
                     except ValueError:
                         pass
         redirect(lurl("/volunteer_info"),dict(user_id=user_id))
@@ -220,19 +219,19 @@ class RootController(BaseController):
     def promote(self,user_id,groupName):
         user_id = int(user_id)
         log = getLogger()
-        log.info("Trying to promote {} to group {}".format(user_id,groupName))
+        log.info(_("Trying to promote {} to group {}").format(user_id,groupName))
         u = model.DBSession.query(model.User).filter_by(user_id=user_id).first()
         if u is not None:
             group = model.DBSession.query(model.Group).filter_by(group_name=groupName).first()
             if group is not None:
                 group.users.append(u)
-                log.info('  Promoted {} to {}.'.format(u.user_name,groupName))
+                log.info(_('  Promoted {} to {}.').format(u.user_name,groupName))
                 redirect(lurl('/volunteer_info'),dict(user_id=user_id))
             else:
-                log.error("  Could not promote to non-existing group {}".format(groupName))
+                log.error(_("  Could not promote to non-existing group {}").format(groupName))
                 redirect(lurl('/volunteer_info'),dict(user_id=user_id))
         else:
-            log.error("  Could not promote non-existing user_id {}".format(user_id))
+            log.error(_("  Could not promote non-existing user_id {}").format(user_id))
             redirect(lurl('/volunteer_info'))
 
     @expose('unter.templates.add_availability_start')
@@ -251,7 +250,7 @@ class RootController(BaseController):
         if not form.validate:
             return self.add_availability_start(user_id=form.user_id.data,form=form)
         else:
-            print("Availability form data is valid.")
+            getLogger().debug(_("Availability form data is valid."))
             tfdict = {True:1,False:0}
             obj = Thing()
             form.populate_obj(obj)
@@ -294,11 +293,11 @@ class RootController(BaseController):
             if predicates.has_permission('manage_events') or predicates.has_permission('manage'):
                 user,vinfo = self.getVolunteerIdentity(userId=user_id)
             else:
-                flash("You may only view your own volunteer page.")
+                flash(_("You may only view your own volunteer page."))
                 redirect("/volunteer_info")
         if vinfo is None:
             # Not actually a volunteer - probably editor.
-            flash("No volunteer info for {}".format(user.user_name))
+            flash(_("No volunteer info for {}").format(user.user_name))
             redirect(lurl('/'))
 
         # At this point, we know the requesting_user is
@@ -331,9 +330,9 @@ class RootController(BaseController):
         av = model.DBSession.query(model.VolunteerAvailability).filter_by(vaid=vaid).first()
         if av is not None:
             model.DBSession.delete(av)
-            flash("Available time removed.")
+            flash(_("Available time removed."))
         else:
-            flash("No such available time found.")
+            flash(_("No such available time found."))
         redirect(came_from)
 
     @expose()
@@ -341,10 +340,10 @@ class RootController(BaseController):
         user,vinfo = self.getVolunteerIdentity()
         vr = model.DBSession.query(model.VolunteerResponse).filter_by(neid=neid).filter_by(user_id=user.user_id).first()
         if vr is not None:
-            flash("Commitment cancelled. Thanks for letting us know!")
+            flash(_("Commitment cancelled. Thanks for letting us know!"))
             need.decommit_volunteer(model.DBSession,vcom=vr)
         else:
-            flash("No such commitment found for {}.".format(user.display_name))
+            flash(_("No such commitment found for {}.").format(user.display_name))
         redirect(came_from)
 
     def toRawAvailability(self,av):
@@ -377,8 +376,8 @@ class RootController(BaseController):
     def forgot_pwd_post(self,email_addr):
         foundExistingPuuid = False
         u = model.User.by_email_address(email_addr)
-        resultMsg = "If you entered a known email address, you will receive a"+\
-            " password reset link message at that address. Search for 'MVCA' in your inbox."
+        resultMsg = _("""If you entered a known email address, you will receive a
+password reset link message at that address. Search for 'MVCA' in your inbox.""")
         if u is not None:
             existingPuuids = model.DBSession.query(model.PasswordUUID).filter_by(user_id=u.user_id).all()
             if len(existingPuuids) > 0:
@@ -395,9 +394,9 @@ class RootController(BaseController):
                         mgr = model.DBSession.query(model.User).filter_by(user_name='manager').first()
                         mgrEmail = mgr.email_address
                         mgrPhone = mgr.vinfo.phone
-                        resultMsg = 'You have already requested a password reset link. If you '+\
-                                'did not receive an email, contact the site manager at '+\
-                                '{} or {} to reset your password.'.format(mgrEmail,mgrPhone)
+                        resultMsg = _('''You have already requested a password reset link. If you
+did not receive an email, contact the site manager at
+{} or {} to reset your password.''').format(mgrEmail,mgrPhone)
 
         if u is not None and not foundExistingPuuid:
             # We send the reset link email only if the user exists and
@@ -411,11 +410,11 @@ class RootController(BaseController):
             model.DBSession.add(puuid)
             model.DBSession.flush()
             link = lurl('{}/reset_pwd?uuid={}&user_id={}'.format(alerts.MVCA_SITE,uid,u.user_id))
-            msg = "Someone, perhaps you, requested a reset of your"+\
-                " Migrant Volunteer Coordination Assistant password."+\
-                " If you did request a password reset, click the link"+\
-                " in order to reset your password.<br/>{}".format(link)
-            emailer(message=msg,toAddr=email_addr,subject="MVCA password reset request - do not reply")
+            msg = _('''Someone, perhaps you, requested a reset of your
+Migrant Volunteer Coordination Assistant password.
+If you did request a password reset, click the link
+in order to reset your password.<br/>{}''').format(link)
+            emailer(message=msg,toAddr=email_addr,subject=_("MVCA password reset request - do not reply"))
         return resultMsg
     
     @expose('unter.templates.reset_pwd')
@@ -424,15 +423,14 @@ class RootController(BaseController):
         ruuid = model.DBSession.query(model.PasswordUUID).filter_by(uuid=uuid).first()
         
         if ruuid is None or ruuid.user_id != int(user_id):
-            getLogger().warn('Password reset attempted with invalid UUID {} for user ID {}'.format(uuid,user_id))
-            return 'You are not authorized to reset this password.'
+            getLogger().warn(_('Password reset attempted with invalid UUID {} for user ID {}').format(uuid,user_id))
+            return _('You are not authorized to reset this password.')
         if now - alerts.MAX_PWD_RESET_INTERVAL > ruuid.create_time:
             model.DBSession.delete(ruuid)
-            return 'This reset link has expired. Visit <a href="/forgot_pwd">the reset page</a>'+\
-                    'to request a new one.'
+            return _('This reset link has expired. Visit <a href="/forgot_pwd">the reset page</a> to request a new one.')
         if alerts.MIN_PWD_RESET_INTERVAL is not None:
             if now - alerts.MIN_PWD_RESET_INTERVAL < ruuid.create_time:
-                return 'This reset link is too new. Please try again in one minute.'
+                return _('This reset link is too new. Please try again in one minute.')
         return dict(uuid=uuid)
 
     @expose()
@@ -441,22 +439,21 @@ class RootController(BaseController):
         ruuid = model.DBSession.query(model.PasswordUUID).filter_by(uuid=uuid).first()
         
         if ruuid is None:
-            getLogger().warn('Password reset POST attempted with invalid UUID {}'.format(uuid))
-            return 'You are not authorized to reset this password.'
+            getLogger().warn(_('Password reset POST attempted with invalid UUID {}').format(uuid))
+            return _('You are not authorized to reset this password.')
         if now - alerts.MAX_PWD_RESET_INTERVAL > ruuid.create_time:
-            return 'This reset link has expired. Visit <a href="/forgot_pwd">the reset page</a>'+\
-                    'to request a new one.'
+            return _('This reset link has expired. Visit <a href="/forgot_pwd">the reset page</a> to request a new one.')
         if alerts.MIN_PWD_RESET_INTERVAL is not None:
             if now - alerts.MIN_PWD_RESET_INTERVAL < ruuid.create_time:
-                return 'This reset link is too new. Please try again in one minute.'
+                return _('This reset link is too new. Please try again in one minute.')
 
         if pwd != pwd2:
-            flash("The passwords to not match.")
+            flash(_("The passwords to not match."))
             redirect("/forgot_pwd")
         u = model.DBSession.query(model.User).filter_by(user_id=ruuid.user_id).first()
         if u is None:
-            getLogger().warn('Password reset POST attempted with nonexistent user {}'.format(ruuid.user_id))
-            return 'You are not authorized to reset this password.'
+            getLogger().warn(_('Password reset POST attempted with nonexistent user {}').format(ruuid.user_id))
+            return _('You are not authorized to reset this password.')
 
         # Looks like everything is OK, we can actually
         # change the password now. First we must delete
@@ -464,7 +461,7 @@ class RootController(BaseController):
         # again.
         model.DBSession.delete(ruuid)
         u.password = pwd
-        flash('Your password has been changed.')
+        flash(_('Your password has been changed.'))
         redirect('/login')
         
 
@@ -490,7 +487,6 @@ class RootController(BaseController):
                 userid = request.identity['repoze.who.userid']
                 user = model.User.by_user_name(userid)
                 vinfo = user.vinfo
-                print("user.vinfo = {}".format(vinfo))
         else:
             ''' Get the identity for the given user. '''
             userId = int(userId)
@@ -509,7 +505,7 @@ class RootController(BaseController):
         Called when a user clicks a response link on the web page.
         '''
         user,vinfo = self.getVolunteerIdentity()
-        getLogger().info('Responding to event {} on behalf of {}'.\
+        getLogger().info(_('Responding to event {} on behalf of {}').\
                 format(neid,user))
         if user is None:
             redirect(lurl('/login'))
@@ -517,7 +513,7 @@ class RootController(BaseController):
         if nev is not None:
             need.commit_volunteer(model.DBSession,user,nev)
         else:
-            getLogger().warn('Cannot respond to nonexisting event {}'.\
+            getLogger().warn(_('Cannot respond to nonexisting event {}').\
                     format(nev.neid))
         redirect(lurl('/volunteer_info',dict(user_id=user.user_id,message='')))
 
@@ -531,13 +527,13 @@ class RootController(BaseController):
         user,nev = alerts.getUserAndEventForUUID(uuid)
         if user is not None and nev is not None:
             if action == 'accept':
-                getLogger().info("Accepting event {} for user {}.".format(nev.neid,user.user_id))
+                getLogger().info(_("Accepting event {} for user {}.").format(nev.neid,user.user_id))
                 need.commit_volunteer(model.DBSession,user=user,nev=nev)
-                return "Thank you for responding. You will receive a reminder one hour prior to the event."
+                return _("Thank you for responding. You will receive a reminder one hour prior to the event.")
             if action == 'refuse':
-                getLogger().info('Removing response for {} event {}.'.format(user.user_name,nev.neid))
+                getLogger().info(_('Removing response for {} event {}.').format(user.user_name,nev.neid))
                 need.decommit_volunteer(model.DBSession,user=user,ev=nev)
-        return 'Thank you for responding.'
+        return _('Thank you for responding.')
 
     @expose('unter.templates.add_need_event_start')
     @require(predicates.has_permission('manage_events'))
@@ -552,12 +548,12 @@ class RootController(BaseController):
     def add_need_event_post(self,**kwargs):
         form = NeedEventForm(request.POST)
         for fld in form:
-            print("Form {} = {}".format(fld.name,fld.data))
+            getLogger().info(_("Form {} = {}").format(fld.name,fld.data))
         if not form.validate():
-            print("Need event data is NOT valid: {}".format(form.errors))
+            getLogger().info(_("Need event data is NOT valid: {}").format(form.errors))
             return self.add_need_event_start(form=form)
         else:
-            print("Need event data is valid")
+            getLogger().debug(_("Need event data is valid"))
             obj = Thing()
             form.populate_obj(obj)
             obj.print("NeedEvent:")
@@ -596,7 +592,6 @@ class RootController(BaseController):
         user,vinfo = self.getVolunteerIdentity()
         isCoordinator = False
         if user is not None:
-            print("user.permissions: {}".format(user.permissions))
             isCoordinator = 'manage_events' in [perm.permission_name for perm in user.permissions]
         return dict(user=user,vinfo=vinfo,isCoordinator=isCoordinator,evs=evs,complete=completed)
 
@@ -606,10 +601,9 @@ class RootController(BaseController):
         ''' Mark a need event as being complete. '''
         ev = DBSession.query(model.NeedEvent).filter(model.NeedEvent.neid == neid).first()
         if ev is not None:
-            print("Got need event {}".format(neid))
             ev.complete = 1
         else:
-            print("No such need event {}".format(neid))
+            getLogger().warn(_("No such need event {}").format(neid))
         redirect(lurl("/need_events"))
 
     @expose()
@@ -617,17 +611,15 @@ class RootController(BaseController):
     def cancel_event(self,neid):
         ev = DBSession.query(model.NeedEvent).filter_by(neid=neid).first()
         if ev is not None:
-            getLogger().info('Cancelling event {}'.format(neid))
+            getLogger().info(_('Cancelling event {}').format(neid))
             need.cancelEvent(model.DBSession,ev,sendAlerts=True)
-            flash('Event cancelled.')
+            flash(_('Event cancelled.'))
         else:
-            flash('Cannot find that event.')
+            flash(_('Cannot find that event.'))
         redirect(lurl('/need_events'))
 
     @expose('json')
     def check_need_events(self,ev_id=None):
-        print("Checking events with ev_id={}".format(ev_id))
-
         if ev_id is not None:
             checkOneEvent(DBSession,ev_id)
         else:
