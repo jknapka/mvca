@@ -39,10 +39,10 @@ class TestCoordPage(TestController):
 
     def test_0_lastAlertTimesInCoordPage(self):
         resp = self.app.get('/coord_page',extra_environ={'REMOTE_USER':'carla'},status=200)
-        ok_('Last alert sent' in resp.text,resp.text)
+        ok_('Last alert' in resp.text,resp.text)
 
         zup = bsoup(resp.text,features="html.parser")
-        td = str(zup.find(id='alert-time-neid-1'))
+        td = str(zup.find(id='alert-time-ev-1'))
         ok_(dt.datetime.fromtimestamp(0).ctime() in td,td)
 
     def test_1_lastAlertTimeUpdatesOnAlert(self):
@@ -63,13 +63,13 @@ class TestCoordPage(TestController):
         resp = self.app.get('/coord_page',extra_environ={'REMOTE_USER':'carla'},status=200)
 
         zup = bsoup(resp.text,features="html.parser")
-        td = str(zup.find(id='alert-time-neid-1'))
+        td = str(zup.find(id='alert-time-ev-1'))
         ok_(now.ctime() in td,td)
 
     def test_2_alertLinksInEvents(self):
         resp = self.app.get('/coord_page',extra_environ={'REMOTE_USER':'carla'},status=200)
         zup = bsoup(resp.text,features="html.parser")
-        td = str(zup.find(id='alert-time-neid-1'))
+        td = str(zup.find(id='alert-time-ev-1'))
         ok_('href="/send_alert?neid=1"' in td,td)
 
     def test_3_alerts1(self):

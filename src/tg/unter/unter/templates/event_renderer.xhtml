@@ -68,18 +68,18 @@ else:
 		id="nev-div-${ev.ev.neid}"
 	 	class="unter-need-event-row"
 	    style="${leftStyle}">
-		<td>${ev.ev.created_by.display_name}</td>
-		<td><a href="/event_details?neid=${ev.ev.neid}">
+		<td id="created-by-${ev.ev.neid}" >${ev.ev.created_by.display_name}</td>
+		<td id="date-${ev.ev.neid}" ><a href="/event_details?neid=${ev.ev.neid}">
 			${ev.date_str}
 			</a>
 		</td>
-		<td>${ev.time_str}</td>
-		<td>${ev.ev_str}</td>
-		<td>${ev.ev.duration}</td>
-		<td>${ev.ev.location}</td>
-		<td>${ev.ev.affected_persons}</td>
-		<td>${ev.ev.volunteer_count}</td>
-		<td>${len(ev.ev.responses)}
+		<td id="time-ev-${ev.ev.neid}">${ev.time_str}</td>
+		<td id="type-ev-${ev.ev.neid}">${ev.ev_str}</td>
+		<td id="duration-ev-${ev.ev.neid}">${ev.ev.duration}</td>
+		<td id="location-ev-${ev.ev.neid}">${ev.ev.location}</td>
+		<td id="affected-persons-ev-${ev.ev.neid}">${ev.ev.affected_persons}</td>
+		<td id="volunteer-count-ev-${ev.ev.neid}">${ev.ev.volunteer_count}</td>
+		<td id="responses-ev-${ev.ev.neid}">${len(ev.ev.responses)}
 			<ul py:if="len(ev.ev.responses)>0">
 				<li py:for="vr in ev.ev.responses">
 					<a href="${tg.url('/volunteer_info',dict(user_id=vr.user.user_id))}">
@@ -88,21 +88,21 @@ else:
 				</li>
 			</ul>
 		</td>
-		<td>${ev.last_alert_time}
+		<td id="alert-time-ev-${ev.ev.neid}">${ev.last_alert_time}
 			<a py:if="isCoordinator and (not complete) and time.time() - 3600 > ev.ev.last_alert_time"
 				   href="/send_alert?neid=${ev.ev.neid}"><br/>Send alert</a>
 		</td>
-		<td py:if="isCoordinator"><a py:if="not complete"
+		<td py:if="isCoordinator" id="complete-ev-${ev.ev.neid}"><a py:if="not complete"
 				href="/event_complete?neid=${ev.ev.neid}">Mark complete</a>
 			<span py:if="complete">Already complete</span>
 		</td>
-		<td py:if="isVolunteer and (not complete) and isViewedUser">
+		<td py:if="isVolunteer and (not complete) and isViewedUser" id="respond-ev-${ev.ev.neid}">
 			<a href="/respond?neid=${ev.ev.neid}">Commit to serve</a>
 			<br/>
 			<a href="/decommit?neid=${ev.ev.neid}">Sorry, can't make it</a>
 			<span> </span>
 		</td>
-		<td py:if="isCoordinator">
+		<td py:if="isCoordinator" id="cancel-ev-${ev.ev.neid}">
 			<a href="/cancel?neid=${ev.ev.neid}">Cancel</a>
 		</td>
 		</tr>
@@ -110,7 +110,7 @@ else:
 			border="1"
 		    style="${bottomStyle}; ${leftStyle}">
 		<td border="0"></td>
-		<td colspan="100">${ev.ev.notes}</td>
+		<td colspan="100" id="notes-ev-${ev.ev.neid}">${ev.ev.notes}</td>
 	</tr>
 
 </py:def>
