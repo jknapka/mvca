@@ -41,13 +41,12 @@ def sendAlerts(volunteers,nev,honorLastAlertTime=True):
     if honorLastAlertTime:
         now = dt.datetime.now().timestamp()
         if now - MIN_ALERT_SECONDS < nev.last_alert_time:
-            print("NOT alerting for need event {} - it was alerted recently.".format(\
+            getLogger().debug("NOT alerting for need event {} - it was alerted recently.".format(\
                     nev.neid))
             return False
     for vol in volunteers:
         logging.getLogger("unter.alerts").info("ALERTING {} for need event {}".format(vol.user_name,nev.neid))
-        if SMS_ENABLED:
-            if vol.vinfo.text_alerts_ok == 1:
+        if SMS_ENABLED and vol.vinfo.text_alerts_ok == 1:
                 getLogger().info('  Alerting via SMS')
                 sendSmsForEvent(nev,vol)
         if EMAIL_ENABLED:
@@ -66,8 +65,7 @@ def sendConfirmationAlert(vol,nev,confirming=True):
     getLogger().info("Confirming event {} to volunteer {}".\
             format(nev.neid,vol.user_name))
     msgText = makeConfirmationMsgForEvent(vol,nev,confirming)
-    if SMS_ENABLED:
-        if vol.vinfo.text_alerts_ok == 1:
+    if SMS_ENABLED and vol.vinfo.text_alerts_ok == 1:
             getLogger().info("  Confirming via SMS")
             sendSMS = getSMSAlerter()
             destNumber = makeValidSMSPhoneNumber(vol.vinfo.phone)
@@ -341,7 +339,7 @@ class TwilioSMSAlerter:
     def __call__(self,message,sourceNumber=None,destNumber=None):
         getLogger().info("Sending SMS alert to {} using Twilio.".format(destNumber))
         if self.TWILIO_SID is None or self.TWILIO_AUTH_TOK is None:
-            logging.getLogger('unter').error("Cannot send SMS via Twilio.")
+            logging.getLogger('unter').error("Cannot send SMS via Twilio - missing credentials.")
             stubSMSAlerter(message,sourceNumber,destNumber)
             return
        
