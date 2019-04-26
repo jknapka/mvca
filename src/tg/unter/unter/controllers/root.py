@@ -376,8 +376,8 @@ class RootController(BaseController):
     def forgot_pwd_post(self,email_addr):
         foundExistingPuuid = False
         u = model.User.by_email_address(email_addr)
-        resultMsg = _("""If you entered a known email address, you will receive a
-password reset link message at that address. Search for 'MVCA' in your inbox.""")
+        resultMsg = _("""If you entered a known email address, you will receive a password reset link
+message at that address. Search for 'MVCA' in your inbox.""")
         if u is not None:
             existingPuuids = model.DBSession.query(model.PasswordUUID).filter_by(user_id=u.user_id).all()
             if len(existingPuuids) > 0:
