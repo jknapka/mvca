@@ -4,15 +4,17 @@ Utility functions used in various places.
 import datetime as dt
 import logging
 
+from tg.i18n import ugettext as _, lazy_ugettext as l_
+
 from unter import model
 
 def debugTest(msg):
     logging.getLogger('unter.test').debug(msg)
 
 def evTypeToString(evt):
-    return {0:"take people to the airport",
-            1:"take people to the bus station",
-            2:"interpeter services"}[evt]
+    return {0:_("take people to the airport"),
+            1:("take people to the bus station"),
+            2:("interpeter services")}[evt]
 
 def minutesPastMidnight(tm):
     print("tm is a {}".format(tm.__class__.__name__))
@@ -25,9 +27,9 @@ def minutesPastMidnightToTimeString(mpm):
     return "{}:{:02d}".format(hour,mins)
 
 class Thing(object):
-    ''' A generic ocntainer in which to unpack form data. '''
+    ''' A generic container in which to unpack form data. '''
 
-    def print(self,label="Thing:"):
+    def print(self,label=l_("Thing:")):
         printDict(self.__dict__)
 
 def printDict(kwargs,label="kwargs:"):
@@ -92,10 +94,10 @@ def createEvent(created_by,
         ev_type=model.NeedEvent.EV_TYPE_BUS,
         date_of_need=None,
         time_of_need=10*60+19,
-        duration=63,notes="DEFAULT NOTE",
+        duration=63,notes=l_("DEFAULT NOTE"),
         volunteer_count=1,
         affected_persons=2,
-        location="Nowhere",
+        location=l_("Nowhere"),
         complete=0):
     if date_of_need is None:
         date_of_need = dt.date.today() + dt.timedelta(days=1)

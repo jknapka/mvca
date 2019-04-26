@@ -15,6 +15,8 @@ import unter.model as model
 
 import tg
 
+from tg.i18n import ugettext as _, lazy_ugettext as l_
+
 __all__ = ["sendSMSUsingTwilio","stubSMSAlerter","getSMSAlerter","setSMSAlerter",
     "sendAlerts","SMS_ENABLED","EMAIL_ENABLED","MVCA_SITE","configureSMSAlerts",
     "MIN_PWD_RESET_INTERVAL","MIN_PWD_EMAIL_INTERVAL"]
@@ -26,13 +28,13 @@ SMS_ENABLED = True
 EMAIL_ENABLED = True
 
 # The base site URL to use in alerts.
-MVCA_SITE = tg.config.get('mvca.site','https://127.0.0.1')
+MVCA_SITE = l_(tg.config.get('mvca.site','https://127.0.0.1'))
 
 MAX_PWD_RESET_INTERVAL = 3600
 MIN_PWD_RESET_INTERVAL = None
 
 def getLogger():
-    return logging.getLogger('unter.allerts')
+    return logging.getLogger('unter.alerts')
 
 def sendAlerts(volunteers,nev,honorLastAlertTime=True):
     '''
@@ -45,7 +47,7 @@ def sendAlerts(volunteers,nev,honorLastAlertTime=True):
                     nev.neid))
             return False
     for vol in volunteers:
-        logging.getLogger("unter.alerts").info("ALERTING {} for need event {}".format(vol.user_name,nev.neid))
+        getLogger().info("ALERTING {} for need event {}".format(vol.user_name,nev.neid))
         if SMS_ENABLED and vol.vinfo.text_alerts_ok == 1:
                 getLogger().info('  Alerting via SMS')
                 sendSmsForEvent(nev,vol)
@@ -76,16 +78,16 @@ def sendConfirmationAlert(vol,nev,confirming=True):
         sendEmail(message=msgText,toAddr=vol.email_address,subject="Event confirmation")
 
 def makeConfirmationMsgForEvent(vol,ev,confirming):
-    txt = "Thank you for responding, {}. ".format(vol.display_name)
+    txt = _("Thank you for responding, {}. ").format(vol.display_name)
     if confirming:
         ev_date = dt.datetime.fromtimestamp(ev.date_of_need)
-        txt += "Please go to {} at {} on {}. You will receive a reminder one hour beforehand.".\
+        txt += _("Please go to {} at {} on {}. You will receive a reminder one hour beforehand.").\
                 format(ev.location,minutesPastMidnightToTimeString(ev.time_of_need),\
                 str(dt.date(ev_date.year,ev_date.month,ev_date.day)))
     else:
-        txt += "Enough volunteers have responded already, so you do not need to attend this event. "
-        txt += "If someone cancels, we may contact you again. Thank you for being "
-        txt += "willing to help!"
+        txt += _("Enough volunteers have responded already, so you do not need to attend this event. ")
+        txt += _("If someone cancels, we may contact you again. Thank you for being ")
+        txt += _("willing to help!")
     return txt
 
 def sendCoordDecommitAlert(vol,ev):
@@ -105,7 +107,7 @@ def sendCoordDecommitAlert(vol,ev):
 def makeCoordDecommitMsg(vol,ev):
     getLogger().debug("ev.date_of_need is a {}".format(type(ev.date_of_need)))
     getLogger().debug("ev.date_of_need is {}".format(ev.date_of_need))
-    txt = "Volunteer {} cannot serve at your event {} {} at {}".\
+    txt = _("Volunteer {} cannot serve at your event {} {} at {}").\
             format(vol.display_name,
                     dt.date.fromtimestamp(ev.date_of_need),
                     minutesPastMidnightToTimeString(ev.time_of_need),
@@ -124,11 +126,11 @@ def sendCancellationAlert(ev,vol):
     if EMAIL_ENABLED:
         getLogger().info("  Alerting via email.")
         sendEmail = getEmailAlerter()
-        sendEmail(message=msg,toAddr=vol.email_address,subject="An event has been cancelled")
+        sendEmail(message=msg,toAddr=vol.email_address,subject=l_("An event has been cancelled"))
 
 def makeEventCancellationMsg(ev,vol):
-    msg = '''An event you committed to has been cancelled. You do not need to go to {} at {} on {}.
-    Thank you for being willing to help!'''.\
+    msg = _('''An event you committed to has been cancelled. You do not need to go to {} at {} on {}.
+    Thank you for being willing to help!''').\
             format(ev.location,dt.date.fromtimestamp(ev.date_of_need),\
                     minutesPastMidnightToTimeString(ev.time_of_need))
     return msg
@@ -140,9 +142,9 @@ def sendEmailForEvent(nev,vol,source="MVCA"):
     emailAlerter = getEmailAlerter()
     toAddr = vol.email_address
     msg = makeMessageForEvent(nev,vol)
-    emailAlerter(message=msg,toAddr=toAddr,subject="Volunteers needed")
+    emailAlerter(message=msg,toAddr=toAddr,subject=_("Volunteers needed"))
 
-def stubEmailAlerter(message,toAddr,fromAddr="none@nowhere",subject="Volunteer alert"):
+def stubEmailAlerter(message,toAddr,fromAddr="none@nowhere",subject=l_("Volunteer alert")):
     '''
     Default email alerter - merely logs an attempt to send email.
     '''
@@ -150,7 +152,7 @@ def stubEmailAlerter(message,toAddr,fromAddr="none@nowhere",subject="Volunteer a
             format(fromAddr,toAddr,subject,message))
 
 SMTP_ALERTER = None
-def sendEmailUsingSMTP(message,toAddr,fromAddr=None,subject="Volunteer alert"):
+def sendEmailUsingSMTP(message,toAddr,fromAddr=None,subject=l_("Volunteer alert")):
     '''
     An alerter that sends via a configured SMTP server.
     '''
@@ -265,9 +267,9 @@ def makeMessageForEvent(nev,vol,source='MVCA'):
     uuid = makeUUIDForAlert(nev,vol)
     link = "{}/sms_response?uuid={}&action=accept".format(MVCA_SITE,uuid)
     dlink = "{}/sms_response?uuid={}&action=refuse".format(MVCA_SITE,uuid)
-    msg = ("This is {}. We have a need for {} volunteer(s) at {} {}. Purpose: {}. "\
-            +"Location: {}. Can you help? Call {} {} or click link to commit: {}. "\
-            +"Or click to ignore: {}").format(source,\
+    msg = (_("This is {}. We have a need for {} volunteer(s) at {} {}. Purpose: {}. ")\
+            +_("Location: {}. Can you help? Call {} {} or click link to commit: {}. ")\
+            +_("Or click to ignore: {}")).format(source,\
             n_vols,\
             minutesPastMidnightToTimeString(at_time),\
             at_date,

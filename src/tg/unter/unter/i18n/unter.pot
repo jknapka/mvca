@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: unter 0.1\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2019-04-25 22:16-0600\n"
+"POT-Creation-Date: 2019-04-25 23:45-0600\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -16,6 +16,96 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.6.0\n"
+
+#: unter/controllers/alerts.py:79
+msgid "Thank you for responding, {}. "
+msgstr ""
+
+#: unter/controllers/alerts.py:82
+msgid "Please go to {} at {} on {}. You will receive a reminder one hour beforehand."
+msgstr ""
+
+#: unter/controllers/alerts.py:86
+msgid ""
+"Enough volunteers have responded already, so you do not need to attend this "
+"event. "
+msgstr ""
+
+#: unter/controllers/alerts.py:87
+msgid "If someone cancels, we may contact you again. Thank you for being "
+msgstr ""
+
+#: unter/controllers/alerts.py:88
+msgid "willing to help!"
+msgstr ""
+
+#: unter/controllers/alerts.py:108
+msgid "Volunteer {} cannot serve at your event {} {} at {}"
+msgstr ""
+
+#: unter/controllers/alerts.py:127
+msgid "An event has been cancelled"
+msgstr ""
+
+#: unter/controllers/alerts.py:130
+msgid ""
+"An event you committed to has been cancelled. You do not need to go to {} at "
+"{} on {}.\n"
+"    Thank you for being willing to help!"
+msgstr ""
+
+#: unter/controllers/alerts.py:143 unter/templates/event_details.xhtml:22
+#: unter/templates/event_renderer.xhtml:56
+msgid "Volunteers needed"
+msgstr ""
+
+#: unter/controllers/alerts.py:145 unter/controllers/alerts.py:153
+msgid "Volunteer alert"
+msgstr ""
+
+#: unter/controllers/alerts.py:268
+msgid "This is {}. We have a need for {} volunteer(s) at {} {}. Purpose: {}. "
+msgstr ""
+
+#: unter/controllers/alerts.py:269
+msgid "Location: {}. Can you help? Call {} {} or click link to commit: {}. "
+msgstr ""
+
+#: unter/controllers/alerts.py:270
+msgid "Or click to ignore: {}"
+msgstr ""
+
+#: unter/controllers/need.py:27
+msgid "Checking need event {} {}"
+msgstr ""
+
+#: unter/controllers/need.py:29
+msgid "  This event is fully-served, no alerts necessary."
+msgstr ""
+
+#: unter/controllers/need.py:32
+msgid "  Alertable vols for {}: {}"
+msgstr ""
+
+#: unter/controllers/need.py:37
+msgid "Checking need events at {}"
+msgstr ""
+
+#: unter/controllers/need.py:60
+msgid "Adding response for {} event {}."
+msgstr ""
+
+#: unter/controllers/need.py:67
+msgid "Response {} already present for {} event {}."
+msgstr ""
+
+#: unter/controllers/need.py:78
+msgid "Removing decommitment for {} event {}."
+msgstr ""
+
+#: unter/controllers/need.py:112
+msgid "Cannot decommit - user or event missing."
+msgstr ""
 
 #: unter/controllers/root.py:123
 #, python-format
@@ -93,8 +183,8 @@ msgstr ""
 
 #: unter/controllers/root.py:379
 msgid ""
-"If you entered a known email address, you will receive a\n"
-"password reset link message at that address. Search for 'MVCA' in your inbox."
+"If you entered a known email address, you will receive a password reset link\n"
+"message at that address. Search for 'MVCA' in your inbox."
 msgstr ""
 
 #: unter/controllers/root.py:397
@@ -240,6 +330,22 @@ msgstr ""
 
 #: unter/controllers/secure.py:27
 msgid "Secure Controller here"
+msgstr ""
+
+#: unter/controllers/util.py:15
+msgid "take people to the airport"
+msgstr ""
+
+#: unter/controllers/util.py:32
+msgid "Thing:"
+msgstr ""
+
+#: unter/controllers/util.py:97
+msgid "DEFAULT NOTE"
+msgstr ""
+
+#: unter/controllers/util.py:100
+msgid "Nowhere"
 msgstr ""
 
 #: unter/templates/about.xhtml:3 unter/templates/data.xhtml:3
@@ -839,10 +945,6 @@ msgstr ""
 
 #: unter/templates/event_details.xhtml:21
 msgid "Persons in need"
-msgstr ""
-
-#: unter/templates/event_details.xhtml:22 unter/templates/event_renderer.xhtml:56
-msgid "Volunteers needed"
 msgstr ""
 
 #: unter/templates/event_details.xhtml:23 unter/templates/volunteer_info.xhtml:34

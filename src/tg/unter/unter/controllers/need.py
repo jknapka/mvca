@@ -6,6 +6,11 @@ import logging
 import sys
 import datetime as dt
 
+from tg.i18n import ugettext, lazy_ugettext
+_ = ugettext
+l_ = lazy_ugettext
+import tg
+
 import unter.model as model
 import unter.controllers.alerts as alerts
 from unter.controllers.util import Thing
@@ -16,24 +21,31 @@ def debug(msg):
 def debugTest(msg):
     logging.getLogger("unter.test").debug(msg)
 
+def setup_i18n():
+    if not tg.request:
+        global _, l_
+        _ = lambda x: x
+        l_ = lambda x: x
+
 def checkOneEvent(dbsession,ev_id,honorLastAlertTime=True):
+    setup_i18n()
     nev = dbsession.query(model.NeedEvent).filter_by(neid=ev_id).first()
     if nev is not None:
         notes = nev.notes
     else:
         logging.getLogger('unter.need').info("No such event ID {}".format(ev_id))
         return
-    debugTest("Checking need event {} {}".format(ev_id,notes))
+    debugTest(_("Checking need event {} {}").format(ev_id,notes))
     if isFullyServed(dbsession,nev):
-        debugTest("  This event is fully-served, no alerts necessary.")
+        debugTest(_("  This event is fully-served, no alerts necessary."))
         return
     vols = getAlertableVolunteers(dbsession,nev)
-    debugTest("  Alertable vols for {}: {}".format(nev.notes,[v.user_name for v in vols]))
+    debugTest(_("  Alertable vols for {}: {}").format(nev.notes,[v.user_name for v in vols]))
     alerts.sendAlerts(vols,nev,honorLastAlertTime=honorLastAlertTime)
     dbsession.flush()
 
 def checkValidEvents(dbsession,when=None):
-    print("Checking need events at {}".format(when))
+    debug(_("Checking need events at {}").format(when))
     nevs = dbsession.query(model.NeedEvent).filter_by(complete=0).all()
     for nev in nevs:
         checkOneEvent(dbsession,nev.neid)
@@ -56,14 +68,14 @@ def commit_volunteer(dbsession,user,nev):
     if vcom is None:
         # Only respond if the event is not already fully-served.
         if len(nev.responses) < nev.volunteer_count:
-            logging.getLogger('unter.root').info('Adding response for {} event {}.'.format(user.user_name,nev.neid))
+            logging.getLogger('unter.need').info(_('Adding response for {} event {}.').format(user.user_name,nev.neid))
             vresp = model.VolunteerResponse(user_id=user.user_id,neid=nev.neid)
             model.DBSession.add(vresp)
             alerts.sendConfirmationAlert(user,nev,confirming=True)
         else:
             alerts.sendConfirmationAlert(user,nev,confirming=False)
     else:
-        logging.getLogger('unter.root').info('Response {} already present for {} event {}.'.format(vcom.vrid,user.user_name,nev.neid))
+        logging.getLogger('unter.need').info(_('Response {} already present for {} event {}.').format(vcom.vrid,user.user_name,nev.neid))
 
     # Remove any decommitments for this user/event.
     # Even if a volunteer is redundant (because the event is
@@ -74,7 +86,7 @@ def commit_volunteer(dbsession,user,nev):
     # alerted in that case.
     vdcs = model.DBSession.query(model.VolunteerDecommitment).filter_by(user_id=user.user_id).filter_by(neid=nev.neid).all()
     if len(vdcs) > 0:
-        logging.getLogger('unter.root').info('Removing decommitment for {} event {}.'.format(user.user_name,nev.neid))
+        logging.getLogger('unter.need').info(_('Removing decommitment for {} event {}.').format(user.user_name,nev.neid))
     for vdc in vdcs:
         model.DBSession.delete(vdc)
 
@@ -108,7 +120,7 @@ def decommit_volunteer(dbsession,vcom=None,user=None,ev=None):
     if alertCoord:
         alerts.sendCoordDecommitAlert(vresp.user,vresp.need_event)
     if vresp.user is None or vresp.need_event is None:
-        raise Exception("Cannot decommit - user or event missing.")
+        raise Exception(_("Cannot decommit - user or event missing."))
     existingDecommit = dbsession.query(model.VolunteerDecommitment).filter_by(user_id=vresp.user.user_id).\
             filter_by(neid=vresp.need_event.neid).first()
     if existingDecommit is None:
