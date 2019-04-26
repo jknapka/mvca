@@ -33,8 +33,24 @@ to respond to events for *other* volunteers? Probably not?
 ----------
 ISSUES
 
-) Provide a configurable site name and use [SITE_NAME] in
-alert emails and SMSs.
+) It would be really good to provide a Spanish-language version of
+the entire site. I am totally unqualified to do that, from a
+language perspective. Providing "es" versions of templates should
+be natively supported by TurboGears, so all I need is translation
+assistance there. Internationalizing resource strings (eg for
+dynamically-generated SMS messages) will require more effort.
+
+) I'm considering letting Unter assume a volunteer is available
+any time, if they have not configured any available time periods.
+That way, new volunteers will start to see alerts for need events
+immediately, and some might not ever need to bother configuring
+time availabilities.  We could also include a link to the
+"configure your available times" page in each alert message (but
+only for users with no configured time periods).
+
+) (in progress) Provide a configurable site name and use [SITE_NAME] in
+alert emails and SMSs. (Note, we can use the tg config
+variable "project_name" for this.)
 
 ) (done) Need a "password reset" function.
 
