@@ -76,6 +76,9 @@ class RootController(BaseController):
             loggedInUser,vinfo = self.getVolunteerIdentity()
             user = model.DBSession.query(model.User).filter_by(user_id=user_id).first()
             if user is not None:
+                if (user.user_id != loggedInUser.user_id) and not util.isUserManager(loggedInUser):
+                    flash(_("You may only edit your own volunteer information."))
+                    redirect('/volunteer_info')
                 form = self.getExistingVolunteerForm(user)
                 editing = True
         if form is None:
@@ -145,12 +148,18 @@ class RootController(BaseController):
                     zipcode=form.zipcode.data)
             DBSession.add(vinfo)
 
+            # before they can respond to events.
             # Add the volunteer to the 'volunteers' group. To promote a
             # volunteer to a coordinator, add them to the 'coordinators' group
             # via the admin interface (/admin/ URL - you must be logged in as
             # 'manager' to use that).
-            volGroup = DBSession.query(model.Group).filter_by(group_name='volunteers').first()
-            volGroup.users.append(acct)
+            # EXCEPT: only do this if the logged-in user is a coordinator
+            # or manager.
+            user,vinfo = self.getVolunteerIdentity()
+            if user is not None:
+                if util.isUserManager(user):
+                    volGroup = DBSession.query(model.Group).filter_by(group_name='volunteers').first()
+                    volGroup.users.append(acct)
 
             if not request.identity:
                 flash(_("Please log in and let us know when you are available."))

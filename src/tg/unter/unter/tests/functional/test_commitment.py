@@ -23,10 +23,7 @@ class TestCommitment(TestController):
         self.setupDB()
 
     def test_decommit(self):
-        '''
-        Check that a user can de-commit from an event to which
-        they have responded.
-        '''
+        ''' A user can de-commit from an event to which they have responded.  '''
         # Check that the commitment exists.
         u = model.DBSession.query(model.User).filter_by(user_name="testy").first()
         ok_(u is not None)
@@ -60,12 +57,7 @@ class TestCommitment(TestController):
         ok_(vdecom is not None)
 
     def test_decommit_with_no_response(self):
-        '''
-        Check that a user can decommit from an event without
-        first responding to it (eg to say: "While I would normally
-        be available to serve this event, for contingent reasons
-        I cannot in fact do so").
-        '''
+        ''' A user can decommit from an event without first responding to it. '''
         # Check that neither a response nor a decommit exists.
         u = model.DBSession.query(model.User).filter_by(user_name="testy").first()
         ok_(u is not None)

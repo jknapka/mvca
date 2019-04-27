@@ -76,7 +76,7 @@ class TestNeedEvent(TestController):
 
     def test_1_CarlaExists(self):
         '''
-        Check that Carla the coordinator exists.
+        Carla the coordinator exists.
         '''
         carla = self.session.query(model.User).filter_by(user_name='carla').first()
         ok_(carla is not None)
@@ -86,8 +86,7 @@ class TestNeedEvent(TestController):
 
     def test_2_AirportNeedEvent_1(self):
         '''
-        Check that we find the correct volunteers to alert for
-        a given need event.
+        We find the correct volunteers to alert for a given need event.
         '''
         nev = self.createAirportNeed(self.getUser(self.session,'carla'))
 
@@ -123,9 +122,7 @@ class TestNeedEvent(TestController):
 
 
     def test_3_AirportNeedEvent_2(self):
-        '''
-        Check that getAlertableVolunteers() works as expected.
-        '''
+        ''' GetAlertableVolunteers() works as expected.  '''
         nev = self.createAirportNeed(self.getUser(self.session,'carla'))
 
         volunteers = need.getAlertableVolunteers(self.session,nev)
@@ -135,11 +132,7 @@ class TestNeedEvent(TestController):
         ok_('velma' in names)
 
     def test_4_AlertAirportNeed(self):
-        '''
-        Check that alerts:
-        1) Are sent when the event is new.
-        2) Are not sent if the event was alerted within the past 4 hours.
-        '''
+        ''' Alerts: 1) Are sent when the event is new.  2) Are not sent if the event was alerted within the past 4 hours.  '''
         nev = self.createAirportNeed(self.getUser(self.session,'carla'))
         volunteers = need.getAlertableVolunteers(self.session,nev)
 

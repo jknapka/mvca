@@ -35,16 +35,14 @@ class TestNeedEventsPage(TestController):
             transaction.commit()
 
     def test_0_alertAllLink(self):
-        '''
-        Check that the "Send event alerts" link appears.
-        '''
+        ''' The "Send event alerts" link appears.  '''
         env = {'REMOTE_USER':'carla'}
         resp = self.app.get('/need_events?complete=0',extra_environ=env,
                 status=200)
         ok_('Send alerts for all' in resp.text,resp.text)
 
     def test_1_alerts1(self):
-        ''' Check that we alert only non-fully-staffed events. '''
+        ''' We alert only non-fully-staffed events. '''
         try:
             self.createResponse('veronica','Veronica only bus 1')
             self.createResponse('velma','Veronica or Velma airport')

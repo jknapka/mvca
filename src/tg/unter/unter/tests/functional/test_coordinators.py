@@ -74,8 +74,7 @@ class TestCoordPage(TestController):
 
     def test_3_alerts1(self):
         '''
-        Check that appropriate people are alerted when we send
-        alerts.
+        Appropriate people are alerted when we send alerts.
         '''
         nev = model.DBSession.query(model.NeedEvent).filter_by(\
                 notes="Veronica or Velma airport").first()
