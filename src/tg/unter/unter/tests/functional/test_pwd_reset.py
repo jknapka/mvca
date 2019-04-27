@@ -102,7 +102,7 @@ class TestPasswordResets(TestController):
         ok_("/login" in resp,resp)
 
     def test_1_passwordResetWithNoUUIDFails(self):
-        ''' Check that a reset attempt with no matching UUID fails.'''
+        ''' A reset attempt with no matching UUID fails.'''
         v = self.getUser(model.DBSession,'veronica')
         v_pwd = v.password # This is just a hash, but we need to compare it later.
         email = v.email_address
@@ -145,7 +145,7 @@ class TestPasswordResets(TestController):
         ok_('not authorized' in resp.text,resp.text)
 
     def test_2_passwordResetWithWrongUserFails(self):
-        ''' Check that a reset attempt with an incorrect user ID fails.'''
+        ''' A reset attempt with an incorrect user ID fails.'''
         v = self.getUser(model.DBSession,'veronica')
         v_pwd = v.password # This is just a hash, but we need to compare it later.
         email = v.email_address
@@ -188,7 +188,7 @@ class TestPasswordResets(TestController):
         ok_('not authorized' in resp.text,resp.text)
 
     def test_3_passwordResetTooEarlyFails(self):
-        ''' Check that a reset attempt before the min reset interval elapses fails.'''
+        ''' A reset attempt before the min reset interval elapses fails.'''
         v = self.getUser(model.DBSession,'veronica')
         v_pwd = v.password # This is just a hash, but we need to compare it later.
         email = v.email_address
@@ -249,7 +249,7 @@ class TestPasswordResets(TestController):
         eq_('/reset_pwd_post',form[0].get('action'),form[0])
 
     def test_4_passwordResetTooLateFails(self):
-        ''' Check that a reset attempt with an expired link fails.'''
+        ''' A reset attempt with an expired link fails.'''
         v = self.getUser(model.DBSession,'veronica')
         v_pwd = v.password # This is just a hash, but we need to compare it later.
         email = v.email_address
@@ -298,7 +298,7 @@ class TestPasswordResets(TestController):
         eq_(0,len(ruuids),"There's a stray password UUID left.")
 
     def test_5_passwordResetLinksUsableOnceOnly(self):
-        ''' Check that password reset links are usable only once. '''
+        ''' Password reset links are usable only once. '''
         v = self.getUser(model.DBSession,'veronica')
         v_pwd = v.password # This is just a hash, but we need to compare it later.
         email = v.email_address
@@ -368,8 +368,7 @@ class TestPasswordResets(TestController):
         ok_("not authorized" in resp.text,resp.text)
 
     def test_6_onlyOnePwdResetPerUser(self):
-        ''' Check that we only allow one password reset attempt to be
-        outstanding for any particular user. '''
+        ''' We only allow one password reset attempt to be outstanding for any particular user. '''
         alerts.MAX_PWD_RESET_INTERVAL = 1
 
         v = self.getUser(model.DBSession,'veronica')

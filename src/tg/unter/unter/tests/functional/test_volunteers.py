@@ -51,7 +51,7 @@ class TestVolunteers(TestController):
 
     def test_0_fullyServed(self):
         '''
-        Check that we can tell when an event is fully-served by volunteers.
+        We can tell when an event is fully-served by volunteers.
         '''
         try:
             # Velma responds.
@@ -70,8 +70,7 @@ class TestVolunteers(TestController):
 
     def test_0_getAvailableEventsForVeronica(self):
         '''
-        Check that getAvailableEventsForVolunteer() gets Veronica's
-        available events correctly.
+        getAvailableEventsForVolunteer() gets Veronica's available events correctly.
         '''
         v = model.DBSession.query(model.User).filter_by(user_name='veronica').first()
         evs = need.getAvailableEventsForVolunteer(model.DBSession,v)
@@ -85,8 +84,7 @@ class TestVolunteers(TestController):
 
     def test_1_seeEventsAvailableToVeronica(self):
         '''
-        Check that Veronica can see the events she may be
-        available to serve.
+        Veronica can see the events she may be available to serve.
         '''
         environ = {'REMOTE_USER': 'veronica'}
         response = self.app.get('/volunteer_info',extra_environ=environ, status=200)
@@ -99,8 +97,7 @@ class TestVolunteers(TestController):
 
     def test_2_doNotSeeRespondedEvents(self):
         '''
-        Check that if Veronica responds to an event, she no longer sees
-        that event as one she can respond to.
+        If Veronica responds to an event, she no longer sees that event as one she can respond to.
         '''
         # Veronica responds:
         # (Since we're not in app contest we must manage the txn.)
@@ -123,10 +120,7 @@ class TestVolunteers(TestController):
         ok_('Veronica only airport' in response.text,"Missing event: Veronica only airport: "+availableStr)
 
     def test_3_doNotSeeOverlappingEvents(self):
-        '''
-        Check that if Veronica responds to an event, she no longer sees
-        overlapping events as ones she can respond to.
-        '''
+        ''' Volunteers no longer see overlapping events as respondable.  '''
         # Veronica responds:
         # (Since we're not in app contest we must manage the txn.)
         try:
@@ -150,11 +144,7 @@ class TestVolunteers(TestController):
         ok_('Veronica only bus 2' not in response.text,"Unexpected event: Veronica only bus 2: "+availableStr)
 
     def test_4_doNotSeeFullyServedEvents(self):
-        '''
-        Check that if an event Veronica would otherwise be available for
-        is already fully-served by other volunteers, she does not see it
-        anywhere on her volunteer page.
-        '''
+        ''' Volunteers do not see fully-served events as repsondable.  '''
         # Velma responds:
         # (Since we're not in app contest we must manage the txn.)
         try:

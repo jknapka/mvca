@@ -42,7 +42,7 @@ class TestPromotions(TestController):
             transaction.commit()
 
     def test_0_managersHavePromotionLinks(self):
-        ''' Check that promotion links appear in the "manager" view of volunteer_info. '''
+        ''' Promotion links appear in the "manager" view of volunteer_info. '''
         resp = self.app.get("/add_volunteer_start?user_id=6",
                 extra_environ={'REMOTE_USER':'manager'},
                 status=200)
@@ -50,7 +50,7 @@ class TestPromotions(TestController):
         ok_('Promote volunteer to manager' in resp.text,resp.text)
 
     def test_1_noPromotionLinksForCoords(self):
-        ''' Check that promotion links DO NOT appear in the "coordinator" view of volunteer_info. '''
+        ''' Promotion links DO NOT appear in the "coordinator" view of volunteer_info. '''
         resp = self.app.get("/add_volunteer_start?user_id=6",
                 extra_environ={'REMOTE_USER':'carla'},
                 status=200)
@@ -58,7 +58,7 @@ class TestPromotions(TestController):
         ok_('Promote volunteer to manager' not in resp.text,resp.text)
 
     def test_2_noPromotionLinksForVolunteers(self):
-        ''' Check that promotion links DO NOT appear in the "volunteer" view of volunteer_info. '''
+        ''' Promotion links DO NOT appear in the "volunteer" view of volunteer_info. '''
         u = model.DBSession.query(model.User).filter_by(user_id=6).first()
         user_name = u.user_name
         resp = self.app.get("/add_volunteer_start?user_id=6",
@@ -68,7 +68,7 @@ class TestPromotions(TestController):
         ok_('Promote volunteer to manager' not in resp.text,resp.text)
 
     def test_3_promotionToCoord(self):
-        ''' Check that promotion to coordinator works. '''
+        ''' Promotion to coordinator works. '''
         u = model.DBSession.query(model.User).filter_by(user_id=6).first()
         ok_('manage_events' not in [p.permission_name for p in u.permissions],u.permissions)
         resp = self.app.get("/promote_to_coordinator?user_id=6",
@@ -78,7 +78,7 @@ class TestPromotions(TestController):
         ok_('manage_events' in [p.permission_name for p in u.permissions],u.permissions)
 
     def test_4_promotionToManager(self):
-        ''' Check that promotion to manager works. '''
+        ''' Promotion to manager works. '''
         u = model.DBSession.query(model.User).filter_by(user_id=6).first()
         ok_('manage' not in [p.permission_name for p in u.permissions],u.permissions)
         resp = self.app.get("/promote_to_manager?user_id=6",
@@ -88,7 +88,7 @@ class TestPromotions(TestController):
         ok_('manage' in [p.permission_name for p in u.permissions],u.permissions)
 
     def test_5_noPromoteToCoordLinkForCoords(self):
-        ''' Check that when viewing a coordinator there is no "Promote to coord" link. '''
+        ''' When viewing a coordinator there is no "Promote to coord" link. '''
         resp = self.app.get('/add_volunteer_start?user_id=3',
                 extra_environ={'REMOTE_USER':'manager'},
                 status=200)
@@ -96,7 +96,7 @@ class TestPromotions(TestController):
         ok_('Promote volunteer to manager' in resp.text,resp.text)
 
     def test_6_noPromoteToManagerLinkForManagers(self):
-        ''' Check that when viewing a manager there is no "Promote to manager" link. '''
+        ''' When viewing a manager there is no "Promote to manager" link. '''
         resp = self.app.get('/add_volunteer_start?user_id=1',
                 extra_environ={'REMOTE_USER':'manager'},
                 status=200)

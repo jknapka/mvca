@@ -118,7 +118,7 @@ class TestMultiAlerts(TestController):
         eq_(3,len(auuids),"After response: Expected 3 alerts, saw {}".format(len(auuids)))
 
     def test_2_twoVolunteersRespondToOneVolEvent(self):
-        ''' Check that when 2 volunteers respond and only one is needed, the extra gets a "No thanks" alert.
+        ''' When 2 volunteers respond and only one is needed, the extra gets a "No thanks" alert.
             Also check that the first respondent gets a confirmation alert.
         '''
         env = {'REMOTE_USER':'velma'}
@@ -139,7 +139,7 @@ class TestMultiAlerts(TestController):
         ok_("Please go to location 1" not in alerts,alerts)
 
     def test_3_oneVolunteerRespondsToTwoVolEvent(self):
-        ''' Check that when only one volunteer responds to an event needing two, others receive alerts.'''
+        ''' When only one volunteer responds to an event needing two, others receive alerts.'''
         env = {'REMOTE_USER':'velma'}
         self.app.get('/respond?neid=2',extra_environ=env,status=302)
 

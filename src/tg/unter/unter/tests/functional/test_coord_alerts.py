@@ -49,7 +49,7 @@ class TestCoordinatorAlerts(TestController):
         alerts.SMS_ENABLED = True
 
     def test_0_decommitCommittedVolAlertsCoord(self):
-        ''' Check that a volunteer leaving an event they've committed to alerts the coordinator. '''
+        ''' A volunteer leaving an event they've committed to alerts the coordinator. '''
         # Veronica commits.
         env = {'REMOTE_USER':'veronica'}
         self.app.get('/respond?neid=1',extra_environ=env,status=302)
@@ -73,7 +73,7 @@ class TestCoordinatorAlerts(TestController):
         ok_('Veronica cannot serve' in alerts,alerts)
 
     def test_1_decommitUncommittedVolNoAlert(self):
-        ''' Check that a volunteer refusing an event they're not committed to generates no alerts.'''
+        ''' A volunteer refusing an event they're not committed to generates no alerts.'''
         env = {'REMOTE_USER':'veronica'}
         self.app.get('/decommit?neid=1',extra_environ=env,status=302)
 

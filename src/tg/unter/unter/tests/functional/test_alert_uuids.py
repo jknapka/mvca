@@ -76,7 +76,7 @@ class TestAlertUUIDs(TestController):
         model.DBSession.flush()
 
     def test_0_alertsCreateUUIDs(self):
-        ''' Check that sending an alert creates a UUID for the user and event. '''
+        ''' Sending an alert creates a UUID for the user and event. '''
         try:
             # We must manually manage transactions - no app context.
             self.sendAlert()
@@ -95,7 +95,7 @@ class TestAlertUUIDs(TestController):
             transaction.commit()
 
     def test_1_deleteEventDeletesUUIDs(self):
-        ''' Check that deleting an event deletes associated UUID rows. '''
+        ''' Deleting an event deletes associated UUID rows. '''
         try:
             model.DBSession.flush() # So we get a valid neid for self.ev.
             ev = model.DBSession.query(model.NeedEvent).filter_by(neid=self.ev.neid).first()
@@ -122,7 +122,7 @@ class TestAlertUUIDs(TestController):
             transaction.commit()
 
     def test_2_alertLinksUseUUIDs(self):
-        ''' Check that alert texts contain UUIDs and not user or event IDs in URLs. '''
+        ''' Alert texts contain UUIDs and not user or event IDs in URLs. '''
         try:
             self.sendAlert()
         except:
@@ -140,7 +140,7 @@ class TestAlertUUIDs(TestController):
         ok_('neid' not in alerts,"Event ID should not be present in alert log.")
 
     def test_3_alertAcceptLinkCreatesResponse(self):
-        ''' Check that an "accept" alert link creates a response row. '''
+        ''' An "accept" alert link creates a response row. '''
         try:
             self.sendAlert()
         except:
@@ -170,7 +170,7 @@ class TestAlertUUIDs(TestController):
         eq_(len(vresps),1,"No VolunteerResponse objects exist.")
 
     def test_4_alertRefuseLinkCreatesDecommit(self):
-        ''' Check that a "refuse" alert link creates a decommitment row. '''
+        ''' A "refuse" alert link creates a decommitment row. '''
         try:
             self.sendAlert()
         except:
@@ -200,7 +200,7 @@ class TestAlertUUIDs(TestController):
         eq_(len(vresps),1,"No VolunteerDecommitment objects exist.")
 
     def test_5_acceptLinksReusable(self):
-        ''' Check that "accept" links in alerts can be safely triggered multiple times. '''
+        ''' "accept" links in alerts can be safely triggered multiple times. '''
         try:
             self.sendAlert()
         except:
@@ -236,7 +236,7 @@ class TestAlertUUIDs(TestController):
         eq_(len(vresps),1,"Wrong number of VolunteerResponse objects exist.")
 
     def test_6_refuseLinksResusable(self):
-        ''' Check that a "refuse" alert link can be safely triggered multiple times.'''
+        ''' A "refuse" alert link can be safely triggered multiple times.'''
         try:
             self.sendAlert()
         except:
@@ -272,7 +272,7 @@ class TestAlertUUIDs(TestController):
         eq_(len(vresps),1,"Wrong number of VolunteerDecommitment objects exist. Found {}, expected {}.".format(len(vresps),1))
 
     def test_7_usersCanChangeTheirMindsAfterAccepting(self):
-        ''' Check that users can change their minds after accepting. '''
+        ''' Users can change their minds after accepting. '''
         try:
             self.sendAlert()
         except:
@@ -322,7 +322,7 @@ class TestAlertUUIDs(TestController):
         eq_(len(vresps),1,"Wrong number of VolunteerDecommitment objects exist {}.".format(len(vresps)))
 
     def test_8_usersCanChangeTheirMindsAfterRefusing(self):
-        ''' Check that users can change their minds after refusing. '''
+        ''' Users can change their minds after refusing. '''
         try:
             self.sendAlert()
         except:
