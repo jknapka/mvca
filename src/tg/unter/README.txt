@@ -6,6 +6,44 @@ something like the "Migrant Volunteer Coordination Assistant",
 but I was thinking of "Unter" as a pun on the Uber ride-
 sharing service.
 
+Unter supports the following functions:
+
+* Registering volunteers and allowing volunteers to indicate
+  times during the week when they are available to serve.
+
+* Registering coordinators who can create "need events"
+  describing needs for volunteer services at particular
+  dates and times.
+
+* Alerting volunteers when an event needs volunteer help
+  during a date and time when they have indicated they
+  are available.
+
+* Allows volunteers to respond to need events, thereby
+  committing to serve the need.
+
+* Allows coordinators to see which events require volunteer
+  commitment, and which already have committed volunteers.
+
+* Allows coordinators (but not other volunteers) to see
+  contact information for any volunteer.
+
+* Unter intentionally does *not* track the identities of
+  the people being served by volunteer activities. Each
+  event will have a free-text field where coordinators
+  can record relevant identifying information, but the
+  event records will be thrown away when the event
+  is complete. For one thing, we want to avoid endangering
+  clients by keeping too much of a paper trail that might
+  be used by unwelcome authorities to track people; and
+  for another, we don't want to create a lot of pointless
+  administrative labor for coordinators. Creating an
+  event should be a one-minute-or-less activity.
+
+* Unter intentionally tracks only the minimum necessary
+  information for users (coordinators and volunteers) -
+  just email addresses and phone numbers.
+
 QUESTIONS:
 
 1) Should coordinators be able to de-commit a volunteer from
@@ -32,6 +70,10 @@ to respond to events for *other* volunteers? Probably not?
 
 ----------
 ISSUES
+
+) Initial volunteers need to be approved by a coordinator before
+they are activated as volunteers. We may as well require a
+password confirmation email, also.
 
 ) It would be really good to provide a Spanish-language version of
 the entire site. I am totally unqualified to do that, from a
@@ -82,32 +124,10 @@ variable "project_name" for this.)
 	periodically.
 ----------
 
-Unter supports the following functions:
-
-* Registering volunteers and allowing volunteers to indicate
-  times during the week when they are available to serve.
-
-* Registering coordinators who can create "need events"
-  describing needs for volunteer services at particular
-  dates and times.
-
-* Alerting volunteers when an event needs volunteer help
-  during a date and time when they have indicated they
-  are available.
-
-* Allows volunteers to respond to need events, thereby
-  committing to serve the need.
-
-* Allows coordinators to see which events require volunteer
-  commitment, and which already have committed volunteers.
-
-* Allows coordinators (but not other volunteers) to see
-  contact information for any volunteer.
-
 TO DO (some complete - this is just a place to track
 work-in-progress now):
 
-) Volunteers should be able to see and respond only to
+) (done) Volunteers should be able to see and respond only to
 events that are active and not already fully-staffed by
 volunteers.
 
@@ -143,7 +163,7 @@ Story (DONE): Veronica the Volunteer logs into Unter.
 	decommit by clicking. Currently the format of those links
 	is "/respond?user_id=U&neid=N". This is bad, those URLs are
 	easily guessable. What we should actually do is generate a
-	GUID for each user/event combination, store it associated
+	UUID for each user/event combination, store it associated
 	with the event and user, and use it in the URL.
   - We also want users to be able to respond (or decommit) by
 	responding to a text message. Need to check Twilio API
@@ -165,7 +185,7 @@ Story (TO BE WRITTEN)...
 are available at the time of the event and who are not
 already committed to an event will receive an alert.
 
-Story (INCOMPLETE):
+Story (DONE):
 (test_need_events.py)
   - (done) Carla creates a need event for a family needing
     a ride to the airport on Sunday morning at 10:00 AM, which
@@ -176,7 +196,7 @@ Story (INCOMPLETE):
   - (done) Veronica and Velma have not committed to any events that
     overlap the interval from 10:00 AM to 11:00 AM on Sunday 
     morning, so they should receive alerts. 
-  - (pending) Alerts are sent via email, and via text (if the volunteer
+  - (done) Alerts are sent via email, and via text (if the volunteer
     has indicated text alert preference).
   - (done) Volunteer phone numbers are visible on the event
     page to logged-in coordinators, so they can make confirmation
@@ -188,8 +208,7 @@ Story (INCOMPLETE):
     who commit to the events.
 
 ) Check that we can issue alerts for existing events as
-needed and that case (1) is handled correctly for each
-event. That is, we want to be able to issue alerts not only
+needed. That is, we want to be able to issue alerts not only
 for new events, but for existing events that are not
 yet claimed by volunteers.
 
@@ -223,7 +242,7 @@ for which no volunteers have committed.
     she just sent an alert for that specific event, in
     the story above).
   - (done) NOTE: Show events in reverse temporal order on the event page.
-  - Also provide a "today's events only" link.
+  - Provide a "today's events only" link.
   - The "events for day" page should allow forward and backward navigation
 	by day, and allow choosing a specific day.
   - CONSIDER: avoid alerting *volunteers* who have been alerted
@@ -235,6 +254,16 @@ for which no volunteers have committed.
 ) Allow coordinators manage volunteers.
 
 Story (NOT STARTED):
+	- A volunteer registers themself via the "Add volunteer" page.
+    - They are NOT treated as a regular volunteer until a coordinator
+	  approves them. This means:
+      - They do not receive event alerts.
+      - They cannot see the list of active events.
+      - They cannot see any other users' information.
+      - They CAN see and edit their own information,
+		including available time periods.
+
+Story (DONE):
 	- A new person (Vespa) comes to Carla's site to volunteer.
     - Carla takes their information and uses the "add volunteer"
 	  page to add Vespa to the volunteer DB.
