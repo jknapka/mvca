@@ -11,6 +11,9 @@ from tg.util import Bunch
 
 from unter import model
 
+import unter.controllers.alerts as alerts
+import unter.controllers.need as need
+
 import datetime as dt
 from io import StringIO
 
@@ -18,6 +21,15 @@ __all__ = ['setup_app', 'setup_db', 'teardown_db', 'TestController']
 
 application_name = 'main_without_authn'
 
+# Don't break due to missing i18n context. All tests look for
+# English strings.
+def fake_(x):
+    ''' Fake underscore for tests. '''
+    return x
+#alerts._ = fake_
+#alerts.l_ = fake_
+#need._ = fake_
+#need.l_ = fake_
 
 def load_app(name=application_name):
     """Load the test application."""

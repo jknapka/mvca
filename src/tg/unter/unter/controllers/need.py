@@ -6,14 +6,11 @@ import logging
 import sys
 import datetime as dt
 
-from tg.i18n import ugettext, lazy_ugettext
-_ = ugettext
-l_ = lazy_ugettext
-import tg
-
 import unter.model as model
 import unter.controllers.alerts as alerts
 from unter.controllers.util import Thing
+
+from unter.controllers.i18n import FAKE_ as _, FAKEl_ as l_
 
 def debug(msg):
     logging.getLogger(__name__).debug(msg)
@@ -21,14 +18,7 @@ def debug(msg):
 def debugTest(msg):
     logging.getLogger("unter.test").debug(msg)
 
-def setup_i18n():
-    if not tg.request:
-        global _, l_
-        _ = lambda x: x
-        l_ = lambda x: x
-
 def checkOneEvent(dbsession,ev_id,honorLastAlertTime=True):
-    setup_i18n()
     nev = dbsession.query(model.NeedEvent).filter_by(neid=ev_id).first()
     if nev is not None:
         notes = nev.notes

@@ -13,9 +13,8 @@ from unter.controllers.util import *
 
 import unter.model as model
 
+from unter.controllers.i18n import FAKE_ as _, FAKEl_ as l_
 import tg
-
-from tg.i18n import ugettext as _, lazy_ugettext as l_
 
 __all__ = ["sendSMSUsingTwilio","stubSMSAlerter","getSMSAlerter","setSMSAlerter",
     "sendAlerts","SMS_ENABLED","EMAIL_ENABLED","MVCA_SITE","configureSMSAlerts",
@@ -28,6 +27,7 @@ SMS_ENABLED = True
 EMAIL_ENABLED = True
 
 # The base site URL to use in alerts.
+logging.getLogger('unter.alerts').debug('l_ is {}'.format(l_))
 MVCA_SITE = l_(tg.config.get('mvca.site','https://127.0.0.1'))
 
 MAX_PWD_RESET_INTERVAL = 3600
@@ -257,6 +257,8 @@ def sendSmsForEvent(nev,vol,source="MVCA"):
     sendSMS(msg,destNumber=destNumber)
 
 def makeMessageForEvent(nev,vol,source='MVCA'):
+    getLogger().debug('_ is {}'.format(_))
+    getLogger().debug('l_ is {}'.format(l_))
     n_vols = nev.volunteer_count
     at_time=nev.time_of_need
     at_date=str(dt.date.fromtimestamp(nev.date_of_need))

@@ -4,7 +4,9 @@ Utility functions used in various places.
 import datetime as dt
 import logging
 
-from tg.i18n import ugettext as _, lazy_ugettext as l_
+import tg
+
+from unter.controllers.i18n import FAKE_ as _, FAKEl_ as l_
 
 from unter import model
 
