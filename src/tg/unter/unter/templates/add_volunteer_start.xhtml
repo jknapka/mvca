@@ -12,7 +12,9 @@ if requesting_user is not None:
 	rperms = [p.permission_name for p in requesting_user.permissions]
 if user is not None:
 	uperms = [p.permission_name for p in user.permissions]
+isVolunteer = ('respond_to_need' in uperms)
 isManager = ('manage' in rperms)
+isCoordinator = ('manage_events' in rperms)
 viewingCoord = ('manage_events' in uperms)
 viewingManager = ('manage' in uperms)
 viewingSelf = user is not None and requesting_user is not None and \
@@ -43,8 +45,19 @@ viewingSelf = user is not None and requesting_user is not None and \
 		</div>
 
 	<div>${fr.renderForm(form,url)}</div>
+		<span py:if="isVolunteer">This user is an activated volunteer. </span><span py:else="">
+			This volunteer is not yet activated.
+		</span>
 		<span py:if="viewingCoord">This user is a Coordinator. </span>
 		<span py:if="viewingManager">This user is a Manager.</span>
+		<a py:if="not isVolunteer and (isManager or isCoordinator)"
+			href="/approve_volunteer?user_id=${user.user_id}">
+			| Activate volunteer
+		</a>
+		<a py:if="isVolunteer and (isManager or isCoordinator)"
+			href="/deactivate_volunteer?user_id=${user.user_id}">
+			| Deactivate volunteer
+		</a>
 		<a py:if="isManager and not viewingCoord" href="/promote_to_coordinator?user_id=${user.user_id}">
 			| Promote volunteer to coordinator
 		</a>
@@ -54,8 +67,8 @@ viewingSelf = user is not None and requesting_user is not None and \
 		<a py:if="isManager and (viewingCoord or viewingManager)" href="/unpromote?user_id=${user.user_id}">
 			| Remove volunteer admin privileges
 		</a>
-		<a py:if="isManager or viewingSelf"
-															href="/remove_user?user_id=${user.user_id}">
+		<a py:if="isManager or isCoordinator or viewingSelf"
+			href="/remove_user?user_id=${user.user_id}">
 			| Delete volunteer account.
 		</a>
     

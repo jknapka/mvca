@@ -9,6 +9,10 @@ from unter import model
 def debugTest(msg):
     logging.getLogger('unter.test').debug(msg)
 
+def isUserManager(user):
+    perms = [p.permission_name for p in user.permissions]
+    return 'manage' in perms or 'manage_events' in perms
+
 def evTypeToString(evt):
     return {0:"take people to the airport",
             1:"take people to the bus station",

@@ -9,6 +9,7 @@
 import time
 perms = [p.permission_name for p in user.permissions]
 isCoordinator = 'manage_events' in perms
+isManager = 'manage_events' in perms
 all_volunteers.sort(key=lambda u: u.user_name)
     ?>
     <div class="row">
@@ -30,6 +31,7 @@ all_volunteers.sort(key=lambda u: u.user_name)
 						<th>Phone</th>
 						<th>Zip</th>
 						<th>Description</th>
+						<th>Approved volunteer?</th>
 						<th>Coordinator?</th>
 						<th>Site manager?</th>
 					</tr>
@@ -53,6 +55,15 @@ all_volunteers.sort(key=lambda u: u.user_name)
 							</a></td>
 						<td><a href="${tg.url('/volunteer_info',dict(user_id=u.user_id))}">
 							${u.vinfo.description}
+							</a></td>
+						<td><a href="${tg.url('/volunteer_info',dict(user_id=u.user_id))}">
+<?python
+perms = [p.permission_name for p in u.permissions]
+isVolunteer = 'respond_to_need' in perms
+isCoord = 'manage_events' in perms
+isManager = 'manage' in perms
+?>
+							${{True:'Yes',False:'No'}[isVolunteer or isCoord or isManager]}
 							</a></td>
 						<td><a href="${tg.url('/volunteer_info',dict(user_id=u.user_id))}">
 							${{True:'Yes',False:'No'}['manage_events' in [p.permission_name for p in u.permissions]]}
