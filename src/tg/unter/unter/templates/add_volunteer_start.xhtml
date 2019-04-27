@@ -6,11 +6,18 @@
 
   <body py:block="body" py:strip="True">
 <?python
-rperms = [p.permission_name for p in requesting_user.permissions]
-uperms = [p.permission_name for p in user.permissions]
+uperms = []
+rperms = []
+if requesting_user is not None:
+	rperms = [p.permission_name for p in requesting_user.permissions]
+if user is not None:
+	uperms = [p.permission_name for p in user.permissions]
 isManager = ('manage' in rperms)
 viewingCoord = ('manage_events' in uperms)
 viewingManager = ('manage' in uperms)
+viewingSelf = user is not None and requesting_user is not None and \
+			  user.user_id == requesting_user.user_id
+
 ?>
    <py:import href="form_renderer.xhtml" alias="fr"/>
     <div class="row">
@@ -47,7 +54,7 @@ viewingManager = ('manage' in uperms)
 		<a py:if="isManager and (viewingCoord or viewingManager)" href="/unpromote?user_id=${user.user_id}">
 			| Remove volunteer admin privileges
 		</a>
-		<a py:if="isManager or (not viewingManager and not viewingCoord and  requesting_user.user_id == user.user_id)"
+		<a py:if="isManager or viewingSelf"
 															href="/remove_user?user_id=${user.user_id}">
 			| Delete volunteer account.
 		</a>
