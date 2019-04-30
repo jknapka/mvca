@@ -51,7 +51,7 @@ viewingSelf = user is not None and requesting_user is not None and \
 		<span py:if="viewingCoord">This user is a Coordinator. </span>
 		<span py:if="viewingManager">This user is a Manager.</span>
 		<a py:if="not isVolunteer and (isManager or isCoordinator)"
-			href="/approve_volunteer?user_id=${user.user_id}">
+			href="/activate_volunteer?user_id=${user.user_id}">
 			| Activate volunteer
 		</a>
 		<a py:if="isVolunteer and (isManager or isCoordinator)"

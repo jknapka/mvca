@@ -193,6 +193,28 @@ class RootController(BaseController):
         redirect(lurl("/volunteer_info"),dict(user_id=user.user_id))
 
     @expose()
+    @require(predicates.Any(\
+            predicates.has_permission('manage_events'),\
+            predicates.has_permission('manage')))
+    def deactivate_volunteer(self,user_id):
+        u = model.DBSession.query(model.User).filter_by(user_id=user_id).first()
+        if u is not None:
+            g = model.DBSession.query(model.Group).filter_by(group_name='volunteers').first()
+            g.users.remove(u)
+        redirect(lurl("/volunteer_info"),dict(user_id=user_id))
+
+    @expose()
+    @require(predicates.Any(\
+            predicates.has_permission('manage_events'),\
+            predicates.has_permission('manage')))
+    def activate_volunteer(self,user_id):
+        u = model.DBSession.query(model.User).filter_by(user_id=user_id).first()
+        if u is not None:
+            g = model.DBSession.query(model.Group).filter_by(group_name='volunteers').first()
+            g.users.append(u)
+        redirect(lurl("/volunteer_info"),dict(user_id=user_id))
+
+    @expose()
     @require(predicates.has_permission('manage'))
     def promote_to_coordinator(self,user_id):
         self.promote(user_id,'coordinators')

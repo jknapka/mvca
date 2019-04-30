@@ -205,3 +205,88 @@ class TestAddVolunteer(TestController):
         resp = self.app.get('/add_volunteer_start?user_id={}'.format(vol_id),
                 extra_environ=env, status=200)
 
+    def test_8_managerCanEditVol(self):
+        ''' A manager can edit a volunteer. '''
+        env = {'REMOTE_USER':'manager'}
+        resp = self.app.post('/add_volunteer_post',status=302,
+                params={
+                    'user_name': 'testPerson',
+	            'display_name': 'Test Person',
+	            'pwd': 'testPwd',
+	            'pwd2': 'testPwd',
+	            'email': 'test@test.com',
+	            'phone': '9150420042',
+	            'text_alerts_ok': 'true',
+	            'zipcode': '79900',
+	            'description': 'Test user'
+                    })
+        vol = model.DBSession.query(model.User).filter_by(user_name='testPerson').first()
+        ok_(vol is not None,"Failed to create the test user")
+        vol_id = vol.user_id
+
+        resp = self.app.get('/add_volunteer_start?user_id={}'.format(vol_id),
+                extra_environ=env, status=200)
+        ok_('Activate volunteer' in resp.text,resp.text)
+        ok_('Delete volunteer account' in resp.text,resp.text)
+
+        resp = self.app.get('/add_volunteer_start?user_id={}'.format(vol_id),
+                extra_environ=env, status=200)
+
+    def test_9_activationWorks(self):
+        ''' A coordinator can activate a volunteer. '''
+        resp = self.app.post('/add_volunteer_post',status=302,
+                params={
+                    'user_name': 'testPerson',
+	            'display_name': 'Test Person',
+	            'pwd': 'testPwd',
+	            'pwd2': 'testPwd',
+	            'email': 'test@test.com',
+	            'phone': '9150420042',
+	            'text_alerts_ok': 'true',
+	            'zipcode': '79900',
+	            'description': 'Test user'
+                    })
+        vol = model.DBSession.query(model.User).filter_by(user_name='testPerson').first()
+        ok_(vol is not None,"Failed to create the test user")
+        perms = [p.permission_name for p in vol.permissions]
+        ok_('manage_events' not in perms,perms)
+        vol_id = vol.user_id
+
+        env = {'REMOTE_USER':'carla'}
+        resp = self.app.get('/activate_volunteer?user_id={}'.format(vol_id),
+                extra_environ=env, status=302)
+
+        vol = model.DBSession.query(model.User).filter_by(user_name='testPerson').first()
+        perms = [p.permission_name for p in vol.permissions]
+        ok_('manage_events' in perms,perms)
+
+    def test_10_deactivationWorks(self):
+        ''' A coordinator can deactivate a volunteer. '''
+        env = {'REMOTE_USER':'carla'}
+        resp = self.app.post('/add_volunteer_post',status=302,
+                extra_environ=env,
+                params={
+                    'user_name': 'testPerson',
+	            'display_name': 'Test Person',
+	            'pwd': 'testPwd',
+	            'pwd2': 'testPwd',
+	            'email': 'test@test.com',
+	            'phone': '9150420042',
+	            'text_alerts_ok': 'true',
+	            'zipcode': '79900',
+	            'description': 'Test user'
+                    })
+        vol = model.DBSession.query(model.User).filter_by(user_name='testPerson').first()
+        ok_(vol is not None,"Failed to create the test user")
+
+        # Created by a coordinator, so should start activated.
+        perms = [p.permission_name for p in vol.permissions]
+        ok_('manage_events' in perms,perms)
+        vol_id = vol.user_id
+
+        resp = self.app.get('/deactivate_volunteer?user_id={}'.format(vol_id),
+                extra_environ=env, status=302)
+
+        vol = model.DBSession.query(model.User).filter_by(user_name='testPerson').first()
+        perms = [p.permission_name for p in vol.permissions]
+        ok_('manage_events' not in perms,perms)
