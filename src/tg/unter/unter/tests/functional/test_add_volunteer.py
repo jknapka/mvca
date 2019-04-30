@@ -77,7 +77,7 @@ class TestAddVolunteer(TestController):
                 extra_environ=env,status=200)
         ok_('Activate volunteer' in resp.text,resp.text)
 
-    def test_3_newVolunteerHasNoPrivileges(self):
+    def test_3_volunteerCreatedByCoordIsPreApproved(self):
         ''' Newly-created volunteers created by coordinators start out activated. '''
         env = {'REMOTE_USER':'carla'}
         resp = self.app.post('/add_volunteer_post',status=302,
@@ -97,7 +97,7 @@ class TestAddVolunteer(TestController):
         ok_(vol is not None,"Failed to create the test user")
         perms = [p.permission_name for p in vol.permissions]
         ok_('respond_to_need' in perms,"Test user has no respond_to_need permission: {}".\
-                format([p.permission_name for p in vol.permissions]))
+                format(perms))
 
     def test_4_activatedVolunteersCanBeDeactivated(self):
         ''' Coordinators can deactivate volunteers.'''
@@ -153,6 +153,7 @@ class TestAddVolunteer(TestController):
         ''' Non-managers and non-coordinators can only edit themselves.'''
         env = {'REMOTE_USER':'carla'}
         resp = self.app.post('/add_volunteer_post',status=302,
+                extra_environ=env,
                 params={
                     'user_name': 'testPerson',
 	            'display_name': 'Test Person',
@@ -166,6 +167,9 @@ class TestAddVolunteer(TestController):
                     })
         vol = model.DBSession.query(model.User).filter_by(user_name='testPerson').first()
         ok_(vol is not None,"Failed to create the test user")
+        perms = [p.permission_name for p in vol.permissions]
+        ok_('respond_to_need' in perms,"Test user has no respond_to_need permission: {}".\
+                format(perms))
 
         env = {'REMOTE_USER':'testPerson'}
         resp = self.app.get('/add_volunteer_start?user_id={}'.format(vol.user_id),
@@ -249,7 +253,7 @@ class TestAddVolunteer(TestController):
         vol = model.DBSession.query(model.User).filter_by(user_name='testPerson').first()
         ok_(vol is not None,"Failed to create the test user")
         perms = [p.permission_name for p in vol.permissions]
-        ok_('manage_events' not in perms,perms)
+        ok_('respond_to_need' not in perms,perms)
         vol_id = vol.user_id
 
         env = {'REMOTE_USER':'carla'}
@@ -258,7 +262,7 @@ class TestAddVolunteer(TestController):
 
         vol = model.DBSession.query(model.User).filter_by(user_name='testPerson').first()
         perms = [p.permission_name for p in vol.permissions]
-        ok_('manage_events' in perms,perms)
+        ok_('respond_to_need' in perms,perms)
 
     def test_10_deactivationWorks(self):
         ''' A coordinator can deactivate a volunteer. '''
@@ -281,7 +285,7 @@ class TestAddVolunteer(TestController):
 
         # Created by a coordinator, so should start activated.
         perms = [p.permission_name for p in vol.permissions]
-        ok_('manage_events' in perms,perms)
+        ok_('respond_to_need' in perms,perms)
         vol_id = vol.user_id
 
         resp = self.app.get('/deactivate_volunteer?user_id={}'.format(vol_id),
@@ -289,4 +293,4 @@ class TestAddVolunteer(TestController):
 
         vol = model.DBSession.query(model.User).filter_by(user_name='testPerson').first()
         perms = [p.permission_name for p in vol.permissions]
-        ok_('manage_events' not in perms,perms)
+        ok_('respond_to_need' not in perms,perms)

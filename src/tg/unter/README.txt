@@ -453,3 +453,10 @@ While developing you may want the server to reload after changes in package file
     $ gearbox serve --reload --debug
 
 Then you are ready to go.
+
+==========
+Notes:
+
+) If you add an attribute to model.User (in model/auth.py), it will
+break test_auth.py unless you also add that attribute to the attrs dict
+in tests/models/test_auth.py:TestUser
