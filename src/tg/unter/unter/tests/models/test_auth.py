@@ -23,7 +23,11 @@ class TestUser(ModelTest):
     klass = model.User
     attrs = dict(
         user_name="ignucius",
-        email_address="ignucius@example.org"
+        email_address="ignucius@example.org",
+        phone = '0000000000',
+        text_alerts_ok = 0,
+        zipcode = '00000',
+        description = 'test user'
     )
 
     def test_obj_creation_username(self):

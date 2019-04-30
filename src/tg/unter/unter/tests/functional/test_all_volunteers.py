@@ -31,6 +31,9 @@ class TestAllVolunteers(TestController):
             transaction.abort()
         else:
             transaction.commit()
+            users = model.DBSession.query(model.User).all()
+            for u in users:
+                logging.getLogger('unter.test').info('Created user: {}'.format(u.user_name))
 
     def test_0_allVolsPage(self):
         env = {'REMOTE_USER':'carla'}

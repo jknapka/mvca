@@ -68,12 +68,12 @@ class RootController(BaseController):
         ''' Show the "Add a volunteer" page. '''
         editing = False
         user = None
-        loggedInUser,vinfo = None,None
+        loggedInUser = None
         if user_id is not None:
             user_id = int(user_id)
         if user_id is not None and request.identity:
             # We want to edit an existing volunteer.
-            loggedInUser,vinfo = self.getVolunteerIdentity()
+            loggedInUser= self.getVolunteerIdentity()
             user = model.DBSession.query(model.User).filter_by(user_id=user_id).first()
             if user is not None:
                 if (user.user_id != loggedInUser.user_id) and not util.isUserManager(loggedInUser):
@@ -95,11 +95,10 @@ class RootController(BaseController):
         form.pwd.data = ''
         form.pwd2.data = ''
         form.email.data = user.email_address
-        if user.vinfo is not None:
-            form.phone.data = user.vinfo.phone
-            form.text_alerts_ok.data = user.vinfo.text_alerts_ok == 1
-            form.zipcode.data = user.vinfo.zipcode
-            form.description.data = user.vinfo.description
+        form.phone.data = user.phone
+        form.text_alerts_ok.data = user.text_alerts_ok == 1
+        form.zipcode.data = user.zipcode
+        form.description.data = user.description
         return form
 
     @expose('unter.templates.add_volunteer_start')
@@ -117,7 +116,6 @@ class RootController(BaseController):
             email = thing.email
             pwd = thing.pwd
             pwd2 = thing.pwd2
-            print("Email is {}".format(email))
 
             existingUser = model.User.by_user_name(user_name)
             if existingUser is not None:
@@ -125,7 +123,7 @@ class RootController(BaseController):
                     # It's not OK to try to establish a new account
                     # with the same user name as an existing one.
                     return self.add_volunteer_start(form=form,error_msg='Account %s already exists'%user_name)
-                user,vinfo = self.getVolunteerIdentity()
+                user= self.getVolunteerIdentity()
                 if user.user_name == thing.user_name:
                     # It's OK for users to edit their own data.
                     self.edit_volunteer(existingUser,thing)
@@ -139,15 +137,14 @@ class RootController(BaseController):
             if len(pwd) == 0:
                 return self.add_volunteer_start(form=form,error_msg='You must provide a password.')
 
-            acct = model.User(user_name=user_name, email_address=email,display_name=form.display_name.data)
+            acct = model.User(user_name=user_name, email_address=email,display_name=form.display_name.data,
+                    description=form.description.data,
+                    phone=form.phone.data,
+                    text_alerts_ok={True:1,False:0}[form.text_alerts_ok.data],
+                    zipcode=form.zipcode.data)
             acct.password = pwd
             DBSession.add(acct)
             acct = model.User.by_email_address(email)
-
-            vinfo = model.VolunteerInfo(user_id=acct.user_id,description=form.description.data,
-                    phone=form.phone.data,text_alerts_ok={True:1,False:0}[form.text_alerts_ok.data],
-                    zipcode=form.zipcode.data)
-            DBSession.add(vinfo)
 
             # before they can respond to events.
             # Add the volunteer to the 'volunteers' group. To promote a
@@ -156,7 +153,7 @@ class RootController(BaseController):
             # 'manager' to use that).
             # EXCEPT: only do this if the logged-in user is a coordinator
             # or manager.
-            user,vinfo = self.getVolunteerIdentity()
+            user = self.getVolunteerIdentity()
             if user is not None:
                 if util.isUserManager(user):
                     volGroup = DBSession.query(model.Group).filter_by(group_name='volunteers').first()
@@ -167,7 +164,7 @@ class RootController(BaseController):
                 redirect(lurl('/login'))
             else:
                 flash("Volunteer {} added".format(user_name))
-                user,vinfo = self.getVolunteerIdentity()
+                user = self.getVolunteerIdentity()
                 if 'manage_events' in [p.permission_name for p in user.permissions]:
                     page = '/coord_page'
                 else:
@@ -181,15 +178,14 @@ class RootController(BaseController):
         if that is allowed for the logged-in user. This allows users
         to edit their own info, and coordinators to edit anyone's info.
         '''
-        vinfo = user.vinfo
         user.email_address = attribs.email
         user.display_name = attribs.display_name
         if len(attribs.pwd) > 0:
             user.password = attribs.pwd
-        vinfo.description = attribs.description
-        vinfo.phone = attribs.phone
-        vinfo.zipcode = attribs.zipcode
-        vinfo.text_alerts_ok = {True:1,False:0,1:1,0:0}[attribs.text_alerts_ok]
+        user.description = attribs.description
+        user.phone = attribs.phone
+        user.zipcode = attribs.zipcode
+        user.text_alerts_ok = {True:1,False:0,1:1,0:0}[attribs.text_alerts_ok]
         redirect(lurl("/volunteer_info"),dict(user_id=user.user_id))
 
     @expose()
@@ -318,19 +314,15 @@ class RootController(BaseController):
                      params=dict(came_from="/volunteer_info",__logins=login_counter))
 
         # The logged-in user is the "requesting" user.
-        user,vinfo = self.getVolunteerIdentity()
+        user = self.getVolunteerIdentity()
         requesting_user = user
         if user_id is not None and user_id != user.user_id:
             # Only managers and coordinators can view other users' info.
             if predicates.has_permission('manage_events') or predicates.has_permission('manage'):
-                user,vinfo = self.getVolunteerIdentity(userId=user_id)
+                user = self.getVolunteerIdentity(userId=user_id)
             else:
                 flash("You may only view your own volunteer page.")
                 redirect("/volunteer_info")
-        if vinfo is None:
-            # Not actually a volunteer - probably editor.
-            flash("No volunteer info for {}".format(user.user_name))
-            redirect(lurl('/'))
 
         # At this point, we know the requesting_user is
         # either requesting their own data, or alowed to
@@ -341,7 +333,7 @@ class RootController(BaseController):
         events_available = need.getAvailableEventsForVolunteer(model.DBSession,user)
         events_available = [toWrappedEvent(ev) for ev in events_available]
 
-        return dict(user=user,volunteer_info=vinfo,
+        return dict(user=user,
                 requesting_user=requesting_user,
                 availabilities=availabilities,
                 events=events_responded,
@@ -352,8 +344,7 @@ class RootController(BaseController):
     @require(predicates.has_permission('manage_events'))
     def all_volunteers(self):
         users = model.DBSession.query(model.User).all()
-        users = [u for u in users if u.vinfo is not None]
-        user,vinfo = self.getVolunteerIdentity()
+        user = self.getVolunteerIdentity()
         return dict(all_volunteers=users,user=user)
 
     @expose()
@@ -369,7 +360,7 @@ class RootController(BaseController):
 
     @expose()
     def decommit(self,neid,came_from=lurl('/volunteer_info')):
-        user,vinfo = self.getVolunteerIdentity()
+        user = self.getVolunteerIdentity()
         vr = model.DBSession.query(model.VolunteerResponse).filter_by(neid=neid).filter_by(user_id=user.user_id).first()
         if vr is not None:
             flash("Commitment cancelled. Thanks for letting us know!")
@@ -425,7 +416,7 @@ class RootController(BaseController):
                         foundExistingPuuid = True
                         mgr = model.DBSession.query(model.User).filter_by(user_name='manager').first()
                         mgrEmail = mgr.email_address
-                        mgrPhone = mgr.vinfo.phone
+                        mgrPhone = mgr.phone
                         resultMsg = 'You have already requested a password reset link. If you '+\
                                 'did not receive an email, contact the site manager at '+\
                                 '{} or {} to reset your password.'.format(mgrEmail,mgrPhone)
@@ -506,7 +497,7 @@ class RootController(BaseController):
     @expose('unter.templates.coord_page')
     @require(predicates.has_permission('manage_events'))
     def coord_page(self,**kwargs):
-        user,vinfo = self.getVolunteerIdentity()
+        user = self.getVolunteerIdentity()
         if user is None:
             redirect(lurl('/login'))
         events = model.DBSession.query(model.NeedEvent).filter_by(created_by=user).all()
@@ -514,21 +505,17 @@ class RootController(BaseController):
         return dict(user=user,events=events,message='')
 
     def getVolunteerIdentity(self,userId=None):
-        user,vinfo = None,None
+        user = None
         if userId is None:
             ''' Get the logged-in user's volunteer identity. '''
             if request.identity is not None and 'repoze.who.userid' in request.identity:
                 userid = request.identity['repoze.who.userid']
                 user = model.User.by_user_name(userid)
-                vinfo = user.vinfo
-                print("user.vinfo = {}".format(vinfo))
         else:
             ''' Get the identity for the given user. '''
             userId = int(userId)
             user = model.DBSession.query(model.User).filter_by(user_id=userId).first()
-            if user is not None:
-                vinfo = user.vinfo
-        return user,vinfo
+        return user
 
     #==================================
     # Need event management.
@@ -539,7 +526,7 @@ class RootController(BaseController):
         '''
         Called when a user clicks a response link on the web page.
         '''
-        user,vinfo = self.getVolunteerIdentity()
+        user = self.getVolunteerIdentity()
         getLogger().info('Responding to event {} on behalf of {}'.\
                 format(neid,user))
         if user is None:
@@ -593,7 +580,7 @@ class RootController(BaseController):
             form.populate_obj(obj)
             obj.print("NeedEvent:")
 
-            user,vinfo = self.getVolunteerIdentity()
+            user = self.getVolunteerIdentity()
 
             dt = datetime.datetime(obj.date_of_need.year,
                     obj.date_of_need.month,
@@ -624,12 +611,12 @@ class RootController(BaseController):
         evs = [toWrappedEvent(ev,now) for ev in evs]
         evs = [ev for ev in evs if ev.ev.complete==completed]
         evs.sort(key=lambda ev: (ev.ev.date_of_need,ev.ev.time_of_need),reverse=True)
-        user,vinfo = self.getVolunteerIdentity()
+        user = self.getVolunteerIdentity()
         isCoordinator = False
         if user is not None:
             print("user.permissions: {}".format(user.permissions))
             isCoordinator = 'manage_events' in [perm.permission_name for perm in user.permissions]
-        return dict(user=user,vinfo=vinfo,isCoordinator=isCoordinator,evs=evs,complete=completed)
+        return dict(user=user,isCoordinator=isCoordinator,evs=evs,complete=completed)
 
     @expose()
     @require(predicates.has_permission('manage_events'))
@@ -668,7 +655,7 @@ class RootController(BaseController):
 
     @expose('unter.templates.event_details')
     def event_details(self,neid):
-        user,vinfo = self.getVolunteerIdentity()
+        user = self.getVolunteerIdentity()
         nev = model.DBSession.query(model.NeedEvent).filter_by(neid=neid).first()
         vols = need.getAvailableVolunteers(model.DBSession,nev)
         vols = need.getUncommittedVolunteers(model.DBSession,nev,vols)

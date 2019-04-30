@@ -60,7 +60,7 @@ def init_model(engine):
 # Import your model modules here.
 from unter.model.auth import User, Group, Permission
 
-from unter.model.app_model import VolunteerInfo, VolunteerAvailability, NeedEvent, VolunteerResponse, VolunteerDecommitment, AlertUUID, PasswordUUID
+from unter.model.app_model import VolunteerAvailability, NeedEvent, VolunteerResponse, VolunteerDecommitment, AlertUUID, PasswordUUID
 
-__all__ = ('User', 'Group', 'Permission', 'VolunteerInfo', 'VolunteerAvailability', 'NeedEvent', 'VolunteerResponse',
+__all__ = ('User', 'Group', 'Permission', 'VolunteerAvailability', 'NeedEvent', 'VolunteerResponse',
         'VolunteerDecommitment','AlertUUID','PasswordUUID')

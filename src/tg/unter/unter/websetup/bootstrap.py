@@ -10,13 +10,10 @@ def create_entities(session):
     u.display_name = 'Site Manager'
     u.email_address = 'jaknapka+mvca.manager@gmail.com'
     u.password = 'managepass'
-
-    vi = model.VolunteerInfo()
-    vi.phone="9155495098"
-    vi.description = "Site manager"
-    vi.text_alerts_ok = 1
-    vi.zipcode = '79902'
-    u.vinfo = vi
+    u.phone="9155495098"
+    u.description = "Site manager"
+    u.text_alerts_ok = 1
+    u.zipcode = '79902'
 
     g = model.Group()
     g.group_name = 'managers'
@@ -65,6 +62,10 @@ def create_entities(session):
     u1.display_name = 'Example editor'
     u1.email_address = 'editor@somedomain.com'
     u1.password = 'editpass'
+    u1.phone="0000000000"
+    u1.description = "Editor (unused)"
+    u1.text_alerts_ok = 0
+    u1.zipcode = '00000'
 
     session.add(u1)
     transaction.commit()
