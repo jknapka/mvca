@@ -54,7 +54,7 @@ def toWrappedEvent(ev,now=None):
 
 def createUser(user_name="test",email="test@test.test",
         phone="0010010001",desc="Test user",zipcode="79900",
-        display_name=None,
+        display_name=None,text_alerts_ok=1,
         groups=[]):
     if display_name is None:
         display_name = user_name[0].upper()+user_name[1:] 
@@ -62,11 +62,10 @@ def createUser(user_name="test",email="test@test.test",
     u.user_name = user_name
     u.display_name = display_name
     u.email_address = email
-    v = model.VolunteerInfo()
-    v.phone = phone
-    v.description = desc
-    v.sipcode = zipcode
-    u.vinfo = v
+    u.phone = phone
+    u.description = desc
+    u.zipcode = zipcode
+    u.text_alerts_ok = text_alerts_ok
 
     for group in groups:
         g = model.DBSession.query(model.Group).filter_by(group_name=group).first()
@@ -132,17 +131,18 @@ def setupTestUsers():
     coords = model.DBSession.query(model.Group).filter_by(group_name='coordinators').first()
     vols = model.DBSession.query(model.Group).filter_by(group_name='volunteers').first()
 
-    carla = model.User(user_name='carla',email_address='carla@nowhere.net',display_name='Carla',password='carla')
-    carla_vi = model.VolunteerInfo(zipcode='79900',phone='9150010001',description='Carla the Coordinator')
-    carla.vinfo = carla_vi
+    carla = model.User(user_name='carla',email_address='carla@nowhere.net',display_name='Carla',password='carla',
+                        zipcode='79900',phone='9150010001',description='Carla the Coordinator',text_alerts_ok=1)
     coords.users.append(carla)
     model.DBSession.add(carla)
     
     phone = 9150010002
     for uname in ('victor','veronica','velma','vernon','vaughn'):
-        u = model.User(user_name=uname,email_address=uname+'@nowhere.net',display_name=uname[0].upper()+uname[1:],password=uname)
-        v = model.VolunteerInfo(zipcode='79900',phone=""+str(phone),description=u.display_name+' the Volunteer')
-        u.vinfo = v
+        display_name=uname[0].upper()+uname[1:]
+        u = model.User(user_name=uname,email_address=uname+'@nowhere.net',display_name=display_name,
+                password=uname,
+                zipcode='79900',phone=""+str(phone),description=display_name+' the Volunteer',
+                text_alerts_ok=1)
         vols.users.append(u)
         model.DBSession.add(u)
         phone += 1

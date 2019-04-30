@@ -91,11 +91,9 @@ class TestCommitment(TestController):
         try:
             session = model.DBSession
 
-            u = model.User(user_name="testy",email_address="test@test.test")
-            vi = model.VolunteerInfo(phone="1234567890",description="Test user")
-            u.vinfo = vi
+            u = model.User(user_name="testy",email_address="test@test.test",
+                            phone="1234567890",description="Test user")
             session.add(u)
-            session.add(vi)
 
             # A need to which u will respond.
             e = model.NeedEvent()

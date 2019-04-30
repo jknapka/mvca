@@ -46,7 +46,7 @@ def sendAlerts(volunteers,nev,honorLastAlertTime=True):
             return False
     for vol in volunteers:
         logging.getLogger("unter.alerts").info("ALERTING {} for need event {}".format(vol.user_name,nev.neid))
-        if SMS_ENABLED and vol.vinfo.text_alerts_ok == 1:
+        if SMS_ENABLED and vol.text_alerts_ok == 1:
                 getLogger().info('  Alerting via SMS')
                 sendSmsForEvent(nev,vol)
         if EMAIL_ENABLED:
@@ -65,10 +65,10 @@ def sendConfirmationAlert(vol,nev,confirming=True):
     getLogger().info("Confirming event {} to volunteer {}".\
             format(nev.neid,vol.user_name))
     msgText = makeConfirmationMsgForEvent(vol,nev,confirming)
-    if SMS_ENABLED and vol.vinfo.text_alerts_ok == 1:
+    if SMS_ENABLED and vol.text_alerts_ok == 1:
             getLogger().info("  Confirming via SMS")
             sendSMS = getSMSAlerter()
-            destNumber = makeValidSMSPhoneNumber(vol.vinfo.phone)
+            destNumber = makeValidSMSPhoneNumber(vol.phone)
             sendSMS(msgText,destNumber=destNumber)
     if EMAIL_ENABLED:
         getLogger().info("  Confirming via email")
@@ -92,10 +92,10 @@ def sendCoordDecommitAlert(vol,ev):
     getLogger().info("Alerting coordinator {} of volunteer decommitment.".\
             format(ev.created_by.user_name))
     msg = makeCoordDecommitMsg(vol,ev)
-    if SMS_ENABLED and vol.vinfo.text_alerts_ok == 1:
+    if SMS_ENABLED and vol.text_alerts_ok == 1:
         getLogger().info("  Alerting via SMS.")
         sendSMS = getSMSAlerter()
-        destNumber = makeValidSMSPhoneNumber(ev.created_by.vinfo.phone)
+        destNumber = makeValidSMSPhoneNumber(ev.created_by.phone)
         sendSMS(msg,destNumber=destNumber)
     if EMAIL_ENABLED:
         getLogger().info("  Alerting via email.")
@@ -116,10 +116,10 @@ def sendCancellationAlert(ev,vol):
     getLogger().info('Alerting volunteer {} of cancelled event {}.'.\
             format(vol.user_name,ev.neid))
     msg = makeEventCancellationMsg(ev,vol)
-    if SMS_ENABLED and vol.vinfo.text_alerts_ok == 1:
+    if SMS_ENABLED and vol.text_alerts_ok == 1:
         getLogger().info('  Alerting via SMS.')
         sendSMS = getSMSAlerter()
-        destNumber = makeValidSMSPhoneNumber(vol.vinfo.phone)
+        destNumber = makeValidSMSPhoneNumber(vol.phone)
         sendSMS(msg,destNumber=destNumber)
     if EMAIL_ENABLED:
         getLogger().info("  Alerting via email.")
@@ -251,7 +251,7 @@ def sendSmsForEvent(nev,vol,source="MVCA"):
     '''
     sendSMS = getSMSAlerter()
 
-    destNumber = makeValidSMSPhoneNumber(vol.vinfo.phone)
+    destNumber = makeValidSMSPhoneNumber(vol.phone)
     msg = makeMessageForEvent(nev,vol)
     sendSMS(msg,destNumber=destNumber)
 
@@ -261,7 +261,7 @@ def makeMessageForEvent(nev,vol,source='MVCA'):
     at_date=str(dt.date.fromtimestamp(nev.date_of_need))
     ev_type = nev.ev_type
     location = nev.location
-    coord_num = nev.created_by.vinfo.phone
+    coord_num = nev.created_by.phone
     coord_name = nev.created_by.display_name
     uuid = makeUUIDForAlert(nev,vol)
     link = "{}/sms_response?uuid={}&action=accept".format(MVCA_SITE,uuid)

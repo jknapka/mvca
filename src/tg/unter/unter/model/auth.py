@@ -90,8 +90,6 @@ class User(DeclarativeBase):
     _password = Column('password', Unicode(128))
     created = Column(DateTime, default=datetime.now)
 
-    vinfo = relationship('VolunteerInfo',uselist=False)
-
     def __repr__(self):
         return '<User: name=%s, email=%s, display=%s>' % (
             repr(self.user_name),
@@ -101,6 +99,13 @@ class User(DeclarativeBase):
 
     def __unicode__(self):
         return self.display_name or self.user_name
+
+
+    # Unter-specific user attributes.
+    description = Column(Unicode(2048), nullable=False)
+    phone = Column(Unicode(32),nullable=False,default='')
+    text_alerts_ok = Column(Integer,nullable=False,default=1)
+    zipcode = Column(Unicode(5),nullable=False,default='')
 
     @property
     def permissions(self):

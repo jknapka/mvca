@@ -48,13 +48,13 @@ all_volunteers.sort(key=lambda u: u.user_name)
 							${u.email_address}
 							</a></td>
 						<td><a href="${tg.url('/volunteer_info',dict(user_id=u.user_id))}">
-							${u.vinfo.phone}
+							${u.phone}
 							</a></td>
 						<td><a href="${tg.url('/volunteer_info',dict(user_id=u.user_id))}">
-							${u.vinfo.zipcode}
+							${u.zipcode}
 							</a></td>
 						<td><a href="${tg.url('/volunteer_info',dict(user_id=u.user_id))}">
-							${u.vinfo.description}
+							${u.description}
 							</a></td>
 						<td><a href="${tg.url('/volunteer_info',dict(user_id=u.user_id))}">
 <?python

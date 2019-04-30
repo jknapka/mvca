@@ -126,11 +126,9 @@ class TestController(object):
         u.user_name = user_name
         u.display_name = display_name
         u.email_address = email
-        v = model.VolunteerInfo()
-        v.phone = phone
-        v.description = desc
-        v.sipcode = zipcode
-        u.vinfo = v
+        u.phone = phone
+        u.description = desc
+        u.zipcode = zipcode
 
         for group in groups:
             g = model.DBSession.query(model.Group).filter_by(group_name=group).first()

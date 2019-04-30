@@ -50,7 +50,7 @@ class TestCancelledEvents(TestController):
         self.app.get('/respond?neid=1',extra_environ=env,status=302)
         alerts = self.getAlertLog()
         v = self.getUser(model.DBSession,'veronica')
-        veronicaPhone = v.vinfo.phone
+        veronicaPhone = v.phone
         ok_(veronicaPhone in alerts,'Should have alerted veronica with a "Thank you"')
 
         # And then the event is cancelled.
@@ -67,9 +67,9 @@ class TestCancelledEvents(TestController):
 
     def test_2_twoRespondentsTwoAlerts(self):
         v = self.getUser(model.DBSession,'veronica')
-        veronicaPhone = v.vinfo.phone
+        veronicaPhone = v.phone
         v = self.getUser(model.DBSession,'velma')
-        velmaPhone = v.vinfo.phone
+        velmaPhone = v.phone
 
         # Veronica responds...
         env = {'REMOTE_USER':'veronica'}

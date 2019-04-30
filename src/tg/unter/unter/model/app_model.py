@@ -8,20 +8,6 @@ from sqlalchemy.orm import relationship, backref
 from unter.model import DeclarativeBase, metadata, DBSession
 
 
-class VolunteerInfo(DeclarativeBase):
-    __tablename__ = 'volunteer_info'
-
-    viid = Column(Integer, primary_key=True)
-    description = Column(Unicode(2048), nullable=False)
-    phone = Column(Unicode(32),nullable=False,default='')
-    text_alerts_ok = Column(Integer,nullable=False,default=1)
-    zipcode = Column(Unicode(5),nullable=False,default='')
-
-    user_id = Column(Integer, ForeignKey('tg_user.user_id'), index=True)
-    user = relationship('User', uselist=False,
-                        backref=backref('volunteer_info',
-                                        cascade='all, delete-orphan'))
-
 class VolunteerAvailability(DeclarativeBase):
     __tablename__ = 'volunteer_availability'
 

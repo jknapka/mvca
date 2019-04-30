@@ -61,7 +61,7 @@ class TestCoordinatorAlerts(TestController):
         ok_('9150010001' not in alerts,alerts)
         # Veronica's number should though.
         v = self.getUser(model.DBSession,'veronica')
-        ok_(v.vinfo.phone in alerts,alerts)
+        ok_(v.phone in alerts,alerts)
         self.resetAlertLog()
 
         # Veronica decommits.
