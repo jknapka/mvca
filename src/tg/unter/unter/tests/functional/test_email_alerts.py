@@ -71,6 +71,7 @@ class TestEmailAlerts(TestController):
         model.DBSession.flush()
 
     def test_0_emailAlerts(self):
+        ''' Alerts can be sent via email. '''
         try:
             self.sendAlert()
         except:

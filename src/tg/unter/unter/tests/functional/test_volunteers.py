@@ -166,6 +166,7 @@ class TestVolunteers(TestController):
         ok_('Veronica only bus 2' in response.text,"Missing event: Veronica only bus 2: "+availableStr)
 
     def test_5_respondLinks(self):
+        ''' Response links appear for events a volunteer is available to serve. '''
         environ = {'REMOTE_USER':'veronica'}
         response = self.app.get('/volunteer_info',extra_environ=environ,status=200)
         soup = bsoup(response.text,features="html.parser")
@@ -178,6 +179,7 @@ class TestVolunteers(TestController):
             ok_('"/respond?neid={}"'.format(id) not in allAnchors)
 
     def test_6_decommitLinks(self):
+        ''' Decommit links appear for events a volunteer is available to serve. '''
         try:
             self.createResponse('veronica','Veronica only airport')
             self.createResponse('veronica','Veronica or Velma airport')

@@ -83,6 +83,7 @@ class TestMultiAlerts(TestController):
         transaction.commit()
 
     def test_0_oneVolunteerEvent(self):
+        ''' We alert only when an event is not fully-served. '''
         self.sendAlert(ev_id=1)
 
         # There should be 2 alert UUIDs.
@@ -100,6 +101,7 @@ class TestMultiAlerts(TestController):
         eq_(2,len(auuids),"After response: Expected 2 alerts, saw {}".format(len(auuids)))
 
     def test_1_twoVolunteerEvent(self):
+        ''' We alert available uncommitted volunteers when an event is served, but not fully served. '''
         self.sendAlert(ev_id=2)
 
         # There should be 2 alert UUIDs.
@@ -111,7 +113,7 @@ class TestMultiAlerts(TestController):
 
         self.sendAlert(ev_id=2)
 
-        # This event still requires one moe volunteer, so the last
+        # This event still requires one more volunteer, so the last
         # alert should have alerted Veronica and there should now
         # be 3 alert UUIDs.
         auuids = model.DBSession.query(model.AlertUUID).all()

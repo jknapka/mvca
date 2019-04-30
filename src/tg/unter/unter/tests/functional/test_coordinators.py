@@ -38,6 +38,7 @@ class TestCoordPage(TestController):
             transaction.commit()
 
     def test_0_lastAlertTimesInCoordPage(self):
+        ''' "Last alert" times appear for events in coord page. '''
         resp = self.app.get('/coord_page',extra_environ={'REMOTE_USER':'carla'},status=200)
         ok_('Last alert' in resp.text,resp.text)
 
@@ -46,6 +47,7 @@ class TestCoordPage(TestController):
         ok_(dt.datetime.fromtimestamp(0).ctime() in td,td)
 
     def test_1_lastAlertTimeUpdatesOnAlert(self):
+        ''' The "Last alert" time updates when an alert is sent. '''
         nev = model.DBSession.query(model.NeedEvent).first()
 
         # With an empty volunteers list, this will update the last
@@ -67,6 +69,7 @@ class TestCoordPage(TestController):
         ok_(now.ctime() in td,td)
 
     def test_2_alertLinksInEvents(self):
+        ''' "Send alert" links appear in the event table. '''
         resp = self.app.get('/coord_page',extra_environ={'REMOTE_USER':'carla'},status=200)
         zup = bsoup(resp.text,features="html.parser")
         td = str(zup.find(id='alert-time-ev-1'))
@@ -91,6 +94,7 @@ class TestCoordPage(TestController):
         ok_('Call Carla 9150010001' in alertLog,alertLog)
 
     def test_4_availableVolunteers(self):
+        ''' We correctly identify volunteers available to serve an event. '''
         nev = model.DBSession.query(model.NeedEvent).filter_by(\
                 notes="Veronica or Velma airport").first()
         # No commitments.
@@ -104,6 +108,7 @@ class TestCoordPage(TestController):
         ok_("Velma" in vols_avail,vols_avail)
 
     def test_5_committedVolunteers(self):
+        ''' We correctly identify volunteers committed to serve an event. '''
         # Commit Velma.
         try:
             self.createResponse('velma','Veronica or Velma airport')

@@ -36,6 +36,7 @@ class TestAllVolunteers(TestController):
                 logging.getLogger('unter.test').info('Created user: {}'.format(u.user_name))
 
     def test_0_allVolsPage(self):
+        ''' Coordinators can load the "All volunteers" page. '''
         env = {'REMOTE_USER':'carla'}
         resp = self.app.get('/all_volunteers',extra_environ=env,status=200)
         users = model.DBSession.query(model.User).all()
@@ -47,6 +48,7 @@ class TestAllVolunteers(TestController):
                 ok_(u.display_name in resp.text,resp.text)
 
     def test_1_allVolsPageNoAccessForVolunteers(self):
+        ''' Regular volunteers cannot load the "All volunteers" page. '''
         env = {'REMOTE_USER':'velma'}
         # This should fail with an auth error.
         resp = self.app.get('/all_volunteers',extra_environ=env,status=403)

@@ -39,12 +39,14 @@ class TestCancelledEvents(TestController):
         transaction.commit()
 
     def test_0_noRepondentsNoAlerts(self):
+        ''' An event with no respondents generates no alerts when cancelled. '''
         env = {'REMOTE_USER':'carla'}
         self.app.get('/cancel_event?neid=1',extra_environ=env,status=302)
         alerts = self.getAlertLog()
         eq_('',alerts,'Unexpectedly sent alerts: {}'.format(alerts))
 
     def test_1_oneRespondentOneAlert(self):
+        ''' An event with one respondent alerts that volunteer when cancelled. '''
         # Veronica responds...
         env = {'REMOTE_USER':'veronica'}
         self.app.get('/respond?neid=1',extra_environ=env,status=302)
@@ -66,6 +68,7 @@ class TestCancelledEvents(TestController):
                 format(alerts))
 
     def test_2_twoRespondentsTwoAlerts(self):
+        ''' An event with two respondents alerts both volunteers when cancelled. '''
         v = self.getUser(model.DBSession,'veronica')
         veronicaPhone = v.phone
         v = self.getUser(model.DBSession,'velma')
