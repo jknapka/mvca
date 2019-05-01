@@ -23,12 +23,35 @@
 
 	<table>
 		<tr>
+			<th></th>
+			<td></td>
+		</tr>
+		<tr>
 			<th>User name</th>
 			<td>${user.user_name}</td>
 		</tr>
 		<tr>
+			<th>Display name</th>
+			<td>${user.display_name}</td>
+		</tr>
+		<tr>
 			<th>Zip code</th>
 			<td>${user.zipcode}</td>
+		</tr>
+		<tr>
+			<th>Email</th>
+			<td>${user.email_address}</td>
+		</tr>
+		<tr>
+			<th>Phone</th>
+			<td>${user.phone}</td>
+		</tr>
+		<tr>
+			<th>Languages</th>
+			<td>
+				<span py:if="1==user.lang_english">English&nbsp;</span>
+				<span py:if="1==user.lang_spanish">Spanish&nbsp;</span>
+			</td>
 		</tr>
 		<tr>
 			<th>Notes</th>

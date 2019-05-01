@@ -21,6 +21,9 @@ all_volunteers.sort(key=lambda u: u.user_name)
     </div>
 
     <div class="row">
+	    <div class="unter-actions">
+		    <a href="/add_volunteer">Add volunteer</a>
+	    </div>
       <div class="col-md-12" id="volunteer-list">
 			<table py:if="len(all_volunteers) > 0" border="1">
 				<thead>
@@ -31,6 +34,7 @@ all_volunteers.sort(key=lambda u: u.user_name)
 						<th>Phone</th>
 						<th>Zip</th>
 						<th>Description</th>
+						<th>Languages</th>
 						<th>Approved volunteer?</th>
 						<th>Coordinator?</th>
 						<th>Site manager?</th>
@@ -38,6 +42,12 @@ all_volunteers.sort(key=lambda u: u.user_name)
 				</thead>
 				<tbody>
 					<tr py:for="u in all_volunteers">
+<?python
+perms = [p.permission_name for p in u.permissions]
+isVolunteer = 'respond_to_need' in perms
+isCoord = 'manage_events' in perms
+isManager = 'manage' in perms
+?>
 						<td><a href="${tg.url('/volunteer_info',dict(user_id=u.user_id))}">
 							${u.user_name}
 							</a></td>
@@ -57,12 +67,10 @@ all_volunteers.sort(key=lambda u: u.user_name)
 							${u.description}
 							</a></td>
 						<td><a href="${tg.url('/volunteer_info',dict(user_id=u.user_id))}">
-<?python
-perms = [p.permission_name for p in u.permissions]
-isVolunteer = 'respond_to_need' in perms
-isCoord = 'manage_events' in perms
-isManager = 'manage' in perms
-?>
+								<span py:if="1==u.lang_english">English&nbsp;</span>
+								<span py:if="1==u.lang_spanish">Spanish&nbsp;</span>
+							</a></td>
+						<td><a href="${tg.url('/volunteer_info',dict(user_id=u.user_id))}">
 							${{True:'Yes',False:'No'}[isVolunteer or isCoord or isManager]}
 							</a></td>
 						<td><a href="${tg.url('/volunteer_info',dict(user_id=u.user_id))}">
@@ -74,7 +82,10 @@ isManager = 'manage' in perms
 					</tr>
 				</tbody>
 			</table>
-	  </div>
+		  </div>
+	    <div class="unter-actions">
+		    <a href="/add_volunteer">Add volunteer</a>
+	    </div>
 	  </div>
   </body>
 </html>

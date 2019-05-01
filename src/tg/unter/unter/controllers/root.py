@@ -87,6 +87,7 @@ class RootController(BaseController):
                 error_msg=error_msg,editing=editing,user=user,requesting_user=loggedInUser)
 
     def getExistingVolunteerForm(self,user):
+        ''' Populate a NewAcctForm with the data for user. '''
         if user is None:
             return None
         form = NewAcctForm()
@@ -99,6 +100,8 @@ class RootController(BaseController):
         form.text_alerts_ok.data = user.text_alerts_ok == 1
         form.zipcode.data = user.zipcode
         form.description.data = user.description
+        form.lang_english.data = user.lang_english == 1
+        form.lang_spanish.data = user.lang_spanish == 1
         return form
 
     @expose('unter.templates.add_volunteer_start')
@@ -106,6 +109,8 @@ class RootController(BaseController):
         ''' Try to create a new volunteer. '''
         form = NewAcctForm(request.POST)
         if not form.validate():
+            getLogger().info('Form failed to validate: {}'.\
+                    format(form.errors))
             return self.add_volunteer_start(form=form)
         else:
             thing = Thing()
@@ -122,13 +127,17 @@ class RootController(BaseController):
                 if not request.identity:
                     # It's not OK to try to establish a new account
                     # with the same user name as an existing one.
+                    getLogger().info('Refusing to add second user named {}'.format(user_name))
                     return self.add_volunteer_start(form=form,error_msg='Account %s already exists'%user_name)
-                user= self.getVolunteerIdentity()
+                user = self.getVolunteerIdentity()
                 if user.user_name == thing.user_name:
                     # It's OK for users to edit their own data.
+                    getLogger().info('Editing self with user name {}'.format(user_name))
                     self.edit_volunteer(existingUser,thing)
                 if predicates.has_permission('manage_events') or predicates.has_permission('manage'):
                     # It's OK for coordinators to edit other volunteers' data.
+                    getLogger().info('Editing {} with user name {}'.\
+                            format(request.identity['repoze.who.userId'],user_name))
                     self.edit_volunteer(existingUser,thing)
             existingUser = model.User.by_email_address(email)
             if existingUser is not None:
@@ -141,7 +150,9 @@ class RootController(BaseController):
                     description=form.description.data,
                     phone=form.phone.data,
                     text_alerts_ok={True:1,False:0}[form.text_alerts_ok.data],
-                    zipcode=form.zipcode.data)
+                    zipcode=form.zipcode.data,
+                    lang_english={True:1,False:0}[thing.lang_english],
+                    lang_spanish={True:1,False:0}[thing.lang_spanish])
             acct.password = pwd
             DBSession.add(acct)
             acct = model.User.by_email_address(email)
@@ -186,6 +197,8 @@ class RootController(BaseController):
         user.phone = attribs.phone
         user.zipcode = attribs.zipcode
         user.text_alerts_ok = {True:1,False:0,1:1,0:0}[attribs.text_alerts_ok]
+        user.lang_english = {True:1,False:0,1:1,0:0}[attribs.lang_english]
+        user.lang_spanish = {True:1,False:0,1:1,0:0}[attribs.lang_spanish]
         redirect(lurl("/volunteer_info"),dict(user_id=user.user_id))
 
     @expose()

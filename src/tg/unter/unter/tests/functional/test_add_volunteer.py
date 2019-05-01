@@ -294,3 +294,59 @@ class TestAddVolunteer(TestController):
         vol = model.DBSession.query(model.User).filter_by(user_name='testPerson').first()
         perms = [p.permission_name for p in vol.permissions]
         ok_('respond_to_need' not in perms,perms)
+
+    def test_11_langsInForm(self):
+        ''' Language proficiencies in volunteer info form. '''
+        resp = self.app.get('/add_volunteer_start',status=200)
+        ok_('lang_english' in resp.text,resp.text)
+        ok_('lang_spanish' in resp.text,resp.text)
+
+    def test_12_canEditLangs(self):
+        ''' Language proficiencies can be edited. '''
+        resp = self.app.post('/add_volunteer_post',status=302,
+                params={
+                    'user_name': 'testPerson',
+	            'display_name': 'Test Person',
+	            'pwd': 'testPwd',
+	            'pwd2': 'testPwd',
+	            'email': 'test@test.com',
+	            'phone': '9150420042',
+	            'text_alerts_ok': 'true',
+	            'zipcode': '79900',
+	            'description': 'Test user',
+                    'lang_english': 'true',
+                    'lang_spanish': 'false'
+                    })
+        vol = model.DBSession.query(model.User).filter_by(user_name='testPerson').first()
+        ok_(vol is not None,"Failed to create the test user")
+        eq_(1,vol.lang_english,"New volunteer should have English set. English {}, Spanish {}".\
+                format(vol.lang_english,vol.lang_spanish))
+        eq_(0,vol.lang_spanish,"New volunteer should not have Spanish set. English {}, Spanish {}".\
+                format(vol.lang_english,vol.lang_spanish))
+
+        env = {'REMOTE_USER':'testPerson'}
+        resp = self.app.post('/add_volunteer_post',
+                status=302,
+                extra_environ=env,
+                params={
+                    'user_name': 'testPerson',
+                    'display_name': 'Test Person',
+                    'pwd': 'testPwd',
+                    'pwd2': 'testPwd',
+                    'email': 'test@test.com',
+                    'phone': '9150420042',
+                    'text_alerts_ok': 'true',
+                    'zipcode': '79900',
+                    'description': 'Test user',
+                    'lang_english': 'false',
+                    'lang_spanish': 'true'
+                    })
+        logging.getLogger('unter.test').error('Response: status={}, text=\n{}'.\
+                format(resp.status,resp.text))
+        vol = model.DBSession.query(model.User).filter_by(user_name='testPerson').first()
+        ok_(vol is not None,"Failed to create the test user")
+        eq_(0,vol.lang_english,"Edited volunteer should not have English set. English {}, Spanish {}".\
+                format(vol.lang_english,vol.lang_spanish))
+        eq_(1,vol.lang_spanish,"Edited volunteer should have Spanish set. English {}, Spanish {}".\
+                format(vol.lang_english,vol.lang_spanish))
+

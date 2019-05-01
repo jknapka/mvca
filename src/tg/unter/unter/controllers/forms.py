@@ -43,6 +43,8 @@ class NewAcctForm(wtf.Form):
 	''' WTForms definition for adding a new account. '''
 	user_name = wtf.TextField('User Name')
 	display_name = wtf.TextField('Display Name')
+	lang_english = wtf.BooleanField('English speaker?')
+	lang_spanish = wtf.BooleanField('Spanish speaker?')
 	pwd = wtf.PasswordField('Password')
 	pwd2 = wtf.PasswordField('Confirm Password')
 	email = wtf.TextField('Email Address')

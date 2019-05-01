@@ -106,6 +106,8 @@ class User(DeclarativeBase):
     phone = Column(Unicode(32),nullable=False,default='')
     text_alerts_ok = Column(Integer,nullable=False,default=1)
     zipcode = Column(Unicode(5),nullable=False,default='')
+    lang_english = Column(Integer,nullable=False,default=1)
+    lang_spanish = Column(Integer,nullable=False,default=0)
 
     @property
     def permissions(self):
