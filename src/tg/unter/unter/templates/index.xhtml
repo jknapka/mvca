@@ -1,6 +1,6 @@
 <html py:extends="master.xhtml" py:strip="True">
     <head py:block="head" py:strip="True">
-        <title py:block="master_title">Welcome to TurboGears 2.3, standing on the shoulders of giants, since 2007</title>
+        <title py:block="master_title">Welcome to the Migrant Volunteer Coordinating Assistant</title>
     </head>
 
     <body py:block="body" py:strip="True">
@@ -8,23 +8,31 @@
         <div class="col-md-8">
           <div class="jumbotron">
             <h1>Welcome to the Migrant Volunteer Coordinating Assistant</h1>
-	    <p>You can <a href="/add_volunteer_start">register as a new volunteer</a> and then
-	    tell us which days and times during the week you are available to help.</p>
-	    <p>If you are already registered, you can <a href="/login?came_from=/volunteer_info">log in</a>
-	    to see your profile and any events you may be able to help with. We often need volunteers
-	    to
-	    <ul>
-		<li>Drive migrants to the airport or bus station from local hotels and shelters.</li>
-		<li>Provide interpreter services for other volunteers and migrants (almost always
-			English/Spanish).</li>
-		<li>Help prepare or serve meals for our local migrant population.</li>
-	    </ul>
-	    </p>
-	    <p>If you are an administrator, you can <a href="login?came_from=/events">log in</a>
-	    to create new events and send text or email alerts to volunteers who have
-	    availability at the appropriate times. You can also check the status of upcoming
-	    events and verify whether enough volunteers are available, and find the information
-	    needed to manually call, text, or email volunteers if needed.</p>
+		<div py:if="request.identity">
+			<p>
+			You are already registered and logged in. Please go to your
+			<a href="/volunteer_info">volunteer information</a> page and
+			use the 
+			</p>
+		</div><div py:else="">
+		    <p>You can <a href="/add_volunteer_start">register as a new volunteer</a> and then
+		    tell us which days and times during the week you are available to help.</p>
+		    <p>If you are already registered, you can <a href="/login?came_from=/volunteer_info">log in</a>
+		    to see your profile and any events you may be able to help with. We often need volunteers
+		    to
+		    <ul>
+			<li>Drive migrants to the airport or bus station from local hotels and shelters.</li>
+			<li>Provide interpreter services for other volunteers and migrants (almost always
+				English/Spanish).</li>
+			<li>Help prepare or serve meals for our local migrant population.</li>
+		    </ul>
+		    </p>
+		    <p>If you are an administrator, you can <a href="login?came_from=/events">log in</a>
+		    to create new events and send text or email alerts to volunteers who have
+		    availability at the appropriate times. You can also check the status of upcoming
+		    events and verify whether enough volunteers are available, and find the information
+		    needed to manually call, text, or email volunteers if needed.</p>
+		</div>
           </div>
         </div>
 	<em class="pull-right small"> Copyright (c) 2019, Joseph Knapka. Built using

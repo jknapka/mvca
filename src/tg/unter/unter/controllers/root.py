@@ -277,10 +277,11 @@ class RootController(BaseController):
 
     @expose('unter.templates.add_availability_start')
     @require(predicates.not_anonymous())
-    def add_availability_start(self,user_id,form=None):
+    def add_availability_start(self,form=None):
         ''' Present the "add a time slot" form. '''
+        user = self.getVolunteerIdentity()
+        user_id = user.user_id
         if form is None:
-            user_id = int(user_id)
             form = AvailabilityForm(user_id=user_id)
         return dict(page='add_availability_start',form=form,url='/add_availability_post')
 
@@ -338,7 +339,7 @@ class RootController(BaseController):
                 redirect("/volunteer_info")
 
         # At this point, we know the requesting_user is
-        # either requesting their own data, or alowed to
+        # either requesting their own data, or allowed to
         # view the user's data.
         availabilities = [self.toRawAvailability(av) for av in user.volunteer_availability]
         events_responded = [vr.need_event for vr in user.volunteer_response if vr.need_event.complete == 0]
@@ -365,19 +366,24 @@ class RootController(BaseController):
     def remove_availability(self,vaid,came_from=lurl('/volunteer_info')):
         av = model.DBSession.query(model.VolunteerAvailability).filter_by(vaid=vaid).first()
         if av is not None:
-            model.DBSession.delete(av)
-            flash("Available time removed.")
+            user = self.getVolunteerIdentity()
+            if av.user.user_id == user.user_id or util.isUserManager(user):
+                model.DBSession.delete(av)
+                flash("Available time removed.")
+            else:
+                flash('You may only manager your own available times.')
         else:
             flash("No such available time found.")
         redirect(came_from)
 
     @expose()
+    @require(predicates.not_anonymous())
     def decommit(self,neid,came_from=lurl('/volunteer_info')):
         user = self.getVolunteerIdentity()
         vr = model.DBSession.query(model.VolunteerResponse).filter_by(neid=neid).filter_by(user_id=user.user_id).first()
         if vr is not None:
-            flash("Commitment cancelled. Thanks for letting us know!")
             need.decommit_volunteer(model.DBSession,vcom=vr)
+            flash("Commitment cancelled. Thanks for letting us know!")
         else:
             flash("No such commitment found for {}.".format(user.display_name))
         redirect(came_from)
