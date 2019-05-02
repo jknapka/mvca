@@ -137,7 +137,7 @@ class RootController(BaseController):
                 if predicates.has_permission('manage_events') or predicates.has_permission('manage'):
                     # It's OK for coordinators to edit other volunteers' data.
                     getLogger().info('Editing {} with user name {}'.\
-                            format(request.identity['repoze.who.userId'],user_name))
+                            format(request.identity['repoze.who.userid'],user_name))
                     self.edit_volunteer(existingUser,thing)
             existingUser = model.User.by_email_address(email)
             if existingUser is not None:
