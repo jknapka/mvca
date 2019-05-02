@@ -37,15 +37,9 @@ respondents = []
 if ev is not None:
     respondents = [vr.user.user_id for vr in ev.ev.responses]
 isRespondent = (user.user_id in respondents)
-if not brief:
-    leftStyle = "border:4px solid black"
-    bottomStyle = "border:4px solid black"
-else:
-    leftStyle = "border:1px solid black"
-    bottomStyle = "border:1px solid black"
 ?>
 	<tr py:if="renderHeader"
-		style="border-bottom: 4px solid black">
+		style="border-bottom: 5px solid black">
 		<th>Created by</th>
 		<th>Date</th>
 		<th>Time</th>
@@ -67,7 +61,7 @@ else:
 	<tr py:if="not renderHeader"
 		id="nev-div-${ev.ev.neid}"
 	 	class="unter-need-event-row"
-	    style="${leftStyle}">
+	    style="border-left: 1px solid black; border-bottom: 1px solid black">
 		<td id="created-by-${ev.ev.neid}" >${ev.ev.created_by.display_name}</td>
 		<td id="date-${ev.ev.neid}" ><a href="/event_details?neid=${ev.ev.neid}">
 			${ev.date_str}
@@ -97,10 +91,12 @@ else:
 			<span py:if="complete">Already complete</span>
 		</td>
 		<td py:if="isVolunteer and (not complete) and isViewedUser" id="respond-ev-${ev.ev.neid}">
-			<a href="/respond?neid=${ev.ev.neid}">Commit to serve</a>
-			<br/>
-			<a href="/decommit?neid=${ev.ev.neid}">Sorry, can't make it</a>
-			<span> </span>
+			<ul>
+				<li><a href="/respond?neid=${ev.ev.neid}">Commit to serve</a>
+				</li>
+				<li><a href="/decommit?neid=${ev.ev.neid}">Sorry, can't make it</a>
+				</li>
+			</ul>
 		</td>
 		<td py:if="isCoordinator" id="cancel-ev-${ev.ev.neid}">
 			<a href="/cancel?neid=${ev.ev.neid}">Cancel</a>
@@ -108,7 +104,7 @@ else:
 		</tr>
 		<tr py:if="not renderHeader and not brief"
 			border="1"
-		    style="${bottomStyle}; ${leftStyle}">
+		    style="border-bottom:3px solid black; border-left:1px solid black">
 		<td border="0"></td>
 		<td colspan="100" id="notes-ev-${ev.ev.neid}">${ev.ev.notes}</td>
 	</tr>
