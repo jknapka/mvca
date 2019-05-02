@@ -5,6 +5,7 @@ import time
 import datetime
 import logging
 import uuid
+import re
 
 from tg import expose, flash, require, url, lurl
 from tg import request, redirect, tmpl_context
@@ -115,6 +116,7 @@ class RootController(BaseController):
         else:
             thing = Thing()
             form.populate_obj(thing)
+            thing.phone = ''.join(re.split('[^0-9]',thing.phone))
             thing.print()
 
             user_name = thing.user_name
@@ -146,11 +148,11 @@ class RootController(BaseController):
             if len(pwd) == 0:
                 return self.add_volunteer_start(form=form,error_msg='You must provide a password.')
 
-            acct = model.User(user_name=user_name, email_address=email,display_name=form.display_name.data,
-                    description=form.description.data,
-                    phone=form.phone.data,
-                    text_alerts_ok={True:1,False:0}[form.text_alerts_ok.data],
-                    zipcode=form.zipcode.data,
+            acct = model.User(user_name=user_name, email_address=email,display_name=thing.display_name,
+                    description=thing.description,
+                    phone=thing.phone,
+                    text_alerts_ok={True:1,False:0}[thing.text_alerts_ok],
+                    zipcode=thing.zipcode,
                     lang_english={True:1,False:0}[thing.lang_english],
                     lang_spanish={True:1,False:0}[thing.lang_spanish])
             acct.password = pwd

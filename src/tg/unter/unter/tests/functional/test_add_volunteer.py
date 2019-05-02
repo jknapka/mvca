@@ -350,3 +350,23 @@ class TestAddVolunteer(TestController):
         eq_(1,vol.lang_spanish,"Edited volunteer should have Spanish set. English {}, Spanish {}".\
                 format(vol.lang_english,vol.lang_spanish))
 
+    def test_13_phoneNumbersSanitized(self):
+        ''' Phone numbers are sanitized on receipt. '''
+        env = {'REMOTE_USER':'carla'}
+        resp = self.app.post('/add_volunteer_post',status=302,
+                extra_environ=env,
+                params={
+                    'user_name': 'testPerson',
+	            'display_name': 'Test Person',
+	            'pwd': 'testPwd',
+	            'pwd2': 'testPwd',
+	            'email': 'test@test.com',
+	            'phone': '+1 (915)042-0042',
+	            'text_alerts_ok': 'true',
+	            'zipcode': '79900',
+	            'description': 'Test user'
+                    })
+        vol = model.DBSession.query(model.User).filter_by(user_name='testPerson').first()
+        ok_(vol is not None,"Failed to create the test user")
+        eq_('19150420042',vol.phone,vol.phone)
+
