@@ -189,6 +189,14 @@ class TestController(object):
         vr.need_event = ev
         model.DBSession.add(vr)
 
+    def createDecommitment(self,volName,evNotes):
+        veronica = self.getUser(model.DBSession,volName)
+        ev = model.DBSession.query(model.NeedEvent).filter_by(notes=evNotes).first()
+        vr = model.VolunteerDecommitment()
+        vr.user = veronica
+        vr.need_event = ev
+        model.DBSession.add(vr)
+
     def getUser(self,session,uname):
         return session.query(model.User).filter_by(user_name=uname).first()
 

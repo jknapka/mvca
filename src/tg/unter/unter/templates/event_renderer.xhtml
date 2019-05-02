@@ -34,12 +34,19 @@ complete = (complete == 1)
 isCoordinator = ('manage_events' in perms)
 isVolunteer = ('respond_to_need' in perms)
 respondents = []
+refusers = []
 if ev is not None:
     respondents = [vr.user.user_id for vr in ev.ev.responses]
+    refusers = [vr.user.user_id for vr in ev.ev.refusers]
 isRespondent = (user.user_id in respondents)
+isRefuser = (user.user_id in refusers)
+commitStyle = ''
+if isRefuser:
+	commitStyle="background-color:lightgray"
 ?>
 	<tr py:if="renderHeader"
 		style="border-bottom: 5px solid black">
+		<th>ID</th>
 		<th>Created by</th>
 		<th>Date</th>
 		<th>Time</th>
@@ -61,7 +68,8 @@ isRespondent = (user.user_id in respondents)
 	<tr py:if="not renderHeader"
 		id="nev-div-${ev.ev.neid}"
 	 	class="unter-need-event-row"
-	    style="border-left: 1px solid black; border-bottom: 1px solid black">
+	    style="border-left: 1px solid black; border-bottom: 1px solid black; ${commitStyle}">
+		<td id="event-id-${ev.ev.neid}">${ev.ev.neid}</td>
 		<td id="created-by-${ev.ev.neid}" >${ev.ev.created_by.display_name}</td>
 		<td id="date-${ev.ev.neid}" ><a href="/event_details?neid=${ev.ev.neid}">
 			${ev.date_str}
@@ -92,9 +100,13 @@ isRespondent = (user.user_id in respondents)
 		</td>
 		<td py:if="isVolunteer and (not complete) and isViewedUser" id="respond-ev-${ev.ev.neid}">
 			<ul>
-				<li><a href="/respond?neid=${ev.ev.neid}">Commit to serve</a>
+				<li py:if="not isRespondent"><a href="/respond?neid=${ev.ev.neid}">Commit to serve</a>
+				</li><li py:else="">
+					You have committed to this event.
 				</li>
-				<li><a href="/decommit?neid=${ev.ev.neid}">Sorry, can't make it</a>
+				<li py:if="not isRefuser"><a href="/decommit?neid=${ev.ev.neid}">Sorry, can't make it</a>
+				</li><li py:else="">
+					You have refused this event.
 				</li>
 			</ul>
 		</td>

@@ -208,6 +208,30 @@ class TestVolunteers(TestController):
         for id in [2,4,5]:
             ok_('"/respond?neid={}"'.format(id) not in allAnchors)
 
+    def test_7_refusers(self):
+        ''' A decommitted volunteer appears in an event's "refusers" list. '''
+        self.createDecommitment('veronica','Veronica only airport')
+        transaction.commit()
+        ev = model.DBSession.query(model.NeedEvent).filter_by(notes='Veronica only airport').first()
+        ok_(ev is not None,'Missing event: Veronica only airport')
+        refusers = ev.refusers
+        eq_(1,len(refusers),'Expected one refuser.')
+        refUser = refusers[0].user
+        eq_('veronica',refUser.user_name,'Expected veronica to be the refuser: {}'.format(refUser.user_name))
+
+    def test_8_decommitLinkWorks(self):
+        ''' The decommit link creates a refuser. '''
+        env = {'REMOTE_USER':'veronica'}
+        ev = model.DBSession.query(model.NeedEvent).filter_by(notes='Veronica only airport').first()
+        resp = self.app.get('/decommit?neid={}'.format(ev.neid),status=302,
+                extra_environ=env)
+        ev = model.DBSession.query(model.NeedEvent).filter_by(notes='Veronica only airport').first()
+        ok_(ev is not None,'Missing event: Veronica only airport')
+        refusers = ev.refusers
+        eq_(1,len(refusers),'Expected one refuser.')
+        refUser = refusers[0].user
+        eq_('veronica',refUser.user_name,'Expected veronica to be the refuser: {}'.format(refUser.user_name))
+
 
     def setupDB(self):
         veronica = self.createUser(user_name='veronica',email='v@mars.net',

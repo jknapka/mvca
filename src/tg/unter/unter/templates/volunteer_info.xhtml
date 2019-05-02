@@ -105,9 +105,7 @@
 			</thead>
 			<tbody>
 				<div py:for="ev in events_available">
-				   <div py:if="user.user_id not in [vd.user.user_id for vd in ev.ev.refusers]">
 					${er.renderEvent(ev,user=requesting_user,viewedUser=user)}
-				   </div>
 				</div>
 			</tbody>
 		</table>

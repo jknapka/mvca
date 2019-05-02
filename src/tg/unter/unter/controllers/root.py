@@ -387,7 +387,13 @@ class RootController(BaseController):
             need.decommit_volunteer(model.DBSession,vcom=vr)
             flash("Commitment cancelled. Thanks for letting us know!")
         else:
-            flash("No such commitment found for {}.".format(user.display_name))
+            #flash("No such commitment found for {}.".format(user.display_name))
+            ev = model.DBSession.query(model.NeedEvent).filter_by(neid=neid).first()
+            if ev is not None:
+                flash('OK, we won\'t bother you about that event again.')
+                need.decommit_volunteer(model.DBSession,user=user,ev=ev)
+            else:
+                pass
         redirect(came_from)
 
     def toRawAvailability(self,av):
