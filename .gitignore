@@ -1,5 +1,7 @@
 .eggs/
 out.txt
+gmail_user.txt
+gmail_pwd.txt
 twilio_sid.txt
 twilio_auth.txt
 venv/
