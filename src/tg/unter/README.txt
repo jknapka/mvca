@@ -71,9 +71,27 @@ to respond to events for *other* volunteers? Probably not?
 ----------
 ISSUES
 
-) Initial volunteers need to be approved by a coordinator before
-they are activated as volunteers. We may as well require a
-password confirmation email, also.
+) Sending of alerts via email and SMS *needs* to be asynchronous.
+Right now for demo purposes those functions are handled within
+the web request directly, but if we try to do them synchronously
+for a large number of volunteers and/or events, we are going to
+hang a server thread for too long.
+
+Right now our back-end DB is SQLite. I trust SQLite, it is super-
+well-tested and robust but only for single-threaded use. So,
+should probably switch to MySQL for development and production.
+Maybe still test with SQLite for simplicity, even though that's
+kind of dangerous due to SQLite's untyped columns. But if we
+use a multi-user DB we can just have a separate alert-service
+process that gets kicked off periodically. That service could
+even be another TG app that supports a simple "/check_events"
+API
+
+Alternatively, we could stick with SQLite and make the alert
+service accept the complete context of each alert in its
+API - text and users to whome the alert should be issued, as
+well as email addresses and phone numbers. This sounds like
+a not-so-great approach, after writing the previous paragraph :-P
 
 ) It would be really good to provide a Spanish-language version of
 the entire site. I am totally unqualified to do that, from a
@@ -81,6 +99,13 @@ language perspective. Providing "es" versions of templates should
 be natively supported by TurboGears, so all I need is translation
 assistance there. Internationalizing resource strings (eg for
 dynamically-generated SMS messages) will require more effort.
+
+  - I've got the i18n stuff to coexist with the functional English-
+	language code, but I've yet to get it to actually perform any
+	translations. It needs to be sensitive to the user browser's
+	preferred language setting, and that for some reason doesn't
+	seem to be working - we always get the English text even when
+	there's a compiled es/unter.mo with some translations.
 
 ) I'm considering letting Unter assume a volunteer is available
 any time, if they have not configured any available time periods.
@@ -93,6 +118,10 @@ only for users with no configured time periods).
 ) (in progress) Provide a configurable site name and use [SITE_NAME] in
 alert emails and SMSs. (Note, we can use the tg config
 variable "project_name" for this.)
+
+) (done) Initial volunteers need to be approved by a coordinator before
+they are activated as volunteers. We may as well require a
+password confirmation email, also.
 
 ) (done) Need a "password reset" function.
 
