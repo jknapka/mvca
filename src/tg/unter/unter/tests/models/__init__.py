@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """Unit test suite for the models of the application."""
 
-from nose.tools import eq_
+from nose.tools import eq_,ok_
 from unter.model import DBSession
 from unter.tests import load_app
 from unter.tests import setup_db, teardown_db
@@ -55,7 +55,7 @@ class ModelTest(object):
 
     def test_create_obj(self):
         """Model objects can be created"""
-        pass
+        ok_(self.obj is not None)
 
     def test_query_obj(self):
         """Model objects can be queried"""

@@ -97,7 +97,7 @@ class TestCommitment(TestController):
 
             # A need to which u will respond.
             e = model.NeedEvent()
-            e.ev_type = 0
+            e.etid = model.NeedEvent.EV_TYPE_AIRPORT
             e.duration=70
             e.created_by = u
             e.date_of_need = int((dt.datetime.now() + dt.timedelta(days=1)).timestamp())
@@ -116,7 +116,7 @@ class TestCommitment(TestController):
             
             # A need with no volunteer response.
             e = model.NeedEvent()
-            e.ev_type = 0
+            e.etid = model.NeedEvent.EV_TYPE_AIRPORT
             e.duration=70
             e.created_by = u
             e.date_of_need = int((dt.datetime.now() + dt.timedelta(days=1)).timestamp())

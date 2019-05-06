@@ -1,6 +1,6 @@
 <html py:extends="master.xhtml" py:strip="True">
   <head py:block="head" py:strip="True">
-    <title py:block="master_title">Add a need event</title>
+    <title py:block="master_title">Add a type of event</title>
     <meta name="generator" content="HTML Tidy for Linux/x86 (vers 11 February 2007), see www.w3.org" />
   </head>
 
@@ -12,11 +12,10 @@
           <h2>Add a needed service event</h2>
         </div>
 
-        <p>Add a need for volunteer services.
-		All fields are required.  <a
-			 py:if="'manage_events' in [p.permission_name for p in user.permissions] or 'manage' in [p.permission_name for p in user.permissions]"
-			 href="/add_event_type_start">| Add a new Type of Need</a></p>
-	<div>${fr.renderForm(form,url)}</div>
+        <p>Add a type of event.
+		All fields are required.
+		</p>
+		<div>${fr.renderForm(form,url)}</div>
       </div>
     </div>
   </body>

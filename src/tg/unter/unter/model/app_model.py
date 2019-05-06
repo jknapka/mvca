@@ -7,6 +7,8 @@ from sqlalchemy.orm import relationship, backref
 
 from unter.model import DeclarativeBase, metadata, DBSession
 
+__all__ = ['EventType','VolunteerAvailability','NeedEvent','VolunteerResponse','VolunteerDecommitment',
+        'AlertUUID','PasswordUUID']
 
 class VolunteerAvailability(DeclarativeBase):
     __tablename__ = 'volunteer_availability'
@@ -30,6 +32,30 @@ class VolunteerAvailability(DeclarativeBase):
     user = relationship('User', uselist=False,
                         backref=backref('volunteer_availability',
                                         cascade='all, delete-orphan'))
+
+class EventType(DeclarativeBase):
+    '''
+    Describe the type of event represented by a NeedEvent instance.
+    This could be "Take people to airport", "Serve a meal", etc.
+    We want site managers to be able to add new event types.
+    '''
+    __tablename__ = 'event_type'
+
+    etid = Column(Integer,primary_key=True)
+    
+    name = Column(Unicode(128),nullable=False,default='NO NAME')
+    description = Column(Unicode(2048),nullable=False,default='')
+
+    @staticmethod
+    def et_by_id(etid):
+        et = DBSession.query(EventType).filter_by(etid=etid).first()
+        return et
+
+    @staticmethod
+    def et_by_name(name):
+        et = DBSession.query(EventType).filter_by(name=name).first()
+        return et
+
 class NeedEvent(DeclarativeBase):
     '''
     Indicate the need for a service.
@@ -44,11 +70,15 @@ class NeedEvent(DeclarativeBase):
     # 1 == bus station
     # 2 == interpreter
     # ??
-    ev_type = Column(Integer,nullable=False)
+    etid = Column(Integer,ForeignKey('event_type.etid'),nullable=False)
+    event_type = relationship('EventType', uselist=False,
+                        backref=backref('need_events_of_type',
+                                        cascade='all, delete-orphan'))
 
-    EV_TYPE_AIRPORT = 0
-    EV_TYPE_BUS = 1
-    EV_TYPE_INTERPRETER = 2
+    # Retain these hard-coded event types for now.
+    EV_TYPE_AIRPORT = 1
+    EV_TYPE_BUS = 2
+    EV_TYPE_INTERPRETER = 3
 
     # Date on which action is needed. Unix time.
     date_of_need = Column(Integer,nullable=False)
@@ -182,6 +212,4 @@ class PasswordUUID(DeclarativeBase):
 
     create_time = Column(Integer,nullable=False)
 
-__all__ = ['VolunteerInfo','VolunteerAvailability','NeedEvent','VolunteerResponse','VolunteerDecommitment',
-        'AlertUUID','PasswordUUID']
 
