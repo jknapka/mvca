@@ -9,14 +9,22 @@ from unter import model
 def debugTest(msg):
     logging.getLogger('unter.test').debug(msg)
 
+def getEventTypes():
+    ets = model.DBSession.query(model.EventType).all()
+    return [(et.name,et.description) for et in ets]
+
 def isUserManager(user):
     perms = [p.permission_name for p in user.permissions]
     return 'manage' in perms or 'manage_events' in perms
 
 def evTypeToString(evt):
-    return {0:"take people to the airport",
-            1:"take people to the bus station",
-            2:"interpeter services"}[evt]
+    #return {0:"take people to the airport",
+    #        1:"take people to the bus station",
+    #        2:"interpeter services"}[evt]
+    et = model.EventType.et_by_id(evt)
+    if et is not None:
+        return et.description
+    return '?'
 
 def minutesPastMidnight(tm):
     print("tm is a {}".format(tm.__class__.__name__))
@@ -47,7 +55,7 @@ def toWrappedEvent(ev,now=None):
             ev.complete = 1
     thing.date_str = "{:02d}/{:02d}/{:04d}".format(date.month,date.day,date.year)
     thing.time_str = minutesPastMidnightToTimeString(ev.time_of_need)
-    thing.ev_str = evTypeToString(ev.ev_type)
+    thing.ev_str = evTypeToString(ev.event_type.name)
     thing.complete = {1:'Yes',0:'No'}[ev.complete]
     thing.last_alert_time = dt.datetime.fromtimestamp(ev.last_alert_time).ctime()
     return thing
@@ -103,7 +111,7 @@ def createEvent(created_by,
     if date_of_need is None:
         date_of_need = dt.date.today() + dt.timedelta(days=1)
     vne = model.NeedEvent()
-    vne.ev_type = ev_type
+    vne.etid = ev_type
     vne.date_of_need = date_of_need.timestamp()
     vne.time_of_need = time_of_need
     vne.duration = duration

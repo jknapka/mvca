@@ -1,18 +1,41 @@
 '''
 Forms used by the Unter web service.
 '''
+# vim: shiftwidth=8 tabstop=8 softtabstop=9 noexpandtab
 import urllib.parse as urls
 import wtforms as wtf
 import wtforms_components as wtfc
 import re
 import datetime
 
+from unter import model
+
+def getEventTypeChoices():
+    ets = model.DBSession.query(model.EventType).all()
+    return list([(str(et.etid),et.name) for et in ets])
+
+class AddEventTypeForm(wtf.Form):
+    name = wtf.TextField("Name")
+    description = wtf.TextField("Description")
+
+    def validate_name(self,field):
+        if not isSafeDisplayName(field.data):
+            raise wtf.ValidationError("Only letters, numbers and spaces are allowed here.")
+
+    def validate_description(self,field):
+        if not isSafeDescription(field.data):
+            raise wtf.ValidationError("Only letters, numbers, spaces, commas, and periods are allowed here.")
+
 class NeedEventForm(wtf.Form):
 	''' WTForm definition to add a need event. '''
+
+	def __init__(self,*args,**kwargs):
+		super().__init__(*args,**kwargs)
+		self.ev_type.choices = getEventTypeChoices()
+
 	date_of_need = wtfc.DateField("Date")
 	time_of_need = wtfc.TimeField("Time")
-	ev_type = wtf.SelectField("Type of Need",
-			choices=[("0","Airport"),("1","Bus station"),("2","Interpreter services")])
+	ev_type = wtf.SelectField("Type of Need",choices=getEventTypeChoices())
 	duration = wtf.DecimalField("Estimated Duration (minutes)")
 	volunteer_count = wtf.DecimalField("Number of Volunteers Needed")
 	affected_persons = wtf.DecimalField("Number of People With Need")

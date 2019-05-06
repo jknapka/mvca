@@ -23,7 +23,7 @@ from unter.lib.base import BaseController
 from unter.controllers.error import ErrorController
 from unter.controllers.need import checkOneEvent, checkValidEvents
 
-from unter.controllers.forms import NewAcctForm,AvailabilityForm,NeedEventForm
+from unter.controllers.forms import NewAcctForm,AvailabilityForm,NeedEventForm,AddEventTypeForm
 
 from unter.controllers.util import *
 import unter.controllers.need as need
@@ -584,25 +584,45 @@ class RootController(BaseController):
                 need.decommit_volunteer(model.DBSession,user=user,ev=nev)
         return 'Thank you for responding.'
 
+    @expose('unter.templates.add_event_type_start')
+    @require(predicates.has_permission('manage_events'))
+    def add_event_type_start(self,form=None,**kwargs):
+        ''' Present the "Add type of need" form. '''
+        if form is None:
+            form = AddEventTypeForm()
+        return dict(page='add_event_type_start',form=form,url='/add_event_type_post')
+
+    @expose('unter.templates.add_event_type_start')
+    @require(predicates.has_permission('manage_events'))
+    def add_event_type_post(self,name,description):
+        ''' Process the "add event type" form. '''
+        form = AddEventTypeForm(request.POST)
+        if not form.validate():
+            return dict(page='add_event_type_start',form=form,url='/add_event_type_post')
+        et = model.EventType.et_by_name(name)
+        if et is not None:
+            flash('An event type named {} already exists.'.format(name))
+            redirect('/add_need_event_start')
+        et = model.EventType(name=name,description=description)
+        model.DBSession.add(et)
+        redirect('/add_need_event_start')
+
     @expose('unter.templates.add_need_event_start')
     @require(predicates.has_permission('manage_events'))
     def add_need_event_start(self,form=None,**kwargs):
         ''' Present the "add a need event" form. '''
         if form is None:
             form = NeedEventForm()
-        return dict(page='add_need_event_start',form=form,url='/add_need_event_post')
+        user = self.getVolunteerIdentity()
+        return dict(page='add_need_event_start',form=form,url='/add_need_event_post',user=user)
 
     @expose('unter.templates.add_need_event_start')
     @require(predicates.has_permission('manage_events'))
     def add_need_event_post(self,**kwargs):
         form = NeedEventForm(request.POST)
-        for fld in form:
-            print("Form {} = {}".format(fld.name,fld.data))
         if not form.validate():
-            print("Need event data is NOT valid: {}".format(form.errors))
             return self.add_need_event_start(form=form)
         else:
-            print("Need event data is valid")
             obj = Thing()
             form.populate_obj(obj)
             obj.print("NeedEvent:")
@@ -614,7 +634,7 @@ class RootController(BaseController):
                     obj.date_of_need.day,
                     hour=12)
 
-            nev = model.NeedEvent(ev_type=int(obj.ev_type),
+            nev = model.NeedEvent(etid=int(obj.ev_type),
                     duration=int(obj.duration),
                     date_of_need=int(dt.timestamp()),
                     time_of_need=minutesPastMidnight(obj.time_of_need),
