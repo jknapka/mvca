@@ -48,8 +48,8 @@ class TestAlertUUIDs(TestController):
             self.createEvents()
         except:
             import sys
-            logging.getLogger('unter.test').error("ABORTING TRANSACTION: {}".format(sys.exc_info()))
             transaction.abort()
+            self.logAbortMessage('setUp')
         else:
             transaction.commit()
 
@@ -63,11 +63,23 @@ class TestAlertUUIDs(TestController):
 
     def createEvents(self):
         ''' Simplified vs super: only one event. '''
-        self.ev = self.createEvent(created_by=self.getUser(model.DBSession,'carla'),
-                date_of_need=dt.datetime.now()+dt.timedelta(days=1),
-                time_of_need=10*60,notes="Test event")
+        with model.DBSession.no_autoflush:
+            self.ev = self.createEvent(created_by=self.getUser(model.DBSession,'carla'),
+                    date_of_need=dt.datetime.now()+dt.timedelta(days=1),
+                    time_of_need=10*60,notes="Test event")
+            etype = model.EventType.et_by_name('Bus Station')
+            logging.getLogger('unter.test').info('Got event type: {}'.format(etype))
+            self.ev.event_type = etype
+            #self.ev.etid = etype.etid
+            model.DBSession.add(self.ev)
         model.DBSession.flush()
         model.DBSession.expunge(self.ev) # Make this event valid after we commit.
+
+    def logAbortMessage(self,methodName):
+        import sys
+        sio = StringIO()
+        traceback.print_tb(sys.exc_info()[2],file=sio)
+        logging.getLogger('unter.test').error("ABORTED TRANSACTION in {}(): {} {}\n{}".format(methodName,sys.exc_info()[0],sys.exc_info()[1],sio.getvalue()))
 
     def sendAlert(self):
         # Call this only inside a transaction.
@@ -87,10 +99,7 @@ class TestAlertUUIDs(TestController):
             eq_(auuid.neid,self.ev.neid,'Alert UUID for wrong event {} (expected {})'.format(auuid.neid,self.ev.neid))
         except:
             transaction.abort()
-            import sys
-            sio = StringIO()
-            traceback.print_tb(sys.exc_info()[2],file=sio)
-            ok_(False,"ABORTED TRANSACTION in test_0_alertsCreateUUIDs(): {}\n{}".format(sys.exc_info()[0],sio.getvalue()))
+            self.logAbortMessage('test_0_alertsCreateUUIDs')
         else:
             transaction.commit()
 
@@ -114,10 +123,7 @@ class TestAlertUUIDs(TestController):
             eq_(len(uuids),0,"Alert UUID should no longer exist.")
         except:
             transaction.abort()
-            import sys
-            sio = StringIO()
-            traceback.print_tb(sys.exc_info()[2],file=sio)
-            ok_(False,"ABORTED TRANSACTION in test_1_deleteEventDeletsUUIDs(): {}\n{}".format(sys.exc_info()[0],sio.getvalue()))
+            self.logAbortMessage('test_1_deleteEventDeletesUUIDs')
         else:
             transaction.commit()
 
@@ -127,10 +133,7 @@ class TestAlertUUIDs(TestController):
             self.sendAlert()
         except:
             transaction.abort()
-            import sys
-            sio = StringIO()
-            traceback.print_tb(sys.exc_info()[2],file=sio)
-            ok_(False,"ABORTED TRANSACTION in test_2_alertLinksUseUUIDs(): {}\n{}".format(sys.exc_info()[0],sio.getvalue()))
+            self.logAbortMessage('test_2_alertLinksUseUUIDs')
         else:
            transaction.commit()
         alerts = self.getAlertLog()
@@ -145,10 +148,7 @@ class TestAlertUUIDs(TestController):
             self.sendAlert()
         except:
             transaction.abort()
-            import sys
-            sio = StringIO()
-            traceback.print_tb(sys.exc_info()[2],file=sio)
-            ok_(False,"ABORTED TRANSACTION in test_2_alertLinksUseUUIDs(): {}\n{}".format(sys.exc_info()[0],sio.getvalue()))
+            self.logAbortMessage('test_3_alertAcceptLinkCreatesResponse')
         else:
             transaction.commit()
 
@@ -175,10 +175,7 @@ class TestAlertUUIDs(TestController):
             self.sendAlert()
         except:
             transaction.abort()
-            import sys
-            sio = StringIO()
-            traceback.print_tb(sys.exc_info()[2],file=sio)
-            ok_(False,"ABORTED TRANSACTION in test_2_alertLinksUseUUIDs(): {}\n{}".format(sys.exc_info()[0],sio.getvalue()))
+            self.logAbortMessage('test_4_alertRefuseLinkCreatesDecommit')
         else:
             transaction.commit()
 
@@ -205,10 +202,7 @@ class TestAlertUUIDs(TestController):
             self.sendAlert()
         except:
             transaction.abort()
-            import sys
-            sio = StringIO()
-            traceback.print_tb(sys.exc_info()[2],file=sio)
-            ok_(False,"ABORTED TRANSACTION in test_5_acceptLinksReusable(): {}\n{}".format(sys.exc_info()[0],sio.getvalue()))
+            self.logAbortMessage('test_5_acceptLinksReusable')
         else:
             transaction.commit()
 
@@ -241,10 +235,7 @@ class TestAlertUUIDs(TestController):
             self.sendAlert()
         except:
             transaction.abort()
-            import sys
-            sio = StringIO()
-            traceback.print_tb(sys.exc_info()[2],file=sio)
-            ok_(False,"ABORTED TRANSACTION in test_2_alertLinksUseUUIDs(): {}\n{}".format(sys.exc_info()[0],sio.getvalue()))
+            self.logAbortMessage('test_6_refuseLinksResusable')
         else:
             transaction.commit()
 
@@ -277,10 +268,7 @@ class TestAlertUUIDs(TestController):
             self.sendAlert()
         except:
             transaction.abort()
-            import sys
-            sio = StringIO()
-            traceback.print_tb(sys.exc_info()[2],file=sio)
-            ok_(False,"ABORTED TRANSACTION in test_2_alertLinksUseUUIDs(): {}\n{}".format(sys.exc_info()[0],sio.getvalue()))
+            self.logAbortMessage('test_7_usersCanChangeTheirMindsAfterAccepting')
         else:
             transaction.commit()
 
@@ -327,10 +315,7 @@ class TestAlertUUIDs(TestController):
             self.sendAlert()
         except:
             transaction.abort()
-            import sys
-            sio = StringIO()
-            traceback.print_tb(sys.exc_info()[2],file=sio)
-            ok_(False,"ABORTED TRANSACTION in test_2_alertLinksUseUUIDs(): {}\n{}".format(sys.exc_info()[0],sio.getvalue()))
+            self.logAbortMessage('test_8_usersCanChangeTheirMindsAfterRefusing')
         else:
             transaction.commit()
 

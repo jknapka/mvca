@@ -168,7 +168,7 @@ class TestController(object):
         if date_of_need is None:
             date_of_need = dt.datetime.now() + dt.timedelta(days=1)
         vne = model.NeedEvent()
-        vne.ev_type = ev_type
+        vne.etid = ev_type
         vne.date_of_need = int(date_of_need.timestamp())
         vne.time_of_need = time_of_need
         vne.duration = duration

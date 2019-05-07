@@ -68,7 +68,25 @@ def create_entities(session):
     u1.zipcode = '00000'
 
     session.add(u1)
+
+    eTypes = [('Airport','Take people to the airport'),
+            ('Bus Station','Take people to the bus station'),
+            ('Interpreter','Provide interpreter services'),
+            ('Serve Meal','Serve a meal to 50-200 people'),
+            ('Prepare Meal','Prepare a meal for 50-200 people')
+            ]
+
+    for (name,desc) in eTypes:
+        t = model.EventType()
+        t.name = name
+        t.description = desc
+        session.add(t)
+
     transaction.commit()
+
+    model.NeedEvent.EV_TYPE_AIRPORT = session.query(model.EventType).filter_by(name='Airport').first().etid
+    model.NeedEvent.EV_TYPE_BUS = session.query(model.EventType).filter_by(name='Bus Station').first().etid
+    model.NeedEvent.EV_TYPE_INTERPRETER = session.query(model.EventType).filter_by(name='Interpreter').first().etid
 
 def bootstrap(command, conf, vars):
     """Place any commands to setup unter here"""

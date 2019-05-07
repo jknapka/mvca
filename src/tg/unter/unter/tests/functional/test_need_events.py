@@ -180,7 +180,7 @@ class TestNeedEvent(TestController):
             nev = model.NeedEvent()
 
             # March 31 2019 is a Sunday.
-            nev.ev_type = model.NeedEvent.EV_TYPE_AIRPORT
+            nev.etid = model.NeedEvent.EV_TYPE_AIRPORT
             nev.date_of_need = dt.datetime(2019,3,31,12,0,0).timestamp()
             nev.time_of_need = 10*60
             nev.duration = 60
@@ -196,6 +196,7 @@ class TestNeedEvent(TestController):
             neid = nev.neid
         except:
             transaction.abort()
+            raise
         else:
             transaction.commit()
 
