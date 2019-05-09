@@ -3,16 +3,16 @@
 # Run all Unter/MVCA tests. This is called by git's pre-commit hook.
 
 # Ensure we're in the root of the source tree.
-pushd ${BASH_SOURCE%/*}
-[[ -e src/tg/unter ]] || {
-	# We ended up in .git/hooks?
-	if [ -e ../../src/tg/unter ] ; then
-		cd ../..
-	else
-		echo "Cannot find root of Unter/MVCA source tree. Exiting."
-		exit 1
-	fi
-}
+#pushd ${BASH_SOURCE%/*}
+#[[ -e ./src/tg/unter ]] || {
+#	# We ended up in .git/hooks?
+#	if [ -e ../src/tg/unter ] ; then
+#		cd ..
+#	else
+#		echo "Cannot find root of Unter/MVCA source tree. Exiting."
+#		exit 1
+#	fi
+#}
 
 # Run tests for all Unter/MVCA components.
 
