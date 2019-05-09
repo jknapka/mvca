@@ -38,5 +38,12 @@ if ! nosetests -x ; then
 fi
 popd
 
+pushd src/tg/alert_service/tests
+if ! nosetests ; then
+	popd
+	exit 1
+fi
+popd
+
 exit 0
 

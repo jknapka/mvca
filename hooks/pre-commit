@@ -13,7 +13,7 @@ pushd ${BASH_SOURCE%/*}
 }
 
 if ! hooks/run-tests.sh ; then
-	echo Committing on master with failed tests - ABORTING COMMIT.
+	echo Committing with failed tests - ABORTING COMMIT.
 	popd
 	exit 1
 fi

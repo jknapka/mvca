@@ -1,0 +1,44 @@
+Unter alert service design notes
+
+) Source code is in src/alert_service.
+
+) First, the existing alert API in the main web service will
+be fine. We need an implementation that hands alerts off to
+the alerter service.
+
+) The mechanism that seems most straightforward to me right
+now:
+
+  a. The web service alerter method writes a temporary JSON filewith
+    with all the data needed to issue the alert. This will look
+	something like:
+
+    {
+		phone: "+12345678901",
+		email: "foo@bar.com",
+		subject: "Event-related thing",
+		message: "Here is the message to send."
+	}
+
+  b. When the file is complete, the web service moves it to
+	a staging directory owned by the alerter service.
+
+  c. The alerter service periodically scans the staging directory
+	and processes any files it finds there.
+
+  d. The alerter service keeps a log file of all alert activity
+	and whether it succeeds.
+
+  e. The alerter service writes a brief file describing its
+	status each time it processes alerts.
+
+  f. The web service supports a URI that lets coordinators and
+	managers read the alert service's status file. And maybe
+	also the complete alert service log.
+
+  g. The alert service reads the Twilio and SMTP credentials
+	from files, just like the web service does.
+
+  h. Like the web service, the alert service will use a
+	configurable API to support different kinds of alert
+	behavior.
