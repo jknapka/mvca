@@ -9,6 +9,6 @@
 	exit 1
 }
 
-ln -s ../../run-tests.sh .git/hooks/pre-commit
+ln -s ../../hooks/pre-commit .git/hooks/pre-commit
 
 exit 0

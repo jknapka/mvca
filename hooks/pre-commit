@@ -1,0 +1,22 @@
+#!/bin/bash
+
+# Pre-commit hook.
+pushd ${BASH_SOURCE%/*}
+[[ -e ../src/tg/unter ]] || {
+	# We ended up in .git/hooks?
+	if [ -e ../../src/tg/unter ] ; then
+		cd ../..
+	else
+		echo "Cannot find root of Unter/MVCA source tree. Exiting."
+		exit 1
+	fi
+}
+
+if ! hooks/run-tests.sh ; then
+	echo Committing on master with failed tests - ABORTING COMMIT.
+	popd
+	exit 1
+fi
+
+popd
+
