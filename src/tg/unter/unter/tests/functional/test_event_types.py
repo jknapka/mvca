@@ -24,18 +24,21 @@ class TestNeedEvent(TestController):
         transaction.commit()
 
     def test_0_addTypeLinkInAddEventPageForCoords(self):
+        ''' The "Add event type" link is present for coordinators. '''
         env = {'REMOTE_USER':'carla'}
         resp = self.app.get('/add_need_event_start',status=200,extra_environ=env)
         ok_('Add a new Type of Need' in resp.text,'Add-event-type link should be present for coordinators:\n{}'.\
                 format(resp.text))
 
     def test_1_addTypeLinkAbsentForVols(self):
+        ''' The "Add event type" link is absent for normal volunteers. '''
         env = {'REMOTE_USER':'veronica'}
         resp = self.app.get('/add_need_event_start',status=403,extra_environ=env)
         ok_('Add a new Type of Need' not in resp.text,'Add-event-type link should NOT be present for normal volunteers:\n{}'.\
                 format(resp.text))
 
     def test_2_addEventTypePage(self):
+        ''' The "Add event type" page can be loaded. '''
         env = {'REMOTE_USER':'carla'}
         resp = self.app.get('/add_event_type_start',status=200,extra_environ=env)
         zup = bsoup(resp.text,features="html.parser")
@@ -45,6 +48,7 @@ class TestNeedEvent(TestController):
         ok_('description' in inms,'No input named "description"')
 
     def test_3_canCreateEventType(self):
+        ''' Event types can be created. '''
         env = {'REMOTE_USER':'carla'}
         resp = self.app.get('/add_event_type_post',status=302,extra_environ=env,
                 params={'name':'TestEvent','description':'TestEvent description'})
@@ -54,6 +58,7 @@ class TestNeedEvent(TestController):
         eq_('TestEvent description',et.description,'Wrong event description: {}'.format(et.description))
 
     def test_5_canCreateEventOfNewType(self):
+        ''' After adding an event type, an event with the new type can be created. '''
         env = {'REMOTE_USER':'carla'}
         resp = self.app.get('/add_event_type_post',status=302,extra_environ=env,
                 params={'name':'TestEvent','description':'TestEvent description'})
